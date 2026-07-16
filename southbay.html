@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mason's Weather — South Bay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-[#e0f2fe] via-[#f0f9ff] to-[#fef3c7] min-h-screen text-[#1e293b]">
+
+    <div id="nws-alert-bar" class="hidden bg-gradient-to-r from-red-600 to-amber-600 text-white py-3 px-4 shadow-xl sticky top-0 z-50 transition-all duration-500 ease-in-out">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
+            <div class="flex items-center space-x-3">
+                <span class="flex h-3 w-3 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-red-100"></span>
+                </span>
+                <div class="text-sm font-semibold tracking-wide">
+                    <span class="uppercase font-extrabold tracking-wider bg-black/30 px-2 py-0.5 rounded text-[11px] mr-2" id="alert-event">ALERT</span>
+                    <span class="text-white/95 font-medium" id="alert-headline">Loading local advisory details...</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3 self-end md:self-auto">
+                <button onclick="toggleAlertDetails()" class="text-xs bg-white/20 hover:bg-white/35 text-white font-bold py-1 px-3 rounded-full transition">
+                    View Details
+                </button>
+            </div>
+        </div>
+        <div id="alert-details" class="hidden mt-3 max-w-7xl mx-auto border-t border-white/20 pt-3 text-xs text-white/90 space-y-2">
+            <p><strong>Description:</strong> <span id="alert-desc"></span></p>
+            <p><strong>Precautionary/Preparedness Actions:</strong> <span id="alert-inst"></span></p>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <header class="flex flex-col sm:flex-row items-center justify-between border-b border-sky-100 pb-6 mb-8 gap-4">
+            <div class="logo-section text-center sm:text-left">
+                <h1 class="text-4xl font-extrabold text-[#1e3d59] tracking-tight">🌊 Mason's Weather</h1>
+                <p class="text-sm font-semibold text-sky-700 tracking-wider">South Bay Marine & Coastal Weather • Station KCAREDON127</p>
+            </div>
+            <div class="header-live-temp flex flex-col items-center sm:items-end">
+                <div class="temp text-4xl font-extrabold text-[#1e3d59]" id="header-big-temp">--°F</div>
+                <div class="update-time text-xs text-sky-600/80">PWS Updated: <span id="update-timestamp" class="font-bold">Loading...</span></div>
+            </div>
+        </header>
+
+        <nav class="flex flex-wrap gap-2 mb-8 justify-center sm:justify-start">
+            <button onclick="switchTab('live')" id="tab-btn-live" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-[#1e3d59] text-white">
+                🌊 Live Conditions
+            </button>
+            <button onclick="switchTab('trends')" id="tab-btn-trends" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-white/60 hover:bg-white text-[#1e3d59]">
+                📊 Forecast & Trends
+            </button>
+            <button onclick="switchTab('cams')" id="tab-btn-cams" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-white/60 hover:bg-white text-[#1e3d59]">
+                📹 Live Beach Cams
+            </button>
+            <button onclick="switchTab('resources')" id="tab-btn-resources" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-white/60 hover:bg-white text-[#1e3d59]">
+                ⚓ Ocean Resources
+            </button>
+        </nav>
+
+        <div id="tab-content-live" class="tab-pane grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <aside class="lg:col-span-3 flex flex-col gap-4">
+                <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-5">
+                    <h3 class="text-lg font-bold text-[#1e3d59] border-b border-sky-100 pb-3 mb-4 flex items-center">
+                        📍 Microclimate Radar
+                    </h3>
+                    <p class="text-xs text-slate-500 mb-4">Select a coastal microclimate to update live stats and 24h trends:</p>
+                    <div id="city-selector" class="flex flex-col gap-2">
+                        <button onclick="selectCity('Redondo Beach', 33.8492, -118.3884, this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-amber-100 text-amber-900 border border-amber-200 shadow-sm">
+                            <span>🏖️ Redondo Beach</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-white/60">Active</span>
+                        </button>
+                        <button onclick="selectCity('Hermosa Beach', 33.8622, -118.3987, this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
+                            <span>🏄‍♂️ Hermosa Beach</span>
+                            <span class="text-xs opacity-60">Coast</span>
+                        </button>
+                        <button onclick="selectCity('Manhattan Beach', 33.8847, -118.4109, this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
+                            <span>🏐 Manhattan Beach</span>
+                            <span class="text-xs opacity-60">Coast</span>
+                        </button>
+                        <button onclick="selectCity('Palos Verdes', 33.7865, -118.3831, this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
+                            <span>⛰️ Palos Verdes</span>
+                            <span class="text-xs opacity-60">Cliffs</span>
+                        </button>
+                        <button onclick="selectCity('Torrance', 33.8358, -118.3406, this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
+                            <span>🏡 Torrance Inland</span>
+                            <span class="text-xs opacity-60">Inland</span>
+                        </button>
+                        <button onclick="selectCity('El Segundo', 33.9192, -118.4165, this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
+                            <span>✈️ El Segundo</span>
+                            <span class="text-xs opacity-60">North</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-5 relative overflow-hidden">
+                    <h4 class="text-sm uppercase tracking-wider text-teal-800 font-bold mb-2">📡 Station Infrastructure</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                        Operating on our newly deployed sensor array. Upgrades include enhanced haptic precipitation tracking, re-calibrated barometric modules, and an elevated anemometer positioning for superior coastal wind accuracy.
+                    </p>
+                    <ul class="text-xs text-slate-500 list-disc pl-4 space-y-1">
+                        <li>High-gain Solar Radiation Shielding</li>
+                        <li>LoRaWAN Telemetry Link</li>
+                        <li>Sub-second API refresh rate</li>
+                    </ul>
+                </div>
+
+                <div class="bg-[#1e3d59] text-white shadow-xl rounded-3xl p-5 relative overflow-hidden">
+                    <h4 class="text-sm uppercase tracking-wider text-sky-300 font-bold mb-1">Ocean Swell Brief</h4>
+                    <p class="text-xs text-sky-100 leading-relaxed">
+                        Afternoon wind-swell expected to peak around 4:30 PM. Swell holding at 2-3ft with clean faces. Marine fog layers expected to roll back in late tonight. Keep track of deep water buoy data under resources!
+                    </p>
+                </div>
+            </aside>
+
+            <main class="lg:col-span-9 flex flex-col gap-6">
+                
+                <!-- Match Mojave Dynamic Header Format exactly -->
+                <div class="bg-white/70 backdrop-blur-md border border-sky-100 shadow-xl rounded-3xl p-6">
+                    <div class="border-b border-sky-100 pb-2 mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                        <h3 class="text-lg font-bold text-[#1e3d59] flex items-center">
+                            📝 Mason's Coastal Summary
+                        </h3>
+                        <span id="coastal-summary-meta" class="text-2xs font-semibold text-sky-800 uppercase tracking-wider">
+                            Updated: Loading...
+                        </span>
+                    </div>
+                    <div id="coastal-summary-text" class="text-sm text-slate-700 leading-relaxed font-medium">
+                        Establishing secure handshake connection with live Google Sheets database...
+                    </div>
+                </div>
+
+                <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-6 md:p-8">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-sky-100 pb-6 mb-6">
+                        <div>
+                            <span class="text-xs font-bold tracking-widest text-sky-600 uppercase">Station Live Data</span>
+                            <h2 id="current-city-title" class="text-3xl font-extrabold text-[#1e3d59]">Redondo Beach</h2>
+                            <p class="text-sm text-slate-500 mt-1">Real-time reports updating instantly</p>
+                        </div>
+                        <div class="flex items-center space-x-4 mt-4 md:mt-0">
+                            <img id="current-weather-nws-icon" class="w-16 h-16 rounded-full border border-sky-100 shadow-sm bg-white" src="https://api.weather.gov/icons/land/day/skc?size=medium" alt="NWS Weather Icon">
+                            <div>
+                                <span id="current-weather-desc" class="text-xl font-bold text-[#1e3d59] block font-sans">Sunny Skies</span>
+                                <span class="text-xs bg-[#1e3d59]/10 text-[#1e3d59] font-bold px-2 py-1 rounded-md">Live Station</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200/50 rounded-2xl p-4 flex flex-col justify-between">
+                            <span class="text-xs font-bold uppercase tracking-wider text-amber-800">Air Temp</span>
+                            <div class="my-2">
+                                <span id="metric-temp" class="text-3xl font-extrabold text-amber-950">--°</span>
+                                <span class="text-lg font-bold text-amber-800">F</span>
+                            </div>
+                            <span class="text-2xs text-amber-700/60 text-xs">Feels like active ground level</span>
+                        </div>
+                        <div class="bg-gradient-to-br from-sky-50 to-teal-50 border border-sky-200/50 rounded-2xl p-4 flex flex-col justify-between">
+                            <span class="text-xs font-bold uppercase tracking-wider text-sky-800">Coastal Wind</span>
+                            <div class="my-2 flex items-center space-x-2">
+                                <span id="metric-wind" class="text-3xl font-extrabold text-sky-950">--</span>
+                                <span class="text-xs font-bold text-sky-800">mph</span>
+                                <div id="wind-compass" class="w-6 h-6 rounded-full bg-[#1e3d59]/10 flex items-center justify-center transform transition-transform duration-700">
+                                    <svg class="w-4 h-4 text-[#1e3d59]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <span class="text-2xs text-sky-700/60 text-xs" id="metric-wind-dir">Direction: NW</span>
+                        </div>
+                        <div class="bg-gradient-to-br from-teal-50 to-emerald-50 border border-teal-200/50 rounded-2xl p-4 flex flex-col justify-between">
+                            <span class="text-xs font-bold uppercase tracking-wider text-teal-800">Humidity</span>
+                            <div class="my-2">
+                                <span id="metric-humidity" class="text-3xl font-extrabold text-teal-950">--%</span>
+                            </div>
+                            <span class="text-2xs text-teal-700/60 text-xs">Marine mist layer factor</span>
+                        </div>
+                        <div class="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-200/50 rounded-2xl p-4 flex flex-col justify-between">
+                            <span class="text-xs font-bold uppercase tracking-wider text-indigo-800">Barometer</span>
+                            <div class="my-2">
+                                <span id="metric-pressure" class="text-2xl font-extrabold text-indigo-950">--</span>
+                                <span class="text-xs font-bold text-indigo-800">hPa</span>
+                            </div>
+                            <span class="text-2xs text-indigo-700/60 text-xs" id="barometer-trend">Trend: Steady</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-amber-100 border border-amber-300/40 rounded-3xl p-6 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-start space-x-4">
+                        <div class="text-3xl mt-1">🐚</div>
+                        <div>
+                            <h4 class="font-bold text-amber-950 text-base">Water & Swim Temp Report</h4>
+                            <p class="text-xs text-amber-900/80 leading-relaxed mt-1">
+                                Ocean Temp is currently sitting around <strong>65°F-67°F</strong>. Ideal for a standard fullsuit or springsuit depending on your sensitivity. Clean, glassy sets coming through.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <span class="bg-amber-800/10 text-amber-900 text-xs font-bold uppercase px-3 py-1.5 rounded-full">Updated Today</span>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <div id="tab-content-trends" class="tab-pane hidden flex flex-col gap-8">
+            
+            <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-6">
+                <h3 class="text-xl font-bold text-[#1e3d59] mb-4 flex items-center border-b border-sky-100 pb-3">
+                    📅 NOAA Marine & Land Grid Forecast (South Bay)
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4" id="weekly-forecast-grid">
+                    <div class="text-center p-3 bg-white/50 rounded-2xl border border-sky-100 flex flex-col items-center justify-center col-span-full py-8">
+                        <span class="text-sm font-semibold text-slate-500 animate-pulse">Contacting NWS Grid Server...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-6">
+                    <h4 class="text-base font-bold text-[#1e3d59] mb-4 flex items-center">🛰️ GOES West Satellite <span class="ml-2 text-xs font-normal text-slate-500">(Color/IR)</span></h4>
+                    <div class="aspect-video bg-slate-100 rounded-2xl overflow-hidden border border-sky-100 flex items-center justify-center relative">
+                        <img src="https://cdn.star.nesdis.noaa.gov/GOES18/ABI/CONUS/GEOCOLOR/latest.jpg" alt="GOES Satellite West" class="w-full h-full object-cover">
+                        <div class="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded backdrop-blur-sm">Live NOAA GOES-18</div>
+                    </div>
+                </div>
+                <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-6">
+                    <h4 class="text-base font-bold text-[#1e3d59] mb-4 flex items-center">📡 Local NWS Doppler Radar <span class="ml-2 text-xs font-normal text-slate-500">(Base Reflectivity)</span></h4>
+                    <div class="aspect-video bg-slate-100 rounded-2xl overflow-hidden border border-sky-100 flex items-center justify-center relative">
+                        <img src="https://radar.weather.gov/ridge/standard/KVTX_loop.gif" alt="NWS Radar Loop" class="w-full h-full object-cover">
+                        <div class="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded backdrop-blur-sm">Live NWS KVTX Loop</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-6">
+                    <h4 class="text-base font-bold text-[#1e3d59] mb-4">📈 24h Temperature Trend (°F)</h4>
+                    <div class="h-64 relative">
+                        <canvas id="tempChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-6">
+                    <h4 class="text-base font-bold text-[#1e3d59] mb-4">🌬️ 24h Wind Speed & Gusts (mph)</h4>
+                    <div class="h-64 relative">
+                        <canvas id="windChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-6">
+                    <h4 class="text-base font-bold text-[#1e3d59] mb-4">🧭 24h Pressure Trend (hPa)</h4>
+                    <div class="h-64 relative">
+                        <canvas id="pressureChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-6">
+                    <h4 class="text-base font-bold text-[#1e3d59] mb-4">🌧️ 24h Rainfall Tracker (inches)</h4>
+                    <div class="h-64 relative">
+                        <canvas id="precipChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-6 overflow-x-auto">
+                <div class="flex items-center justify-between border-b border-sky-100 pb-3 mb-4">
+                    <h3 class="text-xl font-bold text-[#1e3d59]">📋 Recent Telemetry Logs (Spreadsheet View)</h3>
+                    <span class="text-xs bg-[#1e3d59]/10 text-[#1e3d59] font-bold px-2 py-1 rounded-md">Live Auto-Updating</span>
+                </div>
+                <div class="min-w-[700px]">
+                    <table class="w-full text-left text-sm text-slate-600 border-collapse rounded-xl overflow-hidden">
+                        <thead class="bg-[#1e3d59]/10 text-[#1e3d59] text-xs uppercase font-bold">
+                            <tr>
+                                <th class="px-4 py-3 border-b border-sky-200">Date / Time (Local)</th>
+                                <th class="px-4 py-3 border-b border-sky-200">Temp (°F)</th>
+                                <th class="px-4 py-3 border-b border-sky-200">Humidity (%)</th>
+                                <th class="px-4 py-3 border-b border-sky-200">Wind (mph)</th>
+                                <th class="px-4 py-3 border-b border-sky-200">Pressure (hPa)</th>
+                                <th class="px-4 py-3 border-b border-sky-200">Precip (in)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="telemetry-tbody" class="bg-white/40">
+                            <tr>
+                                <td colspan="6" class="px-4 py-6 text-center text-slate-400 font-semibold animate-pulse">Syncing tabular telemetry stream...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="tab-content-cams" class="tab-pane hidden flex flex-col gap-8">
+            <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-6">
+                <div class="border-b border-sky-100 pb-4 mb-6">
+                    <h3 class="text-2xl font-bold text-[#1e3d59] flex items-center">
+                        📹 Live California Beach Cams
+                    </h3>
+                    <p class="text-sm text-slate-500 mt-1">Direct high-definition beach streams</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white/80 border border-slate-100 rounded-3xl p-4 shadow-sm">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="font-bold text-slate-800">📸 Santa Monica Pier Live</span>
+                            <span class="flex h-2.5 w-2.5 relative">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                            </span>
+                        </div>
+                        <div class="aspect-video w-full overflow-hidden rounded-2xl border border-slate-200">
+                            <iframe class="w-full h-full" src="https://www.youtube.com/embed/5_XgUf3kIno?autoplay=1&mute=1" title="Santa Monica Pier Live Stream" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                    </div>
+
+                    <div class="bg-white/80 border border-slate-100 rounded-3xl p-4 shadow-sm">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="font-bold text-slate-800">📸 Coastal CA Beach Watch</span>
+                            <span class="flex h-2.5 w-2.5 relative">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                            </span>
+                        </div>
+                        <div class="aspect-video w-full overflow-hidden rounded-2xl border border-slate-200">
+                            <iframe class="w-full h-full" src="https://www.youtube.com/embed/Nf_YAcLBmU4?autoplay=1&mute=1" title="California Coastal Cam" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-content-resources" class="tab-pane hidden">
+            <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-6 md:p-8">
+                <div class="border-b border-sky-100 pb-4 mb-6">
+                    <h3 class="text-2xl font-bold text-[#1e3d59]">⚓ Coastal Quick Resources</h3>
+                    <p class="text-sm text-slate-500 mt-1">Direct marine tracking portals for local residents</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <a href="https://www.surfline.com/surf-report/redondo-breakwater/5842041f4e65fad6a7708921" target="_blank" class="block bg-white hover:bg-sky-50/50 border border-slate-100 hover:border-sky-200 shadow-sm hover:shadow-md rounded-2xl p-5 transition-all duration-300 group">
+                        <div class="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">🏄‍♂️</div>
+                        <h4 class="font-bold text-[#1e3d59] group-hover:text-sky-700">Surfline Breakwater</h4>
+                        <p class="text-xs text-slate-500 mt-1">Direct swell metrics, wave heights, and winds for Redondo Beach.</p>
+                    </a>
+
+                    <a href="https://tidesandcurrents.noaa.gov/noaatidepredictions.html?id=9410840" target="_blank" class="block bg-white hover:bg-sky-50/50 border border-slate-100 hover:border-sky-200 shadow-sm hover:shadow-md rounded-2xl p-5 transition-all duration-300 group">
+                        <div class="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">📈</div>
+                        <h4 class="font-bold text-[#1e3d59] group-hover:text-sky-700">NOAA Tides: Santa Monica</h4>
+                        <p class="text-xs text-slate-500 mt-1">Real-time daily tide levels, daily highs/lows, and forecasts.</p>
+                    </a>
+
+                    <a href="https://cdip.ucsd.edu/m/products/?stn=028p1&param=waveHs&pub_set=public" target="_blank" class="block bg-white hover:bg-sky-50/50 border border-slate-100 hover:border-sky-200 shadow-sm hover:shadow-md rounded-2xl p-5 transition-all duration-300 group">
+                        <div class="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">⚓</div>
+                        <h4 class="font-bold text-[#1e3d59] group-hover:text-sky-700">CDIP Wave Buoy</h4>
+                        <p class="text-xs text-slate-500 mt-1">Deepwater wave period charts and live marine telemetry.</p>
+                    </a>
+
+                    <a href="https://forecast.weather.gov/meteograms/Plotter.php?lat=33.8492&lon=-118.387&wfo=LOX&zcode=CAZ366&gset=15&gdiff=3&unit=0&tinfo=PY8&ahour=0&pcmd=11101111110000000000000000000000000000000000000000000000000&lg=en&indu=1!1!1!&dd=&bw=&hrspan=48&pqpfhr=6&psnwhr=6" target="_blank" class="block bg-white hover:bg-sky-50/50 border border-slate-100 hover:border-sky-200 shadow-sm hover:shadow-md rounded-2xl p-5 transition-all duration-300 group">
+                        <div class="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">📊</div>
+                        <h4 class="font-bold text-[#1e3d59] group-hover:text-sky-700">NOAA 48hr DMI</h4>
+                        <p class="text-xs text-slate-500 mt-1">NOAA's 48 hour Display.</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="max-w-7xl mx-auto px-4 py-8 mt-4 text-center text-sm font-semibold text-sky-800/60 border-t border-sky-200/50">
+        &copy; 2026 Mason's Weather &bull; Station KCAREDON127 &bull; All Rights Reserved.<br>
+        <span class="text-xs font-normal opacity-80">Telemetry provided by NOAA, NWS, Mason Ramirez, and local sensor networks.</span>
+    </footer>
+
+    <script>
+        // POINTED TO THE SHARED SPREADSHEET ID
+        const SPREADSHEET_ID = "1jQ9ddsqhOXiw2RnN41ZnHs-vyhV2V2lZbmsAa0k3-GY"; 
+        let currentCity = "Redondo Beach";
+        let currentLat = 33.8492;
+        let currentLon = -118.3884;
+
+        let chartInstances = {};
+
+        // TAB SWITCH LOGIC
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-[#1e3d59]', 'text-white');
+                btn.classList.add('bg-white/60', 'text-[#1e3d59]');
+            });
+
+            document.getElementById(`tab-content-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-btn-${tabId}`).classList.remove('bg-white/60', 'text-[#1e3d59]');
+            document.getElementById(`tab-btn-${tabId}`).classList.add('bg-[#1e3d59]', 'text-white');
+
+            if (tabId === 'trends') {
+                setTimeout(() => {
+                    fetchWeatherData();
+                }, 50);
+            }
+        }
+
+        // TOGGLE WARNING DETAILS
+        function toggleAlertDetails() {
+            const details = document.getElementById('alert-details');
+            if (details) details.classList.toggle('hidden');
+        }
+
+        // SELECT CURRENT MICROCLIMATE
+        function selectCity(name, lat, lon, element) {
+            currentCity = name;
+            currentLat = lat;
+            currentLon = lon;
+
+            document.querySelectorAll('.city-btn').forEach(btn => {
+                btn.className = "city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm";
+                const badge = btn.querySelector('span:last-child');
+                if (badge) badge.className = "text-xs opacity-60";
+            });
+
+            element.className = "city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-amber-100 text-amber-900 border border-amber-200 shadow-sm";
+            const currentBadge = element.querySelector('span:last-child');
+            if (currentBadge) {
+                currentBadge.className = "text-xs px-2 py-0.5 rounded-full bg-white/60";
+                currentBadge.innerText = "Active";
+            }
+
+            document.getElementById('current-city-title').innerText = name;
+            fetchWeatherData();
+        }
+
+        // CODES MAPPING TO NWS ICON GRAPHICS
+        function mapNwsIcon(code, isDay = 1) {
+            const dn = isDay ? 'day' : 'night';
+            const map = {
+                0: ["skc", "Clear Skies"],
+                1: ["few", "Mostly Sunny"],
+                2: ["sct", "Partly Cloudy"],
+                3: ["bkn", "Mostly Cloudy"],
+                45: ["fg", "Dense Fog"],
+                48: ["fg", "Foggy Overcast"],
+                51: ["drizzle", "Light Mist"],
+                53: ["drizzle", "Moderate Mist"],
+                55: ["drizzle", "Heavy Coastal Drizzle"],
+                61: ["shra", "Light Coastal Showers"],
+                63: ["ra", "Moderate Rain"],
+                65: ["ra", "Heavy Downpours"],
+                80: ["shra", "Scattered Showers"],
+                81: ["shra", "Heavy Showers"],
+                82: ["shra", "Extreme Rainfall"],
+                95: ["tsra", "Thunderstorms"]
+            };
+            const iconKey = map[code] ? map[code][0] : "skc";
+            const textDesc = map[code] ? map[code][1] : "Clear Skies";
+            return {
+                url: `https://api.weather.gov/icons/land/${dn}/${iconKey}?size=medium`,
+                desc: textDesc
+            };
+        }
+
+        // UTILITY METRIC PARSER FOR WEATHER UNDERGROUND
+        function parsePwsObservation(pwsData) {
+            if (!pwsData || !pwsData.observations || pwsData.observations.length === 0) return null;
+            const obs = pwsData.observations[0];
+            return {
+                temp: Math.round(obs.imperial.temp),
+                windSpeed: Math.round(obs.imperial.windSpeed),
+                windDir: obs.winddir,
+                humidity: Math.round(obs.humidity),
+                pressure: Math.round(obs.imperial.pressure * 33.8639)
+            };
+        }
+
+        // ORCHESTRATE REAL-TIME DATA FETCHES
+        async function fetchWeatherData() {
+            let pWSTemp = null;
+            let pWSWind = null;
+            let pWSHumidity = null;
+            let pWSPressure = null;
+            let pWSWindDir = null;
+
+            if (currentCity === "Redondo Beach") {
+                try {
+                    const pwsRes = await fetch("https://api.weather.com/v2/pws/observations/current?stationId=KCAREDON127&format=json&units=e&apiKey=1fee782e5bad4482ae782e5bad2482f5");
+                    if (pwsRes.ok) {
+                        const pwsJson = await pwsRes.json();
+                        const obs = parsePwsObservation(pwsJson);
+                        if (obs) {
+                            pWSTemp = obs.temp;
+                            pWSWind = obs.windSpeed;
+                            pWSHumidity = obs.humidity;
+                            pWSPressure = obs.pressure;
+                            pWSWindDir = obs.windDir;
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Could not query physical PWS station. Defaulting to virtual matrix calculations.", e);
+                }
+            }
+
+            const openMeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${currentLat}&longitude=${currentLon}&current=temperature_2m,relative_humidity_2m,is_day,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,pressure_msl&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,pressure_msl,precipitation&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&past_days=1&forecast_days=1`;
+
+            try {
+                const res = await fetch(openMeteoUrl);
+                if (!res.ok) throw new Error("OpenMeteo failure");
+                const data = await res.json();
+
+                const current = data.current;
+                const nwsIconData = mapNwsIcon(current.weather_code, current.is_day);
+                
+                document.getElementById('current-weather-nws-icon').src = nwsIconData.url;
+                document.getElementById('current-weather-desc').innerText = nwsIconData.desc;
+                
+                const finalTemp = (pWSTemp !== null) ? pWSTemp : Math.round(current.temperature_2m);
+                const finalWind = (pWSWind !== null) ? pWSWind : Math.round(current.wind_speed_10m);
+                const finalHumidity = (pWSHumidity !== null) ? pWSHumidity : current.relative_humidity_2m;
+                const finalPressure = (pWSPressure !== null) ? pWSPressure : Math.round(current.pressure_msl);
+                const finalWindDir = (pWSWindDir !== null) ? pWSWindDir : current.wind_direction_10m;
+
+                document.getElementById('metric-temp').innerText = finalTemp + "°";
+                document.getElementById('header-big-temp').innerText = finalTemp + "°F";
+
+                const now = new Date();
+                document.getElementById('update-timestamp').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                document.getElementById('metric-wind').innerText = finalWind;
+                document.getElementById('metric-humidity').innerText = finalHumidity + "%";
+                document.getElementById('metric-pressure').innerText = finalPressure;
+                
+                document.getElementById('wind-compass').style.transform = `rotate(${finalWindDir}deg)`;
+                
+                let cardinal = "N";
+                if (finalWindDir > 22.5 && finalWindDir <= 67.5) cardinal = "NE";
+                else if (finalWindDir > 67.5 && finalWindDir <= 112.5) cardinal = "E";
+                else if (finalWindDir > 112.5 && finalWindDir <= 157.5) cardinal = "SE";
+                else if (finalWindDir > 157.5 && finalWindDir <= 202.5) cardinal = "S";
+                else if (finalWindDir > 202.5 && finalWindDir <= 247.5) cardinal = "SW";
+                else if (finalWindDir > 247.5 && finalWindDir <= 292.5) cardinal = "W";
+                else if (finalWindDir > 292.5 && finalWindDir <= 337.5) cardinal = "NW";
+                document.getElementById('metric-wind-dir').innerText = `Direction: ${cardinal} (${finalWindDir}°)`;
+
+                const hourly = data.hourly;
+                const times = hourly.time.slice(-24).map(t => {
+                    const d = new Date(t);
+                    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                });
+                const temps = hourly.temperature_2m.slice(-24);
+                const winds = hourly.wind_speed_10m.slice(-24);
+                const gusts = hourly.wind_gusts_10m.slice(-24);
+                const pressures = hourly.pressure_msl.slice(-24);
+                const precip = hourly.precipitation.slice(-24);
+
+                renderChart('tempChart', times, [{ label: 'Temperature (°F)', data: temps, borderColor: '#f97316', backgroundColor: 'rgba(249, 115, 22, 0.15)', borderWidth: 3, fill: true, tension: 0.4 }]);
+                renderChart('windChart', times, [
+                    { label: 'Wind Speed (mph)', data: winds, borderColor: '#0284c7', backgroundColor: 'rgba(2, 132, 199, 0.1)', borderWidth: 2.5, fill: true, tension: 0.4 },
+                    { label: 'Max Gusts (mph)', data: gusts, borderColor: '#0d9488', backgroundColor: 'rgba(13, 148, 136, 0.05)', borderWidth: 1.5, borderDash: [5, 5], fill: false, tension: 0.4 }
+                ]);
+                renderChart('pressureChart', times, [{ label: 'Atmospheric Pressure (hPa)', data: pressures, borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.1)', borderWidth: 3, fill: true, tension: 0.4 }]);
+                renderChart('precipChart', times, [{ label: 'Hourly Rain (in)', data: precip, borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.6)', borderWidth: 1, type: 'bar' }]);
+
+                const tableBody = document.getElementById('telemetry-tbody');
+                if (tableBody) {
+                    tableBody.innerHTML = '';
+                    const currentTimeIndex = hourly.time.findIndex(t => new Date(t) > now) - 1;
+                    const startIndex = currentTimeIndex > 0 ? currentTimeIndex : hourly.time.length - 1;
+                    
+                    for (let i = 0; i < 7; i++) {
+                        const index = startIndex - i;
+                        if (index < 0) break;
+                        
+                        const logDate = new Date(hourly.time[index]);
+                        const dateStr = logDate.toISOString().split('T')[0];
+                        const timeStr = logDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        
+                        const tempVal = hourly.temperature_2m[index].toFixed(1);
+                        const humVal = hourly.relative_humidity_2m[index];
+                        const windVal = hourly.wind_speed_10m[index].toFixed(1);
+                        const pressVal = hourly.pressure_msl[index].toFixed(1);
+                        const precipVal = hourly.precipitation[index].toFixed(2);
+
+                        tableBody.innerHTML += `
+                            <tr class="hover:bg-white/80 transition-colors">
+                                <td class="px-4 py-2 border-b border-sky-100 text-[13px] text-slate-500">${dateStr} ${timeStr}</td>
+                                <td class="px-4 py-2 border-b border-sky-100 font-bold text-amber-800">${tempVal}</td>
+                                <td class="px-4 py-2 border-b border-sky-100 text-teal-700">${humVal}</td>
+                                <td class="px-4 py-2 border-b border-sky-100 text-sky-700">${windVal}</td>
+                                <td class="px-4 py-2 border-b border-sky-100 text-indigo-700">${pressVal}</td>
+                                <td class="px-4 py-2 border-b border-sky-100 text-cyan-700">${precipVal}</td>
+                            </tr>
+                        `;
+                    }
+                }
+
+                fetchNWSForecast();
+
+            } catch (err) {
+                console.error("OpenMeteo fetch error: ", err);
+            }
+        }
+
+        // NOAA 7-DAY FORECAST GRID SYSTEM WITH COMBINED DAILY & HOURLY INTEGRATION
+        async function fetchNWSForecast() {
+            try {
+                // 1. Get Point Metadata
+                const pointRes = await fetch(`https://api.weather.gov/points/${currentLat},${currentLon}`);
+                if (!pointRes.ok) throw new Error("NWS lookup failed.");
+                const pointData = await pointRes.json();
+                
+                const forecastUrl = pointData.properties.forecast;
+                const forecastHourlyUrl = pointData.properties.forecastHourly;
+
+                // 2. Fetch daily and hourly in parallel
+                const [forecastRes, forecastHourlyRes] = await Promise.all([
+                    fetch(forecastUrl),
+                    fetch(forecastHourlyUrl)
+                ]);
+
+                if (!forecastRes.ok || !forecastHourlyRes.ok) throw new Error("NWS forecasts failed.");
+                
+                const forecastData = await forecastRes.json();
+                const forecastHourlyData = await forecastHourlyRes.json();
+
+                const periods = forecastData.properties.periods;
+                const hourlyPeriods = forecastHourlyData.properties.periods;
+
+                const forecastGrid = document.getElementById('weekly-forecast-grid');
+                forecastGrid.innerHTML = ''; 
+
+                periods.slice(0, 7).forEach(period => {
+                    const block = document.createElement('div');
+                    block.className = "text-center p-3 bg-white/50 hover:bg-white/80 rounded-2xl border border-sky-100 flex flex-col items-center justify-start shadow-sm hover:shadow transition-all duration-300";
+                    
+                    const name = document.createElement('span');
+                    name.className = "text-[11px] font-bold text-sky-800 block uppercase tracking-wide truncate w-full text-center";
+                    name.innerText = period.name;
+
+                    const iconImg = document.createElement('img');
+                    iconImg.className = "w-11 h-11 rounded-lg border border-slate-100 shadow-sm my-2 bg-white";
+                    iconImg.src = period.icon;
+                    iconImg.alt = period.shortForecast;
+                    iconImg.title = period.detailedForecast;
+
+                    const temp = document.createElement('span');
+                    temp.className = "text-sm font-extrabold text-slate-800 block mb-2";
+                    temp.innerText = `${period.temperature}°${period.temperatureUnit}`;
+                    
+                    const detailsContainer = document.createElement('div');
+                    detailsContainer.className = "mt-auto w-full flex flex-col gap-1 border-t border-sky-100/60 pt-2";
+                    
+                    const details = document.createElement('span');
+                    details.className = "text-[10px] font-medium text-slate-600 leading-tight text-center line-clamp-2 min-h-[26px]";
+                    details.innerText = period.shortForecast;
+
+                    const wind = document.createElement('span');
+                    wind.className = "text-[9px] font-bold text-sky-600/90";
+                    wind.innerText = (period.windSpeed) ? `🌬️ ${period.windSpeed} ${period.windDirection}` : "🌬️ Calm";
+                    
+                    const popValue = period.probabilityOfPrecipitation?.value;
+                    const pop = document.createElement('span');
+                    pop.className = "text-[9px] font-bold text-teal-600/90";
+                    pop.innerText = (popValue !== null && popValue > 0) ? `💧 ${popValue}% Rain` : `💧 0% Rain`;
+
+                    // MATCH EXTENDED FORECAST RH TO HOURLY RECORDS:
+                    let calculatedRH = null;
+                    const periodStart = new Date(period.startTime);
+                    const periodEnd = new Date(period.endTime);
+
+                    // Filter all hourly samples falling within this specific forecast period
+                    const relativeHours = hourlyPeriods.filter(h => {
+                        const hTime = new Date(h.startTime);
+                        return hTime >= periodStart && hTime < periodEnd;
+                    });
+
+                    if (relativeHours.length > 0) {
+                        const sum = relativeHours.reduce((acc, curr) => acc + (curr.relativeHumidity?.value || 0), 0);
+                        calculatedRH = Math.round(sum / relativeHours.length);
+                    }
+
+                    const hum = document.createElement('span');
+                    hum.className = "text-[9px] font-bold text-indigo-500/90";
+                    hum.innerText = (calculatedRH !== null) ? `🌫️ ${calculatedRH}% RH` : `🌫️ --% RH`;
+
+                    detailsContainer.appendChild(details);
+                    detailsContainer.appendChild(wind);
+                    detailsContainer.appendChild(pop);
+                    detailsContainer.appendChild(hum);
+
+                    block.appendChild(name);
+                    block.appendChild(iconImg);
+                    block.appendChild(temp);
+                    block.appendChild(detailsContainer);
+                    
+                    forecastGrid.appendChild(block);
+                });
+
+            } catch (err) {
+                console.error("NWS Forecast System Error: ", err);
+            }
+        }
+
+        // COPIED FROM MOJAVE COUNTY OUTLOOK SCRIPT
+        function formatOutlookUpdateTimestamp() {
+            const now = new Date();
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const dayName = days[now.getDay()];
+            
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'pm' : 'am';
+            
+            hours = hours % 12;
+            hours = hours ? hours : 12; // convert 0 to 12
+            
+            return `Updated: ${dayName} @ ${hours}:${minutes} ${ampm}`;
+        }
+
+        // COPIED AND SYNCHRONIZED TO FETCH FROM MOJAVE SPREADSHEET ID FOR SOUTH BAY KEY
+        function syncGoogleSheetDigests() {
+            window.handleGoogleSheetResponse = function(responseJSON) {
+                try {
+                    const rows = responseJSON.table.rows;
+                    let southbayText = "";
+
+                    for (let row of rows) {
+                        if (!row.c || row.c.length < 2) continue;
+
+                        const rawKey = row.c[0] && row.c[0].v ? row.c[0].v.toString() : "";
+                        const rawVal = row.c[1] && row.c[1].v ? row.c[1].v.toString() : "";
+
+                        const key = rawKey.toLowerCase().replace(/\s+/g, '');
+
+                        if (key === "southbay") {
+                            southbayText = rawVal;
+                            break;
+                        }
+                    }
+
+                    const summaryBox = document.getElementById('coastal-summary-text');
+                    if (summaryBox && southbayText) {
+                        summaryBox.innerHTML = southbayText.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+                        
+                        const summaryMeta = document.getElementById('coastal-summary-meta');
+                        if (summaryMeta) {
+                            summaryMeta.innerText = formatOutlookUpdateTimestamp();
+                        }
+                    }
+                } catch (err) {
+                    console.error("Error parsing Google Sheet response payload:", err);
+                } finally {
+                    const tempScript = document.getElementById('g-sheet-jsonp-loader');
+                    if (tempScript) tempScript.remove();
+                }
+            };
+
+            const script = document.createElement('script');
+            script.id = 'g-sheet-jsonp-loader';
+            script.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=responseHandler:handleGoogleSheetResponse`;
+            document.body.appendChild(script);
+        }
+
+        function renderChart(canvasId, labels, datasets) {
+            if (chartInstances[canvasId]) chartInstances[canvasId].destroy();
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            chartInstances[canvasId] = new Chart(ctx, {
+                type: datasets[0].type || 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true, labels: { color: '#1e293b', font: { family: 'Plus Jakarta Sans', size: 11 } } } },
+                    scales: {
+                        y: { grid: { color: 'rgba(0,0,0,0.03)' }, ticks: { color: '#64748b', font: { family: 'Plus Jakarta Sans', size: 10 } } },
+                        x: { grid: { display: false }, ticks: { color: '#64748b', font: { family: 'Plus Jakarta Sans', size: 9 } } }
+                    }
+                }
+            });
+        }
+
+        // LOCAL HAZARD ALERTS TRACKING
+        async function fetchNWSAlerts() {
+            try {
+                const res = await fetch('https://api.weather.gov/alerts/active/zone/CAZ362');
+                const data = await res.json();
+                
+                if (data.features && data.features.length > 0) {
+                    const highestAlert = data.features[0].properties;
+                    document.getElementById('alert-event').innerText = highestAlert.event || 'ALERT';
+                    document.getElementById('alert-headline').innerText = highestAlert.headline || 'Active Advisory Recorded';
+                    document.getElementById('alert-desc').innerText = highestAlert.description || 'No detailed description provided.';
+                    document.getElementById('alert-inst').innerText = highestAlert.instruction || 'Follow municipal precautions and monitor local updates.';
+                    document.getElementById('nws-alert-bar').classList.remove('hidden');
+                } else {
+                    document.getElementById('nws-alert-bar').classList.add('hidden');
+                }
+            } catch (err) {
+                console.log("No active NWS alerts found.");
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchWeatherData();
+            fetchNWSAlerts();
+            syncGoogleSheetDigests();
+            
+            // Loop updates every 5 minutes
+            setInterval(fetchWeatherData, 300000);
+            setInterval(syncGoogleSheetDigests, 300000);
+        });
+    </script>
+</body>
+</html>
