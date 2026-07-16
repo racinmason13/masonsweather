@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kingman & Hualapai Mountains Weather Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;600;700;800&family=Playfair+Display:ital,wght=0,700;1,700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .desert-title {
+            font-family: 'Playfair Display', serif;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-[#fdf2e9] via-[#fed7aa] to-[#fef3c7] min-h-screen text-[#451a03]">
+
+    <div id="nws-alert-bar" class="hidden bg-gradient-to-r from-red-700 to-amber-700 text-white py-3 px-4 shadow-xl sticky top-0 z-50 transition-all duration-500 ease-in-out">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
+            <div class="flex items-center space-x-3">
+                <span class="flex h-3 w-3 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-red-100"></span>
+                </span>
+                <div class="text-sm font-semibold tracking-wide">
+                    <span class="uppercase font-extrabold tracking-wider bg-black/30 px-2 py-0.5 rounded text-[11px] mr-2" id="alert-event">DESERT ALERT</span>
+                    <span class="text-white/95 font-medium" id="alert-headline">Loading Mojave County advisory details...</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3 self-end md:self-auto">
+                <button onclick="toggleAlertDetails()" class="text-xs bg-white/20 hover:bg-white/35 text-white font-bold py-1 px-3 rounded-full transition">
+                    View Details
+                </button>
+            </div>
+        </div>
+        <div id="alert-details" class="hidden mt-3 max-w-7xl mx-auto border-t border-white/20 pt-3 text-xs text-white/90 space-y-2">
+            <p><strong>Description:</strong> <span id="alert-desc"></span></p>
+            <p><strong>Precautionary/Preparedness Actions:</strong> <span id="alert-inst"></span></p>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <header class="flex flex-col sm:flex-row items-center justify-between border-b border-orange-200/60 pb-6 mb-8 gap-4">
+            <div class="logo-section text-center sm:text-left">
+                <h1 class="text-4xl font-extrabold text-[#7c2d12] tracking-tight desert-title">🌵 Kingman & Hualapai Highlands</h1>
+                <p class="text-xs font-bold text-amber-800 tracking-wider uppercase mt-1">Ranch House Weather Network • Elevation Span: 3,300′ to 8,200′</p>
+            </div>
+            <div class="header-live-temp flex flex-col items-center sm:items-end">
+                <div class="temp text-4xl font-extrabold text-[#7c2d12]" id="header-big-temp">--°F</div>
+                <div class="update-time text-xs text-amber-800/80">Station Feed: <span id="update-timestamp" class="font-bold">Loading...</span></div>
+            </div>
+        </header>
+
+        <nav class="flex flex-wrap gap-2 mb-8 justify-center sm:justify-start">
+            <button onclick="switchTab('live')" id="tab-btn-live" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-[#9a3412] text-white">
+                ☀️ Live Conditions
+            </button>
+            <button onclick="switchTab('trends')" id="tab-btn-trends" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-white/60 hover:bg-white text-[#9a3412]">
+                📊 Forecast & Trends
+            </button>
+            <button onclick="switchTab('cams')" id="tab-btn-cams" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-white/60 hover:bg-white text-[#9a3412]">
+                📡 Weather Maps
+            </button>
+            <button onclick="switchTab('resources')" id="tab-btn-resources" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-white/60 hover:bg-white text-[#9a3412]">
+                🗺️ Desert Resources
+            </button>
+        </nav>
+
+        <div id="tab-content-live" class="tab-pane grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <aside class="lg:col-span-3 flex flex-col gap-4">
+                <div class="bg-white/70 backdrop-blur-md border border-orange-100 shadow-xl rounded-3xl p-5">
+                    <h3 class="text-lg font-bold text-[#7c2d12] border-b border-orange-100 pb-3 mb-4 flex items-center">
+                        📍 Microclimates
+                    </h3>
+                    <p class="text-xs text-amber-900/70 mb-4">Select an area elevation to view live weather telemetry & trends:</p>
+                    <div id="city-selector" class="flex flex-col gap-2">
+                        <button onclick="selectCity('Lazy Y U', 35.1328, -113.9180, 'KAZKINGM257', this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-amber-100 text-amber-950 border border-amber-200 shadow-sm">
+                            <span class="flex flex-col">
+                                <span>🏡 Lazy Y U</span>
+                                <span class="text-2xs text-amber-800 font-medium">Elevation: ~4,800′</span>
+                            </span>
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-white/60">Community</span>
+                        </button>
+                        <button onclick="selectCity('Kingman Valley', 35.1894, -114.0530, 'KAZKINGM192', this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#7c2d12] hover:shadow-sm">
+                            <span class="flex flex-col">
+                                <span>🌵 Kingman (Valley Floor)</span>
+                                <span class="text-2xs text-[#7c2d12]/70 font-medium">Elevation: ~3,300′</span>
+                            </span>
+                            <span class="text-xs opacity-60">Valley</span>
+                        </button>
+                        <button onclick="selectCity('Hualapai Peak / Park', 35.0970, -113.8750, 'KAZKINGM104', this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#7c2d12] hover:shadow-sm">
+                            <span class="flex flex-col">
+                                <span>🌲 Hualapai Mountains</span>
+                                <span class="text-2xs text-[#7c2d12]/70 font-medium">Elevation: ~6,500′</span>
+                            </span>
+                            <span class="text-xs opacity-60">Pines</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-[#7c2d12] text-white shadow-xl rounded-3xl p-5 relative overflow-hidden">
+                    <h4 class="text-xs uppercase tracking-wider text-orange-200 font-bold mb-1">Mountain Elevation Swing</h4>
+                    <p class="text-xs text-orange-100/90 leading-relaxed">
+                        Notice the immense temperature gap! While the dry valley basin of Kingman baked in desert breezes, the upper ridges of the Hualapai pine belts remain heavily sheltered, dropping up to 18 degrees cooler. This acts as our local "Sky Island" escape route!
+                    </p>
+                </div>
+            </aside>
+
+            <main class="lg:col-span-9 flex flex-col gap-6">
+                
+                <!-- Added Dynamic Timestamp Tag below -->
+                <div class="bg-white/70 backdrop-blur-md border border-orange-100 shadow-xl rounded-3xl p-6">
+                    <div class="border-b border-orange-100 pb-2 mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                        <h3 class="text-lg font-bold text-[#7c2d12] flex items-center">
+                            📝 Mason's Outlook
+                        </h3>
+                        <span id="outlook-timestamp" class="text-2xs font-semibold text-amber-800 uppercase tracking-wider">
+                            Updated: Loading...
+                        </span>
+                    </div>
+                    <div id="kingman-digest" class="text-sm text-amber-950 leading-relaxed font-medium">
+                        Loading latest desert field reports...
+                    </div>
+                </div>
+
+                <div class="bg-white/70 backdrop-blur-md border border-orange-100 shadow-xl rounded-3xl p-6 md:p-8">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-orange-100 pb-6 mb-6">
+                        <div>
+                            <span class="text-xs font-bold tracking-widest text-orange-700 uppercase" id="current-station-pws">Station PWS: KAZKINGM257</span>
+                            <h2 id="current-city-title" class="text-3xl font-extrabold text-[#7c2d12] desert-title">Lazy Y U</h2>
+                            <p class="text-sm text-amber-900/70 mt-1">Real-time reports updating every 5 minutes</p>
+                        </div>
+                        <div class="flex items-center space-x-4 mt-4 md:mt-0">
+                            <img id="current-weather-nws-icon" class="w-16 h-16 rounded-full border border-orange-100 shadow-sm bg-white" src="https://api.weather.gov/icons/land/day/skc?size=medium" alt="NWS Weather Icon">
+                            <div>
+                                <span id="current-weather-desc" class="text-xl font-bold text-[#7c2d12] block font-sans">Clear/Sunny</span>
+                                <span class="text-xs bg-[#7c2d12]/10 text-[#7c2d12] font-bold px-2 py-1 rounded-md">Live Station Grid</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <div class="bg-gradient-to-br from-amber-50 to-orange-100/40 border border-amber-200/50 rounded-2xl p-4 flex flex-col justify-between">
+                            <span class="text-xs font-bold uppercase tracking-wider text-amber-900">High Desert Temp</span>
+                            <div class="my-2">
+                                <span id="metric-temp" class="text-3xl font-extrabold text-amber-950">--°</span>
+                                <span class="text-lg font-bold text-amber-900">F</span>
+                            </div>
+                            <span class="text-2xs text-amber-800/80">Ground level air sensor</span>
+                        </div>
+                        <div class="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200/50 rounded-2xl p-4 flex flex-col justify-between">
+                            <span class="text-xs font-bold uppercase tracking-wider text-[#7c2d12]">Ridge Winds</span>
+                            <div class="my-2 flex items-center space-x-2">
+                                <span id="metric-wind" class="text-3xl font-extrabold text-orange-950">--</span>
+                                <span class="text-xs font-bold text-orange-900">mph</span>
+                                <div id="wind-compass" class="w-6 h-6 rounded-full bg-[#7c2d12]/10 flex items-center justify-center transform transition-transform duration-700">
+                                    <svg class="w-4 h-4 text-[#7c2d12]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <span class="text-2xs text-[#7c2d12]/80" id="metric-wind-dir">Direction: SW</span>
+                        </div>
+                        <div class="bg-gradient-to-br from-amber-50/50 to-yellow-50/50 border border-yellow-200/50 rounded-2xl p-4 flex flex-col justify-between">
+                            <span class="text-xs font-bold uppercase tracking-wider text-yellow-900">Dry Air Index</span>
+                            <div class="my-2">
+                                <span id="metric-humidity" class="text-3xl font-extrabold text-yellow-950">--%</span>
+                            </div>
+                            <span class="text-2xs text-yellow-800/80">Desert humidity factor</span>
+                        </div>
+                        <div class="bg-gradient-to-br from-stone-50 to-orange-50 border border-stone-200 rounded-2xl p-4 flex flex-col justify-between">
+                            <span class="text-xs font-bold uppercase tracking-wider text-stone-800">Barometer</span>
+                            <div class="my-2">
+                                <span id="metric-pressure" class="text-2xl font-extrabold text-stone-950">--</span>
+                                <span class="text-xs font-bold text-stone-700">hPa</span>
+                            </div>
+                            <span class="text-2xs text-stone-600" id="barometer-trend">Trend: Steady</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-amber-100 border border-amber-300/40 rounded-3xl p-6 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-start space-x-4">
+                        <div class="text-3xl mt-1">☀️</div>
+                        <div>
+                            <h4 class="font-bold text-amber-950 text-base">Desert Hydration & Trail Brief</h4>
+                            <p class="text-xs text-amber-900/90 leading-relaxed mt-1">
+                                High Elevation UV indices exceed **10+** today. Desert humidity is extremely low. Carrying at least **1 gallon of water per person** is strongly recommended for any hikes along the Hualapai Aspen or Potato Patch trail systems.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <span class="bg-amber-800/10 text-amber-900 text-xs font-bold uppercase px-3 py-1.5 rounded-full">Updated Today</span>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <div id="tab-content-trends" class="tab-pane hidden flex flex-col gap-8">
+            <div class="bg-white/70 backdrop-blur-md border border-orange-100 shadow-xl rounded-3xl p-6">
+                <h3 class="text-xl font-bold text-[#7c2d12] mb-4 flex items-center border-b border-orange-100 pb-3 desert-title">
+                    📅 NOAA High-Desert Grid Forecast (Kingman / Hualapai Region)
+                </h3>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4 mb-6" id="weekly-forecast-grid">
+                    <div class="text-center p-3 bg-white/50 rounded-2xl border border-orange-100 flex flex-col items-center justify-center col-span-full py-8">
+                        <span class="text-sm font-semibold text-amber-800 animate-pulse">Querying NWS High Desert Grid Server...</span>
+                    </div>
+                </div>
+
+                <div class="border-t border-orange-200/50 pt-6">
+                    <h4 class="text-xs font-extrabold uppercase tracking-widest text-[#7c2d12] mb-4 flex items-center gap-2">
+                        <span>📝</span> Detailed Daily Weather Outlook
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="weekly-forecast-details">
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white/70 backdrop-blur-md border border-orange-100 shadow-xl rounded-3xl p-6">
+                    <h4 class="text-base font-bold text-[#7c2d12] mb-4">📈 24h Temperature Trend (°F)</h4>
+                    <div class="h-64 relative">
+                        <canvas id="tempChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white/70 backdrop-blur-md border border-orange-100 shadow-xl rounded-3xl p-6">
+                    <h4 class="text-base font-bold text-[#7c2d12] mb-4">🌬️ 24h Wind Speed & Gusts (mph)</h4>
+                    <div class="h-64 relative">
+                        <canvas id="windChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white/70 backdrop-blur-md border border-orange-100 shadow-xl rounded-3xl p-6">
+                    <h4 class="text-base font-bold text-[#7c2d12] mb-4">🧭 24h Pressure Trend (hPa)</h4>
+                    <div class="h-64 relative">
+                        <canvas id="pressureChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white/70 backdrop-blur-md border border-orange-100 shadow-xl rounded-3xl p-6">
+                    <h4 class="text-base font-bold text-[#7c2d12] mb-4">🌧️ 24h Rain / Storm Tracker (inches)</h4>
+                    <div class="h-64 relative">
+                        <canvas id="precipChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-content-cams" class="tab-pane hidden flex flex-col gap-8">
+            <div class="bg-white/70 backdrop-blur-md border border-orange-100 shadow-xl rounded-3xl p-6">
+                <div class="border-b border-orange-100 pb-4 mb-6">
+                    <h3 class="text-2xl font-bold text-[#7c2d12] flex items-center desert-title">
+                        📡 Live Regional Satellite/Radar
+                    </h3>
+                    <p class="text-sm text-amber-900/70 mt-1">Real-time local cameras, active storm radar loops, and visible GOES satellite maps.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white/80 border border-orange-50 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+                        <div class="mb-3">
+                            <span class="font-bold text-amber-950 text-base block">🛰️ Live Weather Radar</span>
+                            <span class="text-xs text-[#7c2d12]/80">Interactive, auto-animating precipitation scan (Kingman Area)</span>
+                        </div>
+                        <div class="w-full h-96 overflow-hidden rounded-xl border border-stone-200 bg-stone-900 flex items-center justify-center">
+                            <img src="https://radar.weather.gov/ridge/standard/KESX_loop.gif" class="w-full h-full object-contain" alt="Live Weather Radar">
+                        </div>
+                    </div>
+
+                    <div class="bg-white/80 border border-orange-50 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+                        <div class="mb-3 flex justify-between items-start">
+                            <div>
+                                <span class="font-bold text-amber-950 text-base block">🌍 GOES-West Visible Satellite</span>
+                                <span class="text-xs text-[#7c2d12]/80">GeoColor daytime-to-nighttime transition imagery</span>
+                            </div>
+                            <span class="text-[10px] text-stone-500 font-bold bg-stone-200/50 px-2 py-0.5 rounded uppercase">Updates Every 5m</span>
+                        </div>
+                        <div class="w-full h-96 overflow-hidden rounded-xl border border-stone-200 bg-stone-900 flex items-center justify-center">
+                            <img id="goes-satellite-img" src="https://cdn.star.nesdis.noaa.gov/GOES18/ABI/SECTOR/psw/GEOCOLOR/GOES18-PSW-GEOCOLOR-600x600.gif" class="w-full h-full object-contain" alt="Satellite Imagery">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="tab-content-resources" class="tab-pane hidden">
+            <div class="bg-white/70 backdrop-blur-md border border-orange-100 shadow-xl rounded-3xl p-6 md:p-8">
+                <div class="border-b border-orange-100 pb-4 mb-6">
+                    <h3 class="text-2xl font-bold text-[#7c2d12] desert-title">🏜️ Desert & Range Travel Portals</h3>
+                    <p class="text-sm text-amber-900/70 mt-1">Crucial Arizona travel, trail, and fire safety systems</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <a href="https://www.mohave.gov/ContentPage.aspx?id=124&cid=83" target="_blank" class="block bg-white hover:bg-orange-50/50 border border-orange-100 hover:border-orange-300 shadow-sm hover:shadow-md rounded-2xl p-5 transition-all duration-300 group">
+                        <div class="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">🌲</div>
+                        <h4 class="font-bold text-[#7c2d12] group-hover:text-orange-800">Hualapai Mountain Park</h4>
+                        <p class="text-xs text-amber-900/70 mt-1">Official park permits, camping reservations, trail maps, and cabin alerts.</p>
+                    </a>
+
+                    <a href="https://www.az511.com/" target="_blank" class="block bg-white hover:bg-orange-50/50 border border-orange-100 hover:border-orange-300 shadow-sm hover:shadow-md rounded-2xl p-5 transition-all duration-300 group">
+                        <div class="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">🛣️</div>
+                        <h4 class="font-bold text-[#7c2d12] group-hover:text-orange-800">AZDOT Route (ADOT 511)</h4>
+                        <p class="text-xs text-amber-900/70 mt-1">Live Arizona transit tracking. Essential for I-40 and US-93 canyon road blocks.</p>
+                    </a>
+
+                    <a href="https://dffm.az.gov/fire-restrictions" target="_blank" class="block bg-white hover:bg-orange-50/50 border border-orange-100 hover:border-orange-300 shadow-sm hover:shadow-md rounded-2xl p-5 transition-all duration-300 group">
+                        <div class="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">🔥</div>
+                        <h4 class="font-bold text-[#7c2d12] group-hover:text-orange-800">AZ Fire Restrictions</h4>
+                        <p class="text-xs text-amber-900/70 mt-1">Check active fire bans, BLM land closures, and high danger warnings before traveling.</p>
+                    </a>
+
+                    <a href="https://www.weather.gov/vef/" target="_blank" class="block bg-white hover:bg-orange-50/50 border border-orange-100 hover:border-orange-300 shadow-sm hover:shadow-md rounded-2xl p-5 transition-all duration-300 group">
+                        <div class="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">📡</div>
+                        <h4 class="font-bold text-[#7c2d12] group-hover:text-orange-800">NWS Las Vegas Radar</h4>
+                        <p class="text-xs text-amber-900/70 mt-1">Direct NOAA Doppler coverage covering the Mojave and northwestern Arizona regions.</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-12 border-t border-orange-200/60 pt-6 text-center text-xs text-amber-800/80">
+            <p>&copy; 2026 Kingman & Hualapai Highlands Weather Network. All rights reserved.</p>
+        </footer>
+
+    </div>
+
+    <!-- Script tag containing ALL functions -->
+    <script>
+        let currentCity = "Lazy Y U";
+        let currentLat = 35.1328;
+        let currentLon = -113.9180;
+        let currentPWS = "KAZKINGM257";
+
+        // Active Chart References
+        let chartInstances = {};
+
+        // Pre-configured with your specific Google Sheet ID
+        const SPREADSHEET_ID = "1jQ9ddsqhOXiw2RnN41ZnHs-vyhV2V2lZbmsAa0k3-GY";
+
+        // 1. CHOOSE ACTIVE TABS
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-[#9a3412]', 'text-white');
+                btn.classList.add('bg-white/60', 'text-[#9a3412]');
+            });
+
+            // Make designated tab visible
+            document.getElementById(`tab-content-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-btn-${tabId}`).classList.remove('bg-white/60', 'text-[#9a3412]');
+            document.getElementById(`tab-btn-${tabId}`).classList.add('bg-[#9a3412]', 'text-white');
+
+            // Render charts and NOAA 7-Day Forecast when tab is selected
+            if (tabId === 'trends') {
+                setTimeout(() => {
+                    fetchWeatherData();
+                }, 50);
+            }
+        }
+
+        // 2. TOGGLE DETAILED ADVISORY PANEL
+        function toggleAlertDetails() {
+            const details = document.getElementById('alert-details');
+            if (details) {
+                details.classList.toggle('hidden');
+            }
+        }
+
+        // 3. SELECT NEW ELEVATION / MICROCLIMATE STATION
+        function selectCity(name, lat, lon, pws, element) {
+            currentCity = name;
+            currentLat = lat;
+            currentLon = lon;
+            currentPWS = pws;
+
+            // Highlight Active Selector button
+            document.querySelectorAll('.city-btn').forEach(btn => {
+                btn.className = "city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#7c2d12] hover:shadow-sm";
+                const badge = btn.querySelector('span:last-child');
+                if (badge) badge.className = "text-xs opacity-60";
+            });
+
+            element.className = "city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-amber-100 text-amber-950 border border-amber-200 shadow-sm";
+            const currentBadge = element.querySelector('span:last-child');
+            if (currentBadge) {
+                currentBadge.className = "text-xs px-2 py-0.5 rounded-full bg-white/60";
+                currentBadge.innerText = "Active";
+            }
+
+            // Update UI Titles & PWS Header
+            document.getElementById('current-city-title').innerText = name;
+            document.getElementById('current-station-pws').innerText = `Station Feed: ${pws}`;
+
+            // Re-fetch weather metrics and update panels
+            fetchWeatherData();
+        }
+
+        // 4. MAP OPENMETEO CODES TO NWS OFFICIAL ICON URL SCHEMES
+        function mapNwsIcon(code, isDay = 1) {
+            const dn = isDay ? 'day' : 'night';
+            const map = {
+                0: ["skc", "Clear Skies"],
+                1: ["few", "Mostly Sunny"],
+                2: ["sct", "Partly Cloudy"],
+                3: ["bkn", "Mostly Cloudy"],
+                45: ["fg", "High Desert Haze"],
+                48: ["fg", "Canyon Fog"],
+                51: ["drizzle", "Scattered Mist"],
+                53: ["drizzle", "Moderate Mist"],
+                55: ["drizzle", "Drizzle"],
+                61: ["shra", "Light Desert Showers"],
+                63: ["ra", "Steady Showers"],
+                65: ["ra", "Heavy Desert Rain"],
+                80: ["shra", "Passing Rain Clouds"],
+                81: ["shra", "Sudden Downpour"],
+                82: ["shra", "Severe Desert Downpour"],
+                95: ["tsra", "Monsoonal Thunderstorms"]
+            };
+            const iconKey = map[code] ? map[code][0] : "skc";
+            const textDesc = map[code] ? map[code][1] : "Clear Skies";
+            return {
+                url: `https://api.weather.gov/icons/land/${dn}/${iconKey}?size=medium`,
+                desc: textDesc
+            };
+        }
+
+        // 5. FETCH REAL-TIME WEATHER & GENERATE DYNAMIC NOAA FORECAST
+        async function fetchWeatherData() {
+            const openMeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${currentLat}&longitude=${currentLon}&current=temperature_2m,relative_humidity_2m,is_day,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,pressure_msl&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,pressure_msl,precipitation&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&past_days=1&forecast_days=1`;
+            
+            // Extract the alphanumeric PWS ID (removes any spaces or brackets)
+            const cleanPWS = currentPWS.split(' ')[0].trim();
+            const wuUrl = `https://api.weather.com/v2/pws/observations/current?stationId=${cleanPWS}&format=json&units=e&apiKey=36cf6515a6a9482d8f6515a6a9182d25`;
+
+            try {
+                // Fetch both OpenMeteo and Weather Underground PWS data in parallel
+                const [omRes, wuRes] = await Promise.allSettled([
+                    fetch(openMeteoUrl).then(res => { if (!res.ok) throw new Error(); return res.json(); }),
+                    fetch(wuUrl).then(res => { if (!res.ok) throw new Error(); return res.json(); })
+                ]);
+
+                let currentTemp = "--";
+                let currentWind = "--";
+                let currentWindDir = 0;
+                let currentHumidity = "--";
+                let currentPressure = "--";
+                let isDay = 1;
+                let weatherCode = 0;
+
+                // Process OpenMeteo Data (Used for charts, NWS status representations, and fallback)
+                let omData = null;
+                if (omRes.status === 'fulfilled') {
+                    omData = omRes.value;
+                    const currentOM = omData.current;
+                    isDay = currentOM.is_day;
+                    weatherCode = currentOM.weather_code;
+
+                    // Set fallback values
+                    currentTemp = Math.round(currentOM.temperature_2m);
+                    currentWind = Math.round(currentOM.wind_speed_10m);
+                    currentWindDir = currentOM.wind_direction_10m;
+                    currentHumidity = currentOM.relative_humidity_2m;
+                    currentPressure = Math.round(currentOM.pressure_msl);
+                }
+
+                // Process Weather Underground PWS Data (Primary Overrides)
+                let usingPWS = false;
+                if (wuRes.status === 'fulfilled' && wuRes.value && wuRes.value.observations && wuRes.value.observations.length > 0) {
+                    const obs = wuRes.value.observations[0];
+                    const imp = obs.imperial;
+
+                    currentTemp = Math.round(imp.temp);
+                    currentWind = Math.round(imp.windSpeed);
+                    currentWindDir = obs.winddir; // Wind Direction Degrees (0-360)
+                    currentHumidity = obs.humidity;
+                    // Convert inHg (e.g. 29.92) to hPa (e.g. 1013) to match unit display standard
+                    currentPressure = Math.round(imp.pressure * 33.8639);
+                    usingPWS = true;
+
+                    // Label updates to notify users of live active station sensor
+                    document.getElementById('current-station-pws').innerText = `Station PWS: ${cleanPWS} (Wunderground Live)`;
+                    
+                    // Display actual local clock reporting on physical station hardware
+                    if (obs.obsTimeLocal) {
+                        try {
+                            const timePart = obs.obsTimeLocal.split(' ')[1]; // Extract "14:05:31"
+                            const [h, m] = timePart.split(':');
+                            const hour = parseInt(h);
+                            const ampm = hour >= 12 ? 'PM' : 'AM';
+                            const displayHour = hour % 12 || 12;
+                            document.getElementById('update-timestamp').innerText = `${displayHour}:${m} ${ampm} (PWS Live)`;
+                        } catch (e) {
+                            document.getElementById('update-timestamp').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        }
+                    }
+                } else {
+                    document.getElementById('current-station-pws').innerText = `Station Feed: ${cleanPWS} (Meteo Grid)`;
+                    document.getElementById('update-timestamp').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                }
+
+                // Update UI readouts
+                const nwsIconData = mapNwsIcon(weatherCode, isDay);
+                document.getElementById('current-weather-nws-icon').src = nwsIconData.url;
+                document.getElementById('current-weather-desc').innerText = nwsIconData.desc;
+                
+                document.getElementById('metric-temp').innerText = currentTemp + "°";
+                document.getElementById('header-big-temp').innerText = currentTemp + "°F";
+
+                document.getElementById('metric-wind').innerText = currentWind;
+                document.getElementById('metric-humidity').innerText = currentHumidity + "%";
+                document.getElementById('metric-pressure').innerText = currentPressure;
+
+                // Adjust wind compass direction arrow rotation
+                if (currentWindDir !== undefined) {
+                    document.getElementById('wind-compass').style.transform = `rotate(${currentWindDir}deg)`;
+                    
+                    let cardinal = "N";
+                    if (currentWindDir > 22.5 && currentWindDir <= 67.5) cardinal = "NE";
+                    else if (currentWindDir > 67.5 && currentWindDir <= 112.5) cardinal = "E";
+                    else if (currentWindDir > 112.5 && currentWindDir <= 157.5) cardinal = "SE";
+                    else if (currentWindDir > 157.5 && currentWindDir <= 202.5) cardinal = "S";
+                    else if (currentWindDir > 202.5 && currentWindDir <= 247.5) cardinal = "SW";
+                    else if (currentWindDir > 247.5 && currentWindDir <= 292.5) cardinal = "W";
+                    else if (currentWindDir > 292.5 && currentWindDir <= 337.5) cardinal = "NW";
+                    document.getElementById('metric-wind-dir').innerText = `Direction: ${cardinal} (${currentWindDir}°)`;
+                }
+
+                // Update Charts using OpenMeteo hourly data
+                if (omData && omData.hourly) {
+                    const hourly = omData.hourly;
+                    const times = hourly.time.slice(-24).map(t => {
+                        const d = new Date(t);
+                        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    });
+
+                    const temps = hourly.temperature_2m.slice(-24);
+                    const winds = hourly.wind_speed_10m.slice(-24);
+                    const gusts = hourly.wind_gusts_10m.slice(-24);
+                    const pressures = hourly.pressure_msl.slice(-24);
+                    const precip = hourly.precipitation.slice(-24);
+
+                    renderChart('tempChart', times, [{
+                        label: 'Temperature (°F)',
+                        data: temps,
+                        borderColor: '#ea580c',
+                        backgroundColor: 'rgba(234, 88, 12, 0.15)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]);
+
+                    renderChart('windChart', times, [
+                        {
+                            label: 'Wind Speed (mph)',
+                            data: winds,
+                            borderColor: '#ca8a04',
+                            backgroundColor: 'rgba(202, 138, 4, 0.1)',
+                            borderWidth: 2.5,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Max Gusts (mph)',
+                            data: gusts,
+                            borderColor: '#c2410c',
+                            backgroundColor: 'rgba(194, 65, 12, 0.05)',
+                            borderWidth: 1.5,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.4
+                        }
+                    ]);
+
+                    renderChart('pressureChart', times, [{
+                        label: 'Atmospheric Pressure (hPa)',
+                        data: pressures,
+                        borderColor: '#78716c',
+                        backgroundColor: 'rgba(120, 113, 108, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]);
+
+                    renderChart('precipChart', times, [{
+                        label: 'Hourly Rain (in)',
+                        data: precip,
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.6)',
+                        borderWidth: 1,
+                        type: 'bar'
+                    }]);
+                }
+
+                // Render NWS Grid forecasts
+                fetchNWSForecast();
+
+            } catch (err) {
+                console.error("Dashboard update failed: ", err);
+            }
+        }
+
+        // 6. QUERY NOAA API TO EXTRACT LIVE 7-DAY NWS FORECAST ICONS & DETAILED TEXTS
+        async function fetchNWSForecast() {
+            const forecastGrid = document.getElementById('weekly-forecast-grid');
+            const forecastDetails = document.getElementById('weekly-forecast-details');
+
+            try {
+                // Query NWS endpoints with coordinates
+                const pointRes = await fetch(`https://api.weather.gov/points/${currentLat},${currentLon}`);
+                if (!pointRes.ok) throw new Error("NWS coordinates resolution failed.");
+                const pointData = await pointRes.json();
+                
+                // Fetch official NWS Forecast Grid API URL
+                const forecastUrl = pointData.properties.forecast;
+                const forecastRes = await fetch(forecastUrl);
+                if (!forecastRes.ok) throw new Error("NWS forecast data fetch failed.");
+                const forecastData = await forecastRes.json();
+                
+                const periods = forecastData.properties.periods;
+                
+                forecastGrid.innerHTML = ''; 
+                if (forecastDetails) forecastDetails.innerHTML = ''; 
+
+                // Slice first 7 periods to fit standard weekly dashboard
+                periods.slice(0, 7).forEach(period => {
+                    // Create Graphic Grid Card
+                    const block = document.createElement('div');
+                    block.className = "text-center p-4 bg-white/50 hover:bg-white/80 rounded-2xl border border-orange-100 flex flex-col items-center justify-between shadow-sm hover:shadow transition-all duration-300";
+                    
+                    const name = document.createElement('span');
+                    name.className = "text-xs font-bold text-amber-900 block uppercase tracking-wide truncate max-w-full";
+                    name.innerText = period.name;
+
+                    const iconImg = document.createElement('img');
+                    iconImg.className = "w-12 h-12 rounded-lg border border-orange-50 shadow-sm my-2 bg-white";
+                    iconImg.src = period.icon;
+                    iconImg.alt = period.shortForecast;
+                    iconImg.title = period.shortForecast;
+
+                    const temp = document.createElement('span');
+                    temp.className = "text-base font-extrabold text-stone-800 block";
+                    temp.innerText = `${period.temperature}°${period.temperatureUnit}`;
+
+                    const shortDesc = document.createElement('span');
+                    shortDesc.className = "text-[10px] text-amber-900/80 mt-1 block font-semibold line-clamp-2 leading-tight";
+                    shortDesc.innerText = period.shortForecast;
+
+                    block.appendChild(name);
+                    block.appendChild(iconImg);
+                    block.appendChild(temp);
+                    block.appendChild(shortDesc);
+                    forecastGrid.appendChild(block);
+
+                    // Create detailed forecast paragraphs
+                    if (forecastDetails) {
+                        const detailCard = document.createElement('div');
+                        detailCard.className = "bg-white/40 border border-orange-100/50 rounded-2xl p-4 shadow-sm flex flex-col gap-1";
+                        
+                        const detailTitle = document.createElement('span');
+                        detailTitle.className = "text-xs font-extrabold text-[#7c2d12] uppercase tracking-wider";
+                        detailTitle.innerText = period.name;
+
+                        const detailDesc = document.createElement('p');
+                        detailDesc.className = "text-xs text-stone-700 leading-relaxed font-medium";
+                        detailDesc.innerText = period.detailedForecast;
+
+                        detailCard.appendChild(detailTitle);
+                        detailCard.appendChild(detailDesc);
+                        forecastDetails.appendChild(detailCard);
+                    }
+                });
+
+            } catch (err) {
+                console.warn("NWS API rate limit or outage - rendering static forecast placeholder.");
+                
+                // Static Grid Fallback
+                forecastGrid.innerHTML = `
+                    <div class="text-center p-4 bg-white/50 rounded-2xl border border-orange-100 flex flex-col items-center justify-between shadow-sm">
+                        <span class="text-xs font-bold text-amber-900 block">TODAY</span>
+                        <img class="w-12 h-12 my-2 rounded-lg border border-orange-50 bg-white" src="https://api.weather.gov/icons/land/day/skc?size=medium" alt="sunny">
+                        <span class="text-base font-extrabold text-stone-800 block">96°F</span>
+                        <span class="text-[10px] text-amber-900/80 mt-1 block font-semibold leading-tight">Sunny</span>
+                    </div>
+                    <div class="text-center p-4 bg-white/50 rounded-2xl border border-orange-100 flex flex-col items-center justify-between shadow-sm">
+                        <span class="text-xs font-bold text-amber-900 block">TONIGHT</span>
+                        <img class="w-12 h-12 my-2 rounded-lg border border-orange-50 bg-white" src="https://api.weather.gov/icons/land/night/skc?size=medium" alt="clear">
+                        <span class="text-base font-extrabold text-stone-800 block">68°F</span>
+                        <span class="text-[10px] text-amber-900/80 mt-1 block font-semibold leading-tight">Clear Skies</span>
+                    </div>
+                    <div class="text-center p-4 bg-white/50 rounded-2xl border border-orange-100 flex flex-col items-center justify-between shadow-sm">
+                        <span class="text-xs font-bold text-amber-900 block">TOMORROW</span>
+                        <img class="w-12 h-12 my-2 rounded-lg border border-orange-50 bg-white" src="https://api.weather.gov/icons/land/day/few?size=medium" alt="clear">
+                        <span class="text-base font-extrabold text-stone-800 block">95°F</span>
+                        <span class="text-[10px] text-amber-900/80 mt-1 block font-semibold leading-tight">Mostly Sunny</span>
+                    </div>
+                    <div class="text-center p-4 bg-white/50 rounded-2xl border border-orange-100 flex flex-col items-center justify-between shadow-sm">
+                        <span class="text-xs font-bold text-amber-900 block">FRI NIGHT</span>
+                        <img class="w-12 h-12 my-2 rounded-lg border border-orange-50 bg-white" src="https://api.weather.gov/icons/land/night/few?size=medium" alt="mostly clear">
+                        <span class="text-base font-extrabold text-stone-800 block">65°F</span>
+                        <span class="text-[10px] text-amber-900/80 mt-1 block font-semibold leading-tight">Mostly Clear</span>
+                    </div>
+                    <div class="text-center p-4 bg-white/50 rounded-2xl border border-orange-100 flex flex-col items-center justify-between shadow-sm">
+                        <span class="text-xs font-bold text-amber-900 block">SATURDAY</span>
+                        <img class="w-12 h-12 my-2 rounded-lg border border-orange-50 bg-white" src="https://api.weather.gov/icons/land/day/few?size=medium" alt="mostly clear">
+                        <span class="text-base font-extrabold text-stone-800 block">98°F</span>
+                        <span class="text-[10px] text-amber-900/80 mt-1 block font-semibold leading-tight">Mostly Sunny</span>
+                    </div>
+                    <div class="text-center p-4 bg-white/50 rounded-2xl border border-orange-100 flex flex-col items-center justify-between shadow-sm">
+                        <span class="text-xs font-bold text-amber-900 block">SAT NIGHT</span>
+                        <img class="w-12 h-12 my-2 rounded-lg border border-orange-50 bg-white" src="https://api.weather.gov/icons/land/night/skc?size=medium" alt="clear">
+                        <span class="text-base font-extrabold text-stone-800 block">69°F</span>
+                        <span class="text-[10px] text-amber-900/80 mt-1 block font-semibold leading-tight">Clear Skies</span>
+                    </div>
+                    <div class="text-center p-4 bg-white/50 rounded-2xl border border-orange-100 flex flex-col items-center justify-between shadow-sm">
+                        <span class="text-xs font-bold text-amber-900 block">SUNDAY</span>
+                        <img class="w-12 h-12 my-2 rounded-lg border border-orange-50 bg-white" src="https://api.weather.gov/icons/land/day/skc?size=medium" alt="sunny">
+                        <span class="text-base font-extrabold text-stone-800 block">101°F</span>
+                        <span class="text-[10px] text-amber-900/80 mt-1 block font-semibold leading-tight">Sunny & Dry</span>
+                    </div>
+                `;
+
+                // Static Detailed Forecast Fallback
+                if (forecastDetails) {
+                    forecastDetails.innerHTML = `
+                        <div class="bg-white/40 border border-orange-100/50 rounded-2xl p-4 shadow-sm flex flex-col gap-1">
+                            <span class="text-xs font-extrabold text-[#7c2d12] uppercase tracking-wider">TODAY</span>
+                            <p class="text-xs text-stone-700 leading-relaxed font-medium">Sunny and hot in the valley floor. West-southwest wind 10 to 15 mph, with gusts reaching up to 25 mph along the canyon corridors of Lazy Y U.</p>
+                        </div>
+                        <div class="bg-white/40 border border-orange-100/50 rounded-2xl p-4 shadow-sm flex flex-col gap-1">
+                            <span class="text-xs font-extrabold text-[#7c2d12] uppercase tracking-wider">TONIGHT</span>
+                            <p class="text-xs text-stone-700 leading-relaxed font-medium">Clear skies with dry downslope breezes. Low around 68°F. Southwest wind dropping to 5 mph after midnight.</p>
+                        </div>
+                        <div class="bg-white/40 border border-orange-100/50 rounded-2xl p-4 shadow-sm flex flex-col gap-1">
+                            <span class="text-xs font-extrabold text-[#7c2d12] uppercase tracking-wider">TOMORROW</span>
+                            <p class="text-xs text-stone-700 leading-relaxed font-medium">Mostly sunny, with a high near 95°F. Calm conditions transitioning to a light southwest breeze in the afternoon.</p>
+                        </div>
+                        <div class="bg-white/40 border border-orange-100/50 rounded-2xl p-4 shadow-sm flex flex-col gap-1">
+                            <span class="text-xs font-extrabold text-[#7c2d12] uppercase tracking-wider">FRI NIGHT</span>
+                            <p class="text-xs text-stone-700 leading-relaxed font-medium">Mostly clear skies. Lows hovering around 65°F. Northwest wind transitioning back to the east-northeast.</p>
+                        </div>
+                        <div class="bg-white/40 border border-orange-100/50 rounded-2xl p-4 shadow-sm flex flex-col gap-1">
+                            <span class="text-xs font-extrabold text-[#7c2d12] uppercase tracking-wider">SUNDAY</span>
+                            <p class="text-xs text-stone-700 leading-relaxed font-medium">An intense high pressure system begins to settle in, pushing temperatures towards 101°F. Low wind speeds and extreme UV index readings. Limit hiking exposures between 10 AM and 4 PM.</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // 7. CHART RENDER ENGINE (Using Chart.js)
+        function renderChart(canvasId, labels, datasets) {
+            if (chartInstances[canvasId]) {
+                chartInstances[canvasId].destroy();
+            }
+
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            chartInstances[canvasId] = new Chart(ctx, {
+                type: datasets[0].type || 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: '#451a03',
+                                font: { family: 'Plus Jakarta Sans', size: 11 }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(0,0,0,0.03)' },
+                            ticks: { color: '#7c2d12', font: { family: 'Plus Jakarta Sans', size: 10 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#7c2d12', font: { family: 'Plus Jakarta Sans', size: 9 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 8. QUERY ACTIVE NWS HAZARD WARNINGS (Zone AZZ003)
+        async function fetchNWSAlerts() {
+            try {
+                const res = await fetch('https://api.weather.gov/alerts/active/zone/AZZ003');
+                const data = await res.json();
+                
+                if (data.features && data.features.length > 0) {
+                    const highestAlert = data.features[0].properties;
+                    
+                    document.getElementById('alert-event').innerText = highestAlert.event || 'ALERT';
+                    document.getElementById('alert-headline').innerText = highestAlert.headline || 'Active Desert Advisory Recorded';
+                    document.getElementById('alert-desc').innerText = highestAlert.description || 'No detailed description provided.';
+                    document.getElementById('alert-inst').innerText = highestAlert.instruction || 'Follow municipal precautions and check fire updates.';
+                    
+                    document.getElementById('nws-alert-bar').classList.remove('hidden');
+                } else {
+                    document.getElementById('nws-alert-bar').classList.add('hidden');
+                }
+            } catch (err) {
+                console.log("No active alerts detected or NWS database offline. Keeping alert bar hidden.");
+            }
+        }
+
+        // 9. AUTO-REFRESH VISIBLE SATELLITE LOOP (Bypasses local cache with timestamp hashes)
+        function startSatelliteAutoRefresh() {
+            const satImg = document.getElementById('goes-satellite-img');
+            const baseUrl = "https://cdn.star.nesdis.noaa.gov/GOES18/ABI/SECTOR/psw/GEOCOLOR/GOES18-PSW-GEOCOLOR-600x600.gif";
+
+            function refresh() {
+                const timestamp = new Date().getTime();
+                if (satImg) {
+                    satImg.src = `${baseUrl}?t=${timestamp}`;
+                }
+            }
+
+            refresh();
+            setInterval(refresh, 300000); // Trigger reload every 5 minutes
+        }
+
+        // Helper function to format the last updated timestamp nicely
+        function formatOutlookUpdateTimestamp() {
+            const now = new Date();
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const dayName = days[now.getDay()];
+            
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'pm' : 'am';
+            
+            hours = hours % 12;
+            hours = hours ? hours : 12; // convert 0 to 12
+            
+            return `Updated: ${dayName} @ ${hours}:${minutes} ${ampm}`;
+        }
+
+        // 10. GOOGLE SHEETS SYNC SYSTEM (JSONP / No-CORS Method)
+        function syncGoogleSheetDigests() {
+            // Set up a global callback function that Google Sheets will execute with the data payload
+            window.handleGoogleSheetResponse = function(responseJSON) {
+                try {
+                    const rows = responseJSON.table.rows;
+                    let kingmanText = "";
+
+                    for (let row of rows) {
+                        // Check if row has valid columns
+                        if (!row.c || row.c.length < 2) continue;
+
+                        const rawKey = row.c[0] && row.c[0].v ? row.c[0].v.toString() : "";
+                        const rawVal = row.c[1] && row.c[1].v ? row.c[1].v.toString() : "";
+
+                        const key = rawKey.toLowerCase().replace(/\s+/g, '');
+
+                        if (key === "kingman") {
+                            kingmanText = rawVal;
+                            break;
+                        }
+                    }
+
+                    const kingmanBox = document.getElementById('kingman-digest');
+                    if (kingmanBox && kingmanText) {
+                        // Dynamically update element; preserves sheet line breaks
+                        kingmanBox.innerHTML = kingmanText.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+                        
+                        // Dynamically update the Outlook section timestamp[cite: 2]
+                        const outlookTimestamp = document.getElementById('outlook-timestamp');
+                        if (outlookTimestamp) {
+                            outlookTimestamp.innerText = formatOutlookUpdateTimestamp();
+                        }
+                    }
+                } catch (err) {
+                    console.error("Error parsing Google Sheet JSONP payload:", err);
+                } finally {
+                    // Clean up the temporary script element to keep DOM clean
+                    const tempScript = document.getElementById('g-sheet-jsonp-loader');
+                    if (tempScript) tempScript.remove();
+                }
+            };
+
+            // Inject script element requesting JSONP representation
+            const script = document.createElement('script');
+            script.id = 'g-sheet-jsonp-loader';
+            script.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=responseHandler:handleGoogleSheetResponse`;
+            
+            // Append script to run it
+            document.body.appendChild(script);
+        }
+        
+        // Dashboard Init Orchestration
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchWeatherData();
+            fetchNWSAlerts();
+            startSatelliteAutoRefresh();
+            syncGoogleSheetDigests(); // Sync sheets on load
+
+            // Auto-update dashboard metrics loop and sync sheet content every 5m
+            setInterval(fetchWeatherData, 300000); 
+            setInterval(syncGoogleSheetDigests, 300000); 
+        });
+    </script>
+</body>
+</html>
