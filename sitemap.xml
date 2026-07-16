@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sitemap — Mason's Weather Network</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+
+    <!-- SCHEMA MARKUP: STRUCTURED DATA FOR SEARCH ENGINES -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://masonsweather.com/",
+          "url": "https://masonsweather.com/",
+          "name": "Mason's Weather Network",
+          "description": "Decentralized Microclimate Systems and weather telemetry portal.",
+          "publisher": {
+            "@id": "https://masonsweather.com/"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://masonsweather.com/",
+          "name": "Mason's Weather Network",
+          "url": "https://masonsweather.com/",
+          "logo": "https://masonsweather.com/images/Mason's Weather Logo.png",
+          "knowsAbout": [
+            "Meteorology",
+            "Climatology",
+            "Microclimates",
+            "Weather Forecasting"
+          ],
+          "knowsLanguage": ["en"],
+          "sponsor": [
+            {
+              "@type": "GovernmentOrganization",
+              "name": "National Oceanic and Atmospheric Administration",
+              "alternateName": "NOAA",
+              "url": "https://www.noaa.gov/"
+            },
+            {
+              "@type": "GovernmentOrganization",
+              "name": "National Weather Service",
+              "alternateName": "NWS",
+              "url": "https://www.weather.gov/"
+            }
+          ]
+        },
+        {
+          "@type": "Person",
+          "@id": "https://masonramirez.net",
+          "name": "Mason Ramirez",
+          "jobTitle": "Broadcast Director",
+          "worksFor": {
+            "@id": "https://nascar.com"
+          },
+          "knowsAbout": [
+            "Meteorology",
+            "Weather Broadcasting",
+            "Data Analytics",
+            "Broadcast Directing",
+            "Broadcast",
+            "Racing",
+            "NASCAR"
+          ]
+        },
+        {
+          "@type": "ItemList",
+          "@id": "https://masonsweather.com/sitemap.xml",
+          "name": "Mason's Weather Network Directory",
+          "numberOfItems": 3,
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "item": {
+                "@type": "WebPage",
+                "@id": "https://masonsweather.com/",
+                "url": "https://masonsweather.com/",
+                "name": "Mason's Weather Portal - Home",
+                "description": "Unified entry point for coastal and desert weather monitoring centers.",
+                "author": {
+                  "@id": "https://masonramirez.net"
+                }
+              }
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "item": {
+                "@type": "WebPage",
+                "@id": "https://masonsweather.com/southbay",
+                "url": "https://masonsweather.com/southbay",
+                "name": "South Bay Masons Weather Station",
+                "description": "Marine meteorology and coastal wave telemetry for South Bay cities.",
+                "author": {
+                  "@id": "https://masonramirez.net"
+                },
+                "spatialCoverage": [
+                  {
+                    "@type": "City",
+                    "name": "Redondo Beach",
+                    "sameAs": "https://en.wikipedia.org/wiki/Redondo_Beach,_California"
+                  },
+                  {
+                    "@type": "City",
+                    "name": "Hermosa Beach",
+                    "sameAs": "https://en.wikipedia.org/wiki/Hermosa_Beach,_California"
+                  },
+                  {
+                    "@type": "City",
+                    "name": "Manhattan Beach",
+                    "sameAs": "https://en.wikipedia.org/wiki/Manhattan_Beach,_California"
+                  },
+                  {
+                    "@type": "City",
+                    "name": "Palos Verdes",
+                    "sameAs": "https://en.wikipedia.org/wiki/Palos_Verdes_Estates,_California"
+                  }
+                ]
+              }
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "item": {
+                "@type": "WebPage",
+                "@id": "https://masonsweather.com/mohavecounty",
+                "url": "https://masonsweather.com/mohavecounty",
+                "name": "Mojave County Weather Station",
+                "description": "High-altitude and desert microclimates tracking Mojave County regions.",
+                "author": {
+                  "@id": "https://masonramirez.net"
+                },
+                "spatialCoverage": [
+                  {
+                    "@type": "City",
+                    "name": "Kingman",
+                    "sameAs": "https://en.wikipedia.org/wiki/Kingman,_Arizona"
+                  },
+                  {
+                    "@type": "City",
+                    "name": "Hualapai Peak",
+                    "sameAs": "https://en.wikipedia.org/wiki/Hualapai_Peak"
+                  },
+                  {
+                    "@type": "City",
+                    "name": "Lake Havasu City",
+                    "sameAs": "https://en.wikipedia.org/wiki/Lake_Havasu_City,_Arizona"
+                  },
+                  {
+                    "@type": "City",
+                    "name": "Bullhead City",
+                    "sameAs": "https://en.wikipedia.org/wiki/Bullhead_City,_Arizona"
+                  },
+                  {
+                    "@type": "City",
+                    "name": "Wikieup",
+                    "sameAs": "https://en.wikipedia.org/wiki/Wikieup,_Arizona"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+</head>
+<body class="bg-gradient-to-tr from-[#0f172a] via-[#111827] to-[#1e1b4b] min-h-screen text-slate-100 flex flex-col justify-between antialiased relative">
+
+    <!-- Subtle Glow Background -->
+    <div class="absolute top-0 right-1/4 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+    <main class="max-w-4xl mx-auto px-6 py-16 z-10 w-full">
+        
+        <!-- Header -->
+        <header class="border-b border-white/10 pb-8 mb-12">
+            <h1 class="text-4xl font-extrabold tracking-tight text-white mb-2">Network Sitemap</h1>
+            <p class="text-slate-400 text-sm font-medium">
+                Structured directory of active microclimate arrays maintained by Broadcast Director <span class="text-indigo-400 font-semibold">Mason Ramirez</span> in coordination with <span class="text-sky-400 font-semibold">NOAA</span> & <span class="text-sky-400 font-semibold">NWS</span>.
+            </p>
+        </header>
+
+        <!-- Directory Lists -->
+        <div class="space-y-8" role="directory">
+            
+            <!-- Root Site -->
+            <section class="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-indigo-500/30 transition-all duration-300">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-widest text-indigo-400">Master Registry</span>
+                        <h2 class="text-xl font-bold text-white mt-1">
+                            <a href="index.html" class="hover:underline">masonsweather.com</a>
+                        </h2>
+                        <p class="text-sm text-slate-400 mt-2">
+                            The central navigation hub serving as the entry point to both coastal and high-desert real-time weather stations.
+                        </p>
+                    </div>
+                    <span class="text-2xl p-2 bg-indigo-500/10 rounded-xl">🏠</span>
+                </div>
+            </section>
+
+            <!-- Grid: Split Locations -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- South Bay -->
+                <section class="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-sky-500/30 transition-all duration-300 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-400">Station A</span>
+                            <span class="text-xl">🌊</span>
+                        </div>
+                        <h2 class="text-lg font-bold text-white mt-3">
+                            <a href="south-bay.html" class="hover:underline">masonsweather.com/southbay</a>
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                            Coastal telemetry networks monitoring tide phases, ocean temps, and marine layers.
+                        </p>
+                        
+                        <!-- Covered Areas -->
+                        <div class="mt-6">
+                            <h3 class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Monitored Sectors:</h3>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                <span class="text-[11px] bg-sky-500/10 text-sky-300 px-2.5 py-0.5 rounded-full font-semibold">Redondo Beach</span>
+                                <span class="text-[11px] bg-sky-500/10 text-sky-300 px-2.5 py-0.5 rounded-full font-semibold">Hermosa Beach</span>
+                                <span class="text-[11px] bg-sky-500/10 text-sky-300 px-2.5 py-0.5 rounded-full font-semibold">Manhattan Beach</span>
+                                <span class="text-[11px] bg-sky-500/10 text-sky-300 px-2.5 py-0.5 rounded-full font-semibold">Palos Verdes</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Mojave County -->
+                <section class="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-amber-500/30 transition-all duration-300 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-extrabold uppercase tracking-widest text-amber-400">Station B</span>
+                            <span class="text-xl">🌵</span>
+                        </div>
+                        <h2 class="text-lg font-bold text-white mt-3">
+                            <a href="mojave.html" class="hover:underline">masonsweather.com/mohavecounty</a>
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                            High-altitude and desert microclimate diagnostics tracking harsh thermal dynamics.
+                        </p>
+                        
+                        <!-- Covered Areas -->
+                        <div class="mt-6">
+                            <h3 class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Monitored Sectors:</h3>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                <span class="text-[11px] bg-amber-500/10 text-amber-300 px-2.5 py-0.5 rounded-full font-semibold">Kingman</span>
+                                <span class="text-[11px] bg-amber-500/10 text-amber-300 px-2.5 py-0.5 rounded-full font-semibold">Hualapai Peak</span>
+                                <span class="text-[11px] bg-amber-500/10 text-amber-300 px-2.5 py-0.5 rounded-full font-semibold">Lake Havasu</span>
+                                <span class="text-[11px] bg-amber-500/10 text-amber-300 px-2.5 py-0.5 rounded-full font-semibold">Bullhead City</span>
+                                <span class="text-[11px] bg-amber-500/10 text-amber-300 px-2.5 py-0.5 rounded-full font-semibold">Wikieup</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-8 text-xs font-semibold text-slate-500 border-t border-white/5 z-10">
+        &copy; 2026 Mason's Weather Network &bull; Telemetry Registered &bull; Powered by Mason Ramirez, NWS, & NOAA Protocols.
+    </footer>
+
+</body>
+</html>
