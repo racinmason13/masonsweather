@@ -52,7 +52,7 @@
         
         <header class="flex flex-col sm:flex-row items-center justify-between border-b border-orange-200/60 pb-6 mb-8 gap-4">
             <div class="logo-section text-center sm:text-left">
-                <h1 class="text-4xl font-extrabold text-[#7c2d12] tracking-tight desert-title">🌵 Kingman & Hualapai Highlands</h1>
+                <h1 class="text-4xl font-extrabold text-[#7c2d12] tracking-tight desert-title">🌵 Kingman & Hualapai Mountains</h1>
                 <p class="text-xs font-bold text-amber-800 tracking-wider uppercase mt-1">Ranch House Weather Network • Elevation Span: 3,300′ to 8,200′</p>
             </div>
             <div class="header-live-temp flex flex-col items-center sm:items-end">
@@ -94,7 +94,7 @@
                         </button>
                         <button onclick="selectCity('Kingman Valley', 35.1894, -114.0530, 'KAZKINGM192', this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#7c2d12] hover:shadow-sm">
                             <span class="flex flex-col">
-                                <span>🌵 Kingman (Valley Floor)</span>
+                                <span>🌵 Kingman</span>
                                 <span class="text-2xs text-[#7c2d12]/70 font-medium">Elevation: ~3,300′</span>
                             </span>
                             <span class="text-xs opacity-60">Valley</span>
@@ -334,7 +334,7 @@
 
     </div>
 
-    <!-- Script tag containing ALL functions -->
+ <!-- Script tag containing ALL functions -->
     <script>
         let currentCity = "Lazy Y U";
         let currentLat = 35.1328;
@@ -795,26 +795,42 @@
             });
         }
 
-        // 8. QUERY ACTIVE NWS HAZARD WARNINGS (Zone AZZ003)
+        // 8. QUERY ACTIVE NWS HAZARD WARNINGS (Zones AZZ003 & AZC015)
         async function fetchNWSAlerts() {
             try {
-                const res = await fetch('https://api.weather.gov/alerts/active/zone/AZZ003');
-                const data = await res.json();
+                // Fetch alerts specifically for Zone AZZ003 (NW Deserts) & County AZC015 (Mohave County)
+                const [zoneRes, countyRes] = await Promise.allSettled([
+                    fetch('https://api.weather.gov/alerts/active/zone/AZZ003').then(r => r.json()),
+                    fetch('https://api.weather.gov/alerts/active/zone/AZC015').then(r => r.json())
+                ]);
+
+                let activeAlert = null;
+
+                // Scan through returned alerts from both potential zones
+                if (zoneRes.status === 'fulfilled' && zoneRes.value.features && zoneRes.value.features.length > 0) {
+                    activeAlert = zoneRes.value.features[0].properties;
+                } else if (countyRes.status === 'fulfilled' && countyRes.value.features && countyRes.value.features.length > 0) {
+                    activeAlert = countyRes.value.features[0].properties;
+                }
+
+                const alertBar = document.getElementById('nws-alert-bar');
                 
-                if (data.features && data.features.length > 0) {
-                    const highestAlert = data.features[0].properties;
+                if (activeAlert) {
+                    // Update Alert Bar content dynamically with active NWS Advisory data
+                    document.getElementById('alert-event').innerText = activeAlert.event || 'WEATHER WARNING';
+                    document.getElementById('alert-headline').innerText = activeAlert.headline || 'Active Desert Advisory Issued by NWS';
+                    document.getElementById('alert-desc').innerText = activeAlert.description || 'No detailed description available.';
+                    document.getElementById('alert-inst').innerText = activeAlert.instruction || 'Monitor NOAA and local municipal guidelines for safety precautions.';
                     
-                    document.getElementById('alert-event').innerText = highestAlert.event || 'ALERT';
-                    document.getElementById('alert-headline').innerText = highestAlert.headline || 'Active Desert Advisory Recorded';
-                    document.getElementById('alert-desc').innerText = highestAlert.description || 'No detailed description provided.';
-                    document.getElementById('alert-inst').innerText = highestAlert.instruction || 'Follow municipal precautions and check fire updates.';
-                    
-                    document.getElementById('nws-alert-bar').classList.remove('hidden');
+                    // Reveal the warning banner
+                    alertBar.classList.remove('hidden');
                 } else {
-                    document.getElementById('nws-alert-bar').classList.add('hidden');
+                    // Keep banner hidden if NWS has no alerts posted
+                    alertBar.classList.add('hidden');
                 }
             } catch (err) {
-                console.log("No active alerts detected or NWS database offline. Keeping alert bar hidden.");
+                console.error("NWS Alert feed query unsuccessful. Keeping alert bar hidden.", err);
+                document.getElementById('nws-alert-bar').classList.add('hidden');
             }
         }
 
@@ -905,12 +921,13 @@
         // Dashboard Init Orchestration
         window.addEventListener('DOMContentLoaded', () => {
             fetchWeatherData();
-            fetchNWSAlerts();
+            fetchNWSAlerts(); // Fetches and sets up live warning bar immediately
             startSatelliteAutoRefresh();
             syncGoogleSheetDigests(); // Sync sheets on load
 
             // Auto-update dashboard metrics loop and sync sheet content every 5m
             setInterval(fetchWeatherData, 300000); 
+            setInterval(fetchNWSAlerts, 300000); // Checks for new warnings every 5 minutes
             setInterval(syncGoogleSheetDigests, 300000); 
         });
     </script>
