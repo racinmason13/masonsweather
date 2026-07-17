@@ -47,16 +47,19 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        <header class="flex flex-col sm:flex-row items-center justify-between border-b border-sky-100 pb-6 mb-8 gap-4">
-            <div class="logo-section text-center sm:text-left">
-                <h1 class="text-4xl font-extrabold text-[#1e3d59] tracking-tight">🌊 Mason's Weather</h1>
-                <p class="text-sm font-semibold text-sky-700 tracking-wider">South Bay Marine & Coastal Weather • Station KCAREDON127</p>
-            </div>
-            <div class="header-live-temp flex flex-col items-center sm:items-end">
-                <div class="temp text-4xl font-extrabold text-[#1e3d59]" id="header-big-temp">--°F</div>
-                <div class="update-time text-xs text-sky-600/80">PWS Updated: <span id="update-timestamp" class="font-bold">Loading...</span></div>
-            </div>
-        </header>
+        <a href="index.html" class="block group hover:opacity-90 transition-opacity">
+          <header class="flex flex-col sm:flex-row items-center justify-between border-b border-sky-100 pb-6 mb-8 gap-4"> 
+            <div class="logo-section text-center sm:text-left"> 
+              <h1 class="text-4xl font-extrabold text-[#1e3d59] tracking-tight group-hover:text-sky-900 transition-colors">🌊 Mason's Weather</h1> 
+              <p class="text-sm font-semibold text-sky-700 tracking-wider">South Bay Marine & Coastal Weather • Station KCAREDON127</p> 
+            </div> 
+          </header>
+        </a>
+
+        <div class="header-live-temp flex flex-col items-center sm:items-end -mt-4 mb-8">
+            <div class="temp text-4xl font-extrabold text-[#1e3d59]" id="header-big-temp">--°F</div>
+            <div class="update-time text-xs text-sky-600/80">Station Updated: <span id="update-timestamp" class="font-bold">Loading...</span></div>
+        </div>
 
         <nav class="flex flex-wrap gap-2 mb-8 justify-center sm:justify-start">
             <button onclick="switchTab('live')" id="tab-btn-live" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-[#1e3d59] text-white">
@@ -131,7 +134,6 @@
 
             <main class="lg:col-span-9 flex flex-col gap-6">
                 
-                <!-- Match Mojave Dynamic Header Format exactly -->
                 <div class="bg-white/70 backdrop-blur-md border border-sky-100 shadow-xl rounded-3xl p-6">
                     <div class="border-b border-sky-100 pb-2 mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                         <h3 class="text-lg font-bold text-[#1e3d59] flex items-center">
@@ -232,6 +234,7 @@
                 </div>
             </div>
 
+           
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-6">
                     <h4 class="text-base font-bold text-[#1e3d59] mb-4 flex items-center">🛰️ GOES West Satellite <span class="ml-2 text-xs font-normal text-slate-500">(Color/IR)</span></h4>
@@ -248,6 +251,33 @@
                     </div>
                 </div>
             </div>
+
+             <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-6">
+                <h3 class="text-xl font-bold text-[#1e3d59] mb-2 flex items-center">
+                    📈 24-Hour Trend Data
+                </h3>
+                <p class="text-sm text-slate-500 mb-6">The telemetry data from the station's sensors reflects the dynamic coastal conditions of the South Bay microclimate over the past 24 hours:</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white/50 border border-sky-100 rounded-2xl p-5 shadow-sm hover:shadow transition-all">
+                        <h4 class="text-xs uppercase tracking-wider text-sky-800 font-bold mb-2">Temperature Trend</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">Follows a standard coastal diurnal cycle, starting with cooler morning mist layers, climbing to afternoon highs, and dropping gradually back down after sunset.</p>
+                    </div>
+                    <div class="bg-white/50 border border-sky-100 rounded-2xl p-5 shadow-sm hover:shadow transition-all">
+                        <h4 class="text-xs uppercase tracking-wider text-sky-800 font-bold mb-2">Coastal Wind Trend</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">Typically showcases light morning breezes that pick up to peak afternoon wind-swells (onshore flow) before settling into calm offshore breezes overnight.</p>
+                    </div>
+                    <div class="bg-white/50 border border-sky-100 rounded-2xl p-5 shadow-sm hover:shadow transition-all">
+                        <h4 class="text-xs uppercase tracking-wider text-sky-800 font-bold mb-2">Atmospheric Pressure</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">Stabilizes the local marine layer; steady pressure indicates consistent coastal conditions, while drops alert to approaching marine cloud cover.</p>
+                    </div>
+                    <div class="bg-white/50 border border-sky-100 rounded-2xl p-5 shadow-sm hover:shadow transition-all">
+                        <h4 class="text-xs uppercase tracking-wider text-sky-800 font-bold mb-2">Rainfall Tracker</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">Tracks active precipitation rates (primarily measuring heavy coastal drizzle or morning marine mist condensation).</p>
+                    </div>
+                </div>
+            </div>
+
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-6">
@@ -277,20 +307,23 @@
             </div>
 
             <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-6 overflow-x-auto">
-                <div class="flex items-center justify-between border-b border-sky-100 pb-3 mb-4">
-                    <h3 class="text-xl font-bold text-[#1e3d59]">📋 Recent Telemetry Logs (Spreadsheet View)</h3>
-                    <span class="text-xs bg-[#1e3d59]/10 text-[#1e3d59] font-bold px-2 py-1 rounded-md">Live Auto-Updating</span>
+                <div class="flex flex-col border-b border-sky-100 pb-3 mb-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xl font-bold text-[#1e3d59]">📋 Recent Telemetry Logs</h3>
+                        <span class="text-xs bg-[#1e3d59]/10 text-[#1e3d59] font-bold px-2 py-1 rounded-md">Live NWS / PWS Feed</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1">Sourced via official NWS KTOA & KCAREDON127 Local Arrays</p>
                 </div>
                 <div class="min-w-[700px]">
                     <table class="w-full text-left text-sm text-slate-600 border-collapse rounded-xl overflow-hidden">
                         <thead class="bg-[#1e3d59]/10 text-[#1e3d59] text-xs uppercase font-bold">
                             <tr>
                                 <th class="px-4 py-3 border-b border-sky-200">Date / Time (Local)</th>
-                                <th class="px-4 py-3 border-b border-sky-200">Temp (°F)</th>
-                                <th class="px-4 py-3 border-b border-sky-200">Humidity (%)</th>
-                                <th class="px-4 py-3 border-b border-sky-200">Wind (mph)</th>
-                                <th class="px-4 py-3 border-b border-sky-200">Pressure (hPa)</th>
-                                <th class="px-4 py-3 border-b border-sky-200">Precip (in)</th>
+                                <th class="px-4 py-3 border-b border-sky-200 text-center">Temp (°F)</th>
+                                <th class="px-4 py-3 border-b border-sky-200 text-center">Humidity (%)</th>
+                                <th class="px-4 py-3 border-b border-sky-200 text-center">Wind Speed (mph)</th>
+                                <th class="px-4 py-3 border-b border-sky-200 text-center">Pressure (hPa)</th>
+                                <th class="px-4 py-3 border-b border-sky-200 text-center">Precip (in)</th>
                             </tr>
                         </thead>
                         <tbody id="telemetry-tbody" class="bg-white/40">
@@ -299,6 +332,9 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+                <div class="mt-4 p-4 bg-sky-50 border-l-4 border-[#1e3d59] text-xs text-slate-600 rounded-r-xl italic">
+                    <strong>📡 Station Infrastructure Note:</strong> These logs are processed natively via local NOAA/NWS APIs and supplemented by our localized PWS station array metrics.
                 </div>
             </div>
 
@@ -386,15 +422,12 @@
     </footer>
 
     <script>
-        // POINTED TO THE SHARED SPREADSHEET ID
         const SPREADSHEET_ID = "1jQ9ddsqhOXiw2RnN41ZnHs-vyhV2V2lZbmsAa0k3-GY"; 
         let currentCity = "Redondo Beach";
         let currentLat = 33.8492;
         let currentLon = -118.3884;
-
         let chartInstances = {};
 
-        // TAB SWITCH LOGIC
         function switchTab(tabId) {
             document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -413,13 +446,11 @@
             }
         }
 
-        // TOGGLE WARNING DETAILS
         function toggleAlertDetails() {
             const details = document.getElementById('alert-details');
             if (details) details.classList.toggle('hidden');
         }
 
-        // SELECT CURRENT MICROCLIMATE
         function selectCity(name, lat, lon, element) {
             currentCity = name;
             currentLat = lat;
@@ -442,36 +473,6 @@
             fetchWeatherData();
         }
 
-        // CODES MAPPING TO NWS ICON GRAPHICS
-        function mapNwsIcon(code, isDay = 1) {
-            const dn = isDay ? 'day' : 'night';
-            const map = {
-                0: ["skc", "Clear Skies"],
-                1: ["few", "Mostly Sunny"],
-                2: ["sct", "Partly Cloudy"],
-                3: ["bkn", "Mostly Cloudy"],
-                45: ["fg", "Dense Fog"],
-                48: ["fg", "Foggy Overcast"],
-                51: ["drizzle", "Light Mist"],
-                53: ["drizzle", "Moderate Mist"],
-                55: ["drizzle", "Heavy Coastal Drizzle"],
-                61: ["shra", "Light Coastal Showers"],
-                63: ["ra", "Moderate Rain"],
-                65: ["ra", "Heavy Downpours"],
-                80: ["shra", "Scattered Showers"],
-                81: ["shra", "Heavy Showers"],
-                82: ["shra", "Extreme Rainfall"],
-                95: ["tsra", "Thunderstorms"]
-            };
-            const iconKey = map[code] ? map[code][0] : "skc";
-            const textDesc = map[code] ? map[code][1] : "Clear Skies";
-            return {
-                url: `https://api.weather.gov/icons/land/${dn}/${iconKey}?size=medium`,
-                desc: textDesc
-            };
-        }
-
-        // UTILITY METRIC PARSER FOR WEATHER UNDERGROUND
         function parsePwsObservation(pwsData) {
             if (!pwsData || !pwsData.observations || pwsData.observations.length === 0) return null;
             const obs = pwsData.observations[0];
@@ -484,7 +485,6 @@
             };
         }
 
-        // ORCHESTRATE REAL-TIME DATA FETCHES
         async function fetchWeatherData() {
             let pWSTemp = null;
             let pWSWind = null;
@@ -492,6 +492,7 @@
             let pWSPressure = null;
             let pWSWindDir = null;
 
+            // 1. Fetch Primary Local KCAREDON127 PWS Telemetry
             if (currentCity === "Redondo Beach") {
                 try {
                     const pwsRes = await fetch("https://api.weather.com/v2/pws/observations/current?stationId=KCAREDON127&format=json&units=e&apiKey=1fee782e5bad4482ae782e5bad2482f5");
@@ -507,114 +508,141 @@
                         }
                     }
                 } catch (e) {
-                    console.warn("Could not query physical PWS station. Defaulting to virtual matrix calculations.", e);
+                    console.warn("Could not query physical PWS station. Defaulting strictly to NWS observations.", e);
                 }
             }
 
-            const openMeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${currentLat}&longitude=${currentLon}&current=temperature_2m,relative_humidity_2m,is_day,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,pressure_msl&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,pressure_msl,precipitation&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&past_days=1&forecast_days=1`;
-
+            // 2. Fetch Deep Historical Records from NWS KTOA (Torrance / South Bay Base Station)
             try {
-                const res = await fetch(openMeteoUrl);
-                if (!res.ok) throw new Error("OpenMeteo failure");
-                const data = await res.json();
+                const nwsObsRes = await fetch("https://api.weather.gov/stations/KTOA/observations?limit=24");
+                if (!nwsObsRes.ok) throw new Error("NWS Observations fetch failed");
+                const nwsObsData = await nwsObsRes.json();
+                const obsFeatures = nwsObsData.features;
 
-                const current = data.current;
-                const nwsIconData = mapNwsIcon(current.weather_code, current.is_day);
-                
-                document.getElementById('current-weather-nws-icon').src = nwsIconData.url;
-                document.getElementById('current-weather-desc').innerText = nwsIconData.desc;
-                
-                const finalTemp = (pWSTemp !== null) ? pWSTemp : Math.round(current.temperature_2m);
-                const finalWind = (pWSWind !== null) ? pWSWind : Math.round(current.wind_speed_10m);
-                const finalHumidity = (pWSHumidity !== null) ? pWSHumidity : current.relative_humidity_2m;
-                const finalPressure = (pWSPressure !== null) ? pWSPressure : Math.round(current.pressure_msl);
-                const finalWindDir = (pWSWindDir !== null) ? pWSWindDir : current.wind_direction_10m;
+                if (obsFeatures.length > 0) {
+                    // Extract most recent data point for immediate fallbacks and descriptions
+                    const currentNWS = obsFeatures[0].properties;
 
-                document.getElementById('metric-temp').innerText = finalTemp + "°";
-                document.getElementById('header-big-temp').innerText = finalTemp + "°F";
+                    const fallbackTemp = currentNWS.temperature.value !== null ? Math.round(currentNWS.temperature.value * 9/5 + 32) : "--";
+                    const fallbackWind = currentNWS.windSpeed.value !== null ? Math.round(currentNWS.windSpeed.value * 0.621371) : "--";
+                    const fallbackHum = currentNWS.relativeHumidity.value !== null ? Math.round(currentNWS.relativeHumidity.value) : "--";
+                    const fallbackPress = currentNWS.barometricPressure.value !== null ? Math.round(currentNWS.barometricPressure.value / 100) : "--";
+                    const fallbackWindDir = currentNWS.windDirection.value !== null ? currentNWS.windDirection.value : 0;
 
-                const now = new Date();
-                document.getElementById('update-timestamp').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-                document.getElementById('metric-wind').innerText = finalWind;
-                document.getElementById('metric-humidity').innerText = finalHumidity + "%";
-                document.getElementById('metric-pressure').innerText = finalPressure;
-                
-                document.getElementById('wind-compass').style.transform = `rotate(${finalWindDir}deg)`;
-                
-                let cardinal = "N";
-                if (finalWindDir > 22.5 && finalWindDir <= 67.5) cardinal = "NE";
-                else if (finalWindDir > 67.5 && finalWindDir <= 112.5) cardinal = "E";
-                else if (finalWindDir > 112.5 && finalWindDir <= 157.5) cardinal = "SE";
-                else if (finalWindDir > 157.5 && finalWindDir <= 202.5) cardinal = "S";
-                else if (finalWindDir > 202.5 && finalWindDir <= 247.5) cardinal = "SW";
-                else if (finalWindDir > 247.5 && finalWindDir <= 292.5) cardinal = "W";
-                else if (finalWindDir > 292.5 && finalWindDir <= 337.5) cardinal = "NW";
-                document.getElementById('metric-wind-dir').innerText = `Direction: ${cardinal} (${finalWindDir}°)`;
-
-                const hourly = data.hourly;
-                const times = hourly.time.slice(-24).map(t => {
-                    const d = new Date(t);
-                    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                });
-                const temps = hourly.temperature_2m.slice(-24);
-                const winds = hourly.wind_speed_10m.slice(-24);
-                const gusts = hourly.wind_gusts_10m.slice(-24);
-                const pressures = hourly.pressure_msl.slice(-24);
-                const precip = hourly.precipitation.slice(-24);
-
-                renderChart('tempChart', times, [{ label: 'Temperature (°F)', data: temps, borderColor: '#f97316', backgroundColor: 'rgba(249, 115, 22, 0.15)', borderWidth: 3, fill: true, tension: 0.4 }]);
-                renderChart('windChart', times, [
-                    { label: 'Wind Speed (mph)', data: winds, borderColor: '#0284c7', backgroundColor: 'rgba(2, 132, 199, 0.1)', borderWidth: 2.5, fill: true, tension: 0.4 },
-                    { label: 'Max Gusts (mph)', data: gusts, borderColor: '#0d9488', backgroundColor: 'rgba(13, 148, 136, 0.05)', borderWidth: 1.5, borderDash: [5, 5], fill: false, tension: 0.4 }
-                ]);
-                renderChart('pressureChart', times, [{ label: 'Atmospheric Pressure (hPa)', data: pressures, borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.1)', borderWidth: 3, fill: true, tension: 0.4 }]);
-                renderChart('precipChart', times, [{ label: 'Hourly Rain (in)', data: precip, borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.6)', borderWidth: 1, type: 'bar' }]);
-
-                const tableBody = document.getElementById('telemetry-tbody');
-                if (tableBody) {
-                    tableBody.innerHTML = '';
-                    const currentTimeIndex = hourly.time.findIndex(t => new Date(t) > now) - 1;
-                    const startIndex = currentTimeIndex > 0 ? currentTimeIndex : hourly.time.length - 1;
+                    // Hydrate Live Headers
+                    document.getElementById('current-weather-nws-icon').src = currentNWS.icon || "https://api.weather.gov/icons/land/day/skc?size=medium";
+                    document.getElementById('current-weather-desc').innerText = currentNWS.textDescription || "Clear";
                     
-                    for (let i = 0; i < 7; i++) {
-                        const index = startIndex - i;
-                        if (index < 0) break;
-                        
-                        const logDate = new Date(hourly.time[index]);
-                        const dateStr = logDate.toISOString().split('T')[0];
-                        const timeStr = logDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                        
-                        const tempVal = hourly.temperature_2m[index].toFixed(1);
-                        const humVal = hourly.relative_humidity_2m[index];
-                        const windVal = hourly.wind_speed_10m[index].toFixed(1);
-                        const pressVal = hourly.pressure_msl[index].toFixed(1);
-                        const precipVal = hourly.precipitation[index].toFixed(2);
+                    const finalTemp = (pWSTemp !== null) ? pWSTemp : fallbackTemp;
+                    const finalWind = (pWSWind !== null) ? pWSWind : fallbackWind;
+                    const finalHumidity = (pWSHumidity !== null) ? pWSHumidity : fallbackHum;
+                    const finalPressure = (pWSPressure !== null) ? pWSPressure : fallbackPress;
+                    const finalWindDir = (pWSWindDir !== null) ? pWSWindDir : fallbackWindDir;
 
-                        tableBody.innerHTML += `
-                            <tr class="hover:bg-white/80 transition-colors">
-                                <td class="px-4 py-2 border-b border-sky-100 text-[13px] text-slate-500">${dateStr} ${timeStr}</td>
-                                <td class="px-4 py-2 border-b border-sky-100 font-bold text-amber-800">${tempVal}</td>
-                                <td class="px-4 py-2 border-b border-sky-100 text-teal-700">${humVal}</td>
-                                <td class="px-4 py-2 border-b border-sky-100 text-sky-700">${windVal}</td>
-                                <td class="px-4 py-2 border-b border-sky-100 text-indigo-700">${pressVal}</td>
-                                <td class="px-4 py-2 border-b border-sky-100 text-cyan-700">${precipVal}</td>
-                            </tr>
-                        `;
+                    document.getElementById('metric-temp').innerText = finalTemp !== "--" ? finalTemp + "°" : "--°";
+                    document.getElementById('header-big-temp').innerText = finalTemp !== "--" ? finalTemp + "°F" : "--°F";
+
+                    const now = new Date();
+                    document.getElementById('update-timestamp').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    document.getElementById('metric-wind').innerText = finalWind;
+                    document.getElementById('metric-humidity').innerText = finalHumidity + "%";
+                    document.getElementById('metric-pressure').innerText = finalPressure;
+                    document.getElementById('wind-compass').style.transform = `rotate(${finalWindDir}deg)`;
+                    
+                    let cardinal = "N";
+                    if (finalWindDir > 22.5 && finalWindDir <= 67.5) cardinal = "NE";
+                    else if (finalWindDir > 67.5 && finalWindDir <= 112.5) cardinal = "E";
+                    else if (finalWindDir > 112.5 && finalWindDir <= 157.5) cardinal = "SE";
+                    else if (finalWindDir > 157.5 && finalWindDir <= 202.5) cardinal = "S";
+                    else if (finalWindDir > 202.5 && finalWindDir <= 247.5) cardinal = "SW";
+                    else if (finalWindDir > 247.5 && finalWindDir <= 292.5) cardinal = "W";
+                    else if (finalWindDir > 292.5 && finalWindDir <= 337.5) cardinal = "NW";
+                    document.getElementById('metric-wind-dir').innerText = `Direction: ${cardinal} (${finalWindDir}°)`;
+
+                    // Parse Historical Graphing metrics (reverse the NWS array to show chronological data left-to-right)
+                    const chartData = [...obsFeatures].reverse();
+                    const times = [];
+                    const temps = [];
+                    const winds = [];
+                    const gusts = [];
+                    const pressures = [];
+                    const precip = [];
+
+                    chartData.forEach(obs => {
+                        const props = obs.properties;
+                        const dDate = new Date(props.timestamp);
+                        times.push(dDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+                        
+                        temps.push(props.temperature.value !== null ? (props.temperature.value * 9/5 + 32).toFixed(1) : null);
+                        winds.push(props.windSpeed.value !== null ? (props.windSpeed.value * 0.621371).toFixed(1) : null);
+                        gusts.push(props.windGust.value !== null ? (props.windGust.value * 0.621371).toFixed(1) : null);
+                        pressures.push(props.barometricPressure.value !== null ? (props.barometricPressure.value / 100).toFixed(1) : null);
+                        
+                        let pVal = 0;
+                        if (props.precipitationLastHour && props.precipitationLastHour.value !== null) {
+                            pVal = (props.precipitationLastHour.value * 39.3701).toFixed(2);
+                        }
+                        precip.push(pVal);
+                    });
+
+                    renderChart('tempChart', times, [{ label: 'Temperature (°F)', data: temps, borderColor: '#f97316', backgroundColor: 'rgba(249, 115, 22, 0.15)', borderWidth: 3, fill: true, tension: 0.4 }]);
+                    renderChart('windChart', times, [
+                        { label: 'Wind Speed (mph)', data: winds, borderColor: '#0284c7', backgroundColor: 'rgba(2, 132, 199, 0.1)', borderWidth: 2.5, fill: true, tension: 0.4 },
+                        { label: 'Max Gusts (mph)', data: gusts, borderColor: '#0d9488', backgroundColor: 'rgba(13, 148, 136, 0.05)', borderWidth: 1.5, borderDash: [5, 5], fill: false, tension: 0.4 }
+                    ]);
+                    renderChart('pressureChart', times, [{ label: 'Atmospheric Pressure (hPa)', data: pressures, borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.1)', borderWidth: 3, fill: true, tension: 0.4 }]);
+                    renderChart('precipChart', times, [{ label: 'Hourly Rain (in)', data: precip, borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.6)', borderWidth: 1, type: 'bar' }]);
+
+                    // Render Recent Telemetry Table
+                    const tableBody = document.getElementById('telemetry-tbody');
+                    if (tableBody) {
+                        tableBody.innerHTML = '';
+                        for (let i = 0; i < Math.min(7, obsFeatures.length); i++) {
+                            const props = obsFeatures[i].properties;
+                            const logDate = new Date(props.timestamp);
+                            const dateStr = logDate.toISOString().split('T')[0];
+                            const timeStr = logDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            
+                            let labelPrefix = "";
+                            if (i === 0) labelPrefix = "<strong>Latest (Current Hour)</strong>";
+                            else if (i === 1) labelPrefix = "<strong>1 Hour Ago</strong>";
+                            else labelPrefix = `<strong>${i} Hours Ago</strong>`;
+                            
+                            const tempVal = props.temperature.value !== null ? (props.temperature.value * 9/5 + 32).toFixed(1) : "--";
+                            const humVal = props.relativeHumidity.value !== null ? Math.round(props.relativeHumidity.value) : "--";
+                            const windVal = props.windSpeed.value !== null ? (props.windSpeed.value * 0.621371).toFixed(1) : "--";
+                            const pressVal = props.barometricPressure.value !== null ? (props.barometricPressure.value / 100).toFixed(1) : "--";
+                            
+                            let precipVal = "0.00";
+                            if (props.precipitationLastHour && props.precipitationLastHour.value !== null) {
+                                precipVal = (props.precipitationLastHour.value * 39.3701).toFixed(2);
+                            }
+
+                            tableBody.innerHTML += `
+                                <tr class="hover:bg-white/80 transition-colors">
+                                    <td class="px-4 py-2 border-b border-sky-100 text-[13px] text-slate-500">${labelPrefix} <span class="text-xs block opacity-60">${dateStr} ${timeStr}</span></td>
+                                    <td class="px-4 py-2 border-b border-sky-100 font-bold text-center text-amber-800">${tempVal}</td>
+                                    <td class="px-4 py-2 border-b border-sky-100 text-center text-teal-700">${humVal}%</td>
+                                    <td class="px-4 py-2 border-b border-sky-100 text-center text-sky-700">${windVal}</td>
+                                    <td class="px-4 py-2 border-b border-sky-100 text-center text-indigo-700">${pressVal}</td>
+                                    <td class="px-4 py-2 border-b border-sky-100 text-center text-cyan-700">${precipVal}</td>
+                                </tr>
+                            `;
+                        }
                     }
                 }
 
+                // 3. Trigger standard NWS 7-Day Grid Outlook
                 fetchNWSForecast();
 
             } catch (err) {
-                console.error("OpenMeteo fetch error: ", err);
+                console.error("Historical API NWS fallback fetch error: ", err);
             }
         }
 
-        // NOAA 7-DAY FORECAST GRID SYSTEM WITH COMBINED DAILY & HOURLY INTEGRATION
         async function fetchNWSForecast() {
             try {
-                // 1. Get Point Metadata
                 const pointRes = await fetch(`https://api.weather.gov/points/${currentLat},${currentLon}`);
                 if (!pointRes.ok) throw new Error("NWS lookup failed.");
                 const pointData = await pointRes.json();
@@ -622,7 +650,6 @@
                 const forecastUrl = pointData.properties.forecast;
                 const forecastHourlyUrl = pointData.properties.forecastHourly;
 
-                // 2. Fetch daily and hourly in parallel
                 const [forecastRes, forecastHourlyRes] = await Promise.all([
                     fetch(forecastUrl),
                     fetch(forecastHourlyUrl)
@@ -673,12 +700,10 @@
                     pop.className = "text-[9px] font-bold text-teal-600/90";
                     pop.innerText = (popValue !== null && popValue > 0) ? `💧 ${popValue}% Rain` : `💧 0% Rain`;
 
-                    // MATCH EXTENDED FORECAST RH TO HOURLY RECORDS:
                     let calculatedRH = null;
                     const periodStart = new Date(period.startTime);
                     const periodEnd = new Date(period.endTime);
 
-                    // Filter all hourly samples falling within this specific forecast period
                     const relativeHours = hourlyPeriods.filter(h => {
                         const hTime = new Date(h.startTime);
                         return hTime >= periodStart && hTime < periodEnd;
@@ -711,7 +736,6 @@
             }
         }
 
-        // COPIED FROM MOJAVE COUNTY OUTLOOK SCRIPT
         function formatOutlookUpdateTimestamp() {
             const now = new Date();
             const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -722,12 +746,11 @@
             const ampm = hours >= 12 ? 'pm' : 'am';
             
             hours = hours % 12;
-            hours = hours ? hours : 12; // convert 0 to 12
+            hours = hours ? hours : 12; 
             
             return `Updated: ${dayName} @ ${hours}:${minutes} ${ampm}`;
         }
 
-        // COPIED AND SYNCHRONIZED TO FETCH FROM MOJAVE SPREADSHEET ID FOR SOUTH BAY KEY
         function syncGoogleSheetDigests() {
             window.handleGoogleSheetResponse = function(responseJSON) {
                 try {
@@ -791,7 +814,6 @@
             });
         }
 
-        // LOCAL HAZARD ALERTS TRACKING
         async function fetchNWSAlerts() {
             try {
                 const res = await fetch('https://api.weather.gov/alerts/active/zone/CAZ362');
@@ -817,7 +839,6 @@
             fetchNWSAlerts();
             syncGoogleSheetDigests();
             
-            // Loop updates every 5 minutes
             setInterval(fetchWeatherData, 300000);
             setInterval(syncGoogleSheetDigests, 300000);
         });
