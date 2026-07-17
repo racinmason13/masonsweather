@@ -90,48 +90,6 @@
             line-height: 1;
         }
 
-        /* BOTTOM RIGHT: Blocks any potential watermark remnants */
-        #bottom-right-blocker {
-            bottom: 20px;
-            right: 20px;
-            border-radius: 12px;
-            min-width: 180px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            padding: 12px 20px;
-        }
-
-        .status-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 11px;
-            color: #94a3b8;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #10b981;
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 8px #10b981;
-        }
-
-        .status-label {
-            color: #ffffff;
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        /* Animation */
-        @keyframes pulse-glow {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.05); }
-        }
     </style>
 </head>
 <body>
@@ -150,17 +108,7 @@
 </div>
 
 
-        <!-- BOTTOM RIGHT OVERLAY (Covers the bottom corner logos/attribution) -->
-        <div id="bottom-right-blocker" class="brand-overlay">
-            <div class="status-row">
-                <span class="status-label">RADAR ACTIVE</span>
-                <span class="status-dot"></span>
-            </div>
-            <div class="status-row" style="margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 4px;">
-                <span>SOURCE</span>
-                <span style="color: #3b82f6;">Mason's Weather</span>
-            </div>
-        </div>
+
 
         <!-- Fullscreen Windy Embed -->
         <iframe src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=default&metricWind=default&zoom=5&overlay=radar&product=radar&level=surface&lat=38&lon=-95" allowfullscreen></iframe>
