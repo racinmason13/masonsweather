@@ -17,13 +17,14 @@
             font-family: 'Playfair Display', serif;
         }
     </style>
-    <link rel="icon" type="image/x-icon" href="\images\Mason's Weather Logo.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="\images\Mason's Weather Logo.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="\images\Mason's Weather Logo.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="\images\Mason's Weather Logo.png">
+    <link class="fav" rel="icon" type="image/x-icon" href="\images\Mason's Weather Logo.png">
+    <link class="fav" rel="icon" type="image/png" sizes="32x32" href="\images\Mason's Weather Logo.png">
+    <link class="fav" rel="icon" type="image/png" sizes="16x16" href="\images\Mason's Weather Logo.png">
+    <link class="fav" rel="apple-touch-icon" sizes="180x180" href="\images\Mason's Weather Logo.png">
 </head>
 <body class="bg-gradient-to-b from-[#fdf2e9] via-[#fed7aa] to-[#fef3c7] min-h-screen text-[#451a03]">
 
+    <!-- CONSOLIDATED SINGLE NWS ALERT BAR (NOW AT VERY TOP) -->
     <div id="nws-alert-bar" class="hidden bg-gradient-to-r from-red-700 to-amber-700 text-white py-3 px-4 shadow-xl sticky top-0 z-50 transition-all duration-500 ease-in-out">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
             <div class="flex items-center space-x-3">
@@ -42,9 +43,33 @@
                 </button>
             </div>
         </div>
-        <div id="alert-details" class="hidden mt-3 max-w-7xl mx-auto border-t border-white/20 pt-3 text-xs text-white/90 space-y-2">
-            <p><strong>Description:</strong> <span id="alert-desc"></span></p>
-            <p><strong>Precautionary/Preparedness Actions:</strong> <span id="alert-inst"></span></p>
+        <div id="alert-details" class="hidden mt-3 max-w-7xl mx-auto border-t border-white/20 pt-3 text-xs text-white/90 space-y-4">
+            <!-- Consolidated alert details will render dynamically here -->
+             <div id="alert-details-content" class="space-y-4"></div>
+        </div>
+    </div>
+
+    <!-- MANUAL SPREADSHEET ALERT BAR (NOW POSITIONED UNDER NWS ALERT BAR) -->
+    <div id="manual-alert-bar" class="hidden bg-gradient-to-r from-purple-800 to-indigo-900 text-white py-3 px-4 shadow-xl sticky top-[48px] z-40 transition-all duration-500 ease-in-out border-b border-indigo-700">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
+            <div class="flex items-center space-x-3">
+                <span class="flex h-3 w-3 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-indigo-100"></span>
+                </span>
+                <div class="text-sm font-semibold tracking-wide">
+                    <span class="uppercase font-extrabold tracking-wider bg-black/30 px-2 py-0.5 rounded text-[11px] mr-2" id="manual-alert-tag">NOTICE</span>
+                    <span class="text-white/95 font-medium" id="manual-alert-headline">Loading local network update...</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3 self-end md:self-auto">
+                <button onclick="toggleManualAlertDetails()" id="manual-details-btn" class="hidden text-xs bg-white/20 hover:bg-white/35 text-white font-bold py-1 px-3 rounded-full transition">
+                    View Details
+                </button>
+            </div>
+        </div>
+        <div id="manual-alert-details" class="hidden mt-3 max-w-7xl mx-auto border-t border-white/20 pt-3 text-xs text-white/90 space-y-2">
+            <p id="manual-alert-desc"></p>
         </div>
     </div>
 
@@ -191,12 +216,13 @@
                     </div>
                 </div>
 
+                <!-- DESERT HYDRATION SECTION (NOW CONNECTED DYNAMICALLY TO THE SPREADSHEET VIA ID) -->
                 <div class="bg-amber-100 border border-amber-300/40 rounded-3xl p-6 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="flex items-start space-x-4">
                         <div class="text-3xl mt-1">☀️</div>
                         <div>
                             <h4 class="font-bold text-amber-950 text-base">Desert Hydration & Trail Brief</h4>
-                            <p class="text-xs text-amber-900/90 leading-relaxed mt-1">
+                            <p id="trail-brief-digest" class="text-xs text-amber-900/90 leading-relaxed mt-1">
                                 High Elevation UV indices exceed **10+** today. Desert humidity is extremely low. Carrying at least **1 gallon of water per person** is strongly recommended for any hikes along the Hualapai Aspen or Potato Patch trail systems.
                             </p>
                         </div>
@@ -371,6 +397,14 @@
         // 2. TOGGLE DETAILED ADVISORY PANEL
         function toggleAlertDetails() {
             const details = document.getElementById('alert-details');
+            if (details) {
+                details.classList.toggle('hidden');
+            }
+        }
+
+        // 2b. TOGGLE DETAILED MANUAL ADVISORY PANEL
+        function toggleManualAlertDetails() {
+            const details = document.getElementById('manual-alert-details');
             if (details) {
                 details.classList.toggle('hidden');
             }
@@ -779,41 +813,77 @@
             });
         }
 
-        // 7. QUERY ACTIVE NWS HAZARD WARNINGS (Zones AZZ003 & AZC015)
+        // 7. QUERY ACTIVE NWS HAZARD WARNINGS (Updated sticky position classes to top-0)
         async function fetchNWSAlerts() {
             try {
-                // Fetch alerts specifically for Zone AZZ003 (NW Deserts) & County AZC015 (Mohave County)
                 const [zoneRes, countyRes] = await Promise.allSettled([
                     fetch('https://api.weather.gov/alerts/active/zone/AZZ003').then(r => r.json()),
                     fetch('https://api.weather.gov/alerts/active/zone/AZC015').then(r => r.json())
                 ]);
 
-                let activeAlert = null;
+                let alertFeatures = [];
 
-                // Scan through returned alerts from both potential zones
-                if (zoneRes.status === 'fulfilled' && zoneRes.value.features && zoneRes.value.features.length > 0) {
-                    activeAlert = zoneRes.value.features[0].properties;
-                } else if (countyRes.status === 'fulfilled' && countyRes.value.features && countyRes.value.features.length > 0) {
-                    activeAlert = countyRes.value.features[0].properties;
+                if (zoneRes.status === 'fulfilled' && zoneRes.value.features) {
+                    alertFeatures = alertFeatures.concat(zoneRes.value.features);
+                }
+                if (countyRes.status === 'fulfilled' && countyRes.value.features) {
+                    alertFeatures = alertFeatures.concat(countyRes.value.features);
                 }
 
+                // Deduplicate alerts by ID
+                const seenIds = new Set();
+                const uniqueAlerts = alertFeatures.filter(f => {
+                    const id = f.properties.id;
+                    if (seenIds.has(id)) return false;
+                    seenIds.add(id);
+                    return true;
+                });
+
                 const alertBar = document.getElementById('nws-alert-bar');
-                
-                if (activeAlert) {
-                    // Update Alert Bar content dynamically with active NWS Advisory data
-                    document.getElementById('alert-event').innerText = activeAlert.event || 'WEATHER WARNING';
-                    document.getElementById('alert-headline').innerText = activeAlert.headline || 'Active Desert Advisory Issued by NWS';
-                    document.getElementById('alert-desc').innerText = activeAlert.description || 'No detailed description available.';
-                    document.getElementById('alert-inst').innerText = activeAlert.instruction || 'Monitor NOAA and local municipal guidelines for safety precautions.';
+                const detailsContent = document.getElementById('alert-details-content');
+
+                if (uniqueAlerts.length > 0) {
+                    // Combine multiple event tags and headlines
+                    const events = uniqueAlerts.map(a => a.properties.event || 'WEATHER WARNING');
+                    const distinctEvents = [...new Set(events)];
                     
-                    // Reveal the warning banner
+                    document.getElementById('alert-event').innerText = distinctEvents.join(' / ');
+                    
+                    if (uniqueAlerts.length === 1) {
+                        document.getElementById('alert-headline').innerText = uniqueAlerts[0].properties.headline || 'Active Desert Advisory Issued by NWS';
+                    } else {
+                        document.getElementById('alert-headline').innerText = `${uniqueAlerts.length} Active Regional Advisories posted by NWS`;
+                    }
+
+                    // Build stacked structural markup for multiple notifications inside the drop-down panel
+                    detailsContent.innerHTML = '';
+                    uniqueAlerts.forEach((alert, idx) => {
+                        const prop = alert.properties;
+                        const block = document.createElement('div');
+                        block.className = idx > 0 ? "border-t border-white/20 pt-3 space-y-1" : "space-y-1";
+                        block.innerHTML = `
+                            <p class="text-[13px] font-bold tracking-wide uppercase text-orange-200">${prop.event || 'Advisory'}</p>
+                            <p class="font-semibold mb-1">${prop.headline || ''}</p>
+                            <p><strong>Description:</strong> <span>${prop.description || 'No descriptive fields offered.'}</span></p>
+                            <p><strong>Precautionary Actions:</strong> <span>${prop.instruction || 'Monitor NOAA weather rules.'}</span></p>
+                        `;
+                        detailsContent.appendChild(block);
+                    });
+
+                    // Match color matrix dynamically if any critical severity level triggers
+                    const hasExtreme = uniqueAlerts.some(a => a.properties.severity === 'Extreme');
+                    if (hasExtreme) {
+                        alertBar.className = "bg-gradient-to-r from-red-800 to-red-950 text-white py-3 px-4 shadow-xl sticky top-0 z-50 transition-all duration-500 ease-in-out";
+                    } else {
+                        alertBar.className = "bg-gradient-to-r from-red-700 to-amber-700 text-white py-3 px-4 shadow-xl sticky top-0 z-50 transition-all duration-500 ease-in-out";
+                    }
+
                     alertBar.classList.remove('hidden');
                 } else {
-                    // Keep banner hidden if NWS has no alerts posted
                     alertBar.classList.add('hidden');
                 }
             } catch (err) {
-                console.error("NWS Alert feed query unsuccessful. Keeping alert bar hidden.", err);
+                console.error("NWS alert consolidation logic failed: ", err);
                 document.getElementById('nws-alert-bar').classList.add('hidden');
             }
         }
@@ -856,6 +926,9 @@
                 try {
                     const rows = responseJSON.table.rows;
                     let kingmanText = "";
+                    let manualAlertHeadline = "";
+                    let manualAlertDesc = "";
+                    let trailBriefText = "";
 
                     for (let row of rows) {
                         if (!row.c || row.c.length < 2) continue;
@@ -867,13 +940,19 @@
 
                         if (key === "kingman") {
                             kingmanText = rawVal;
-                            break;
+                        } else if (key === "manualalert" || key === "manualalertheadline") {
+                            manualAlertHeadline = rawVal;
+                        } else if (key === "manualalertdesc" || key === "manualalertdescription") {
+                            manualAlertDesc = rawVal;
+                        } else if (key === "trailbrief" || key === "deserthydration" || key === "trailbrieftext") {
+                            // Captured column key targets for the Desert Hydration component
+                            trailBriefText = rawVal;
                         }
                     }
 
+                    // Process Standard Kingman Outlook Box
                     const kingmanBox = document.getElementById('kingman-digest');
                     if (kingmanBox && kingmanText) {
-                        // Dynamically update element; preserves sheet line breaks
                         kingmanBox.innerHTML = kingmanText.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
                         
                         const outlookTimestamp = document.getElementById('outlook-timestamp');
@@ -881,6 +960,36 @@
                             outlookTimestamp.innerText = formatOutlookUpdateTimestamp();
                         }
                     }
+
+                    // Process Dynamic Trail Brief Text From Spreadsheet Sync
+                    const trailBriefBox = document.getElementById('trail-brief-digest');
+                    if (trailBriefBox && trailBriefText) {
+                        trailBriefBox.innerHTML = trailBriefText.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+                    }
+
+                    // Process Very Top Manual Alert
+                    const manualBar = document.getElementById('manual-alert-bar');
+                    if (manualBar) {
+                        if (manualAlertHeadline.trim().length > 0) {
+                            document.getElementById('manual-alert-headline').innerText = manualAlertHeadline;
+                            manualBar.classList.remove('hidden');
+                            
+                            const descNode = document.getElementById('manual-alert-desc');
+                            const detailBtn = document.getElementById('manual-details-btn');
+                            
+                            if (manualAlertDesc.trim().length > 0) {
+                                descNode.innerHTML = `<strong>Details:</strong> ` + manualAlertDesc.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+                                detailBtn.classList.remove('hidden');
+                            } else {
+                                descNode.innerHTML = "";
+                                detailBtn.classList.add('hidden');
+                                document.getElementById('manual-alert-details').classList.add('hidden');
+                            }
+                        } else {
+                            manualBar.classList.add('hidden');
+                        }
+                    }
+
                 } catch (err) {
                     console.error("Error parsing Google Sheet JSONP payload:", err);
                 } finally {
@@ -898,9 +1007,9 @@
         // Dashboard Init Orchestration
         window.addEventListener('DOMContentLoaded', () => {
             fetchWeatherData();
-            fetchNWSAlerts(); // Fetches live warning bar
+            fetchNWSAlerts(); 
             startSatelliteAutoRefresh();
-            syncGoogleSheetDigests(); // Sync sheets on load
+            syncGoogleSheetDigests(); 
 
             // Auto-update dashboard metrics loop and sync sheet content every 5m
             setInterval(fetchWeatherData, 300000); 
