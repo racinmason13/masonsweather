@@ -112,21 +112,21 @@
                     </h3>
                     <p class="text-xs text-amber-900/70 mb-4">Select an area elevation to view live weather telemetry & trends:</p>
                     <div id="city-selector" class="flex flex-col gap-2">
-                        <button onclick="selectCity('Lazy Y U', 35.1328, -113.9180, 'KAZKINGM257', this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-amber-100 text-amber-950 border border-amber-200 shadow-sm">
+                        <button onclick="selectCity('Lazy Y U', 35.136876, -113.964484, 'KAZKINGM257', this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-amber-100 text-amber-950 border border-amber-200 shadow-sm">
                             <span class="flex flex-col">
                                 <span>🏡 Lazy Y U</span>
                                 <span class="text-2xs text-amber-800 font-medium">Elevation: ~4,800′</span>
                             </span>
                             <span class="text-xs px-2 py-0.5 rounded-full bg-white/60">Community</span>
                         </button>
-                        <button onclick="selectCity('Kingman Valley', 35.1894, -114.0530, 'KAZKINGM192', this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#7c2d12] hover:shadow-sm">
+                        <button onclick="selectCity('Kingman Valley', 35.207222, -114.033769, 'KAZKINGM227', this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#7c2d12] hover:shadow-sm">
                             <span class="flex flex-col">
                                 <span>🌵 Kingman</span>
                                 <span class="text-2xs text-[#7c2d12]/70 font-medium">Elevation: ~3,300′</span>
                             </span>
                             <span class="text-xs opacity-60">Valley</span>
                         </button>
-                        <button onclick="selectCity('Hualapai Peak / Park', 35.0970, -113.8750, 'KAZKINGM104', this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#7c2d12] hover:shadow-sm">
+                        <button onclick="selectCity('Hualapai Peak / Park', 35.0970, -113.8750, '', this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#7c2d12] hover:shadow-sm">
                             <span class="flex flex-col">
                                 <span>🌲 Hualapai Mountains</span>
                                 <span class="text-2xs text-[#7c2d12]/70 font-medium">Elevation: ~6,500′</span>
@@ -178,7 +178,7 @@
 
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                         <div class="bg-gradient-to-br from-amber-50 to-orange-100/40 border border-amber-200/50 rounded-2xl p-4 flex flex-col justify-between">
-                            <span class="text-xs font-bold uppercase tracking-wider text-amber-900">High Desert Temp</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-amber-900">Live Temp</span>
                             <div class="my-2">
                                 <span id="metric-temp" class="text-3xl font-extrabold text-amber-950">--°</span>
                                 <span class="text-lg font-bold text-amber-900">F</span>
@@ -237,7 +237,7 @@
         <div id="tab-content-trends" class="tab-pane hidden flex flex-col gap-8">
             <div class="bg-white/70 backdrop-blur-md border border-orange-100 shadow-xl rounded-3xl p-6">
                 <h3 class="text-xl font-bold text-[#7c2d12] mb-4 flex items-center border-b border-orange-100 pb-3 desert-title">
-                    📅 NOAA High-Desert Grid Forecast (Kingman / Hualapai Region)
+                    📅 NOAA High-Desert Grid Forecast Localized
                 </h3>
                 
                 <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4 mb-6" id="weekly-forecast-grid">
@@ -363,14 +363,14 @@
 
     <script>
         let currentCity = "Lazy Y U";
-        let currentLat = 35.1328;
-        let currentLon = -113.9180;
+        let currentLat = 35.136876;
+        let currentLon = -113.964484;
         let currentPWS = "KAZKINGM257";
 
         // Active Chart References
         let chartInstances = {};
 
-        // Pre-configured with your specific Google Sheet ID
+        // Sheet Link ID
         const SPREADSHEET_ID = "1jQ9ddsqhOXiw2RnN41ZnHs-vyhV2V2lZbmsAa0k3-GY";
 
         // 1. CHOOSE ACTIVE TABS
