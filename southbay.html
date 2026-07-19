@@ -45,13 +45,37 @@
         </div>
     </div>
 
+    <!-- MANUAL SPREADSHEET NOTICE BAR -->
+    <div id="manual-notice-bar" class="hidden bg-gradient-to-r from-sky-900 to-indigo-950 text-white py-3 px-4 shadow-xl sticky top-[48px] z-30 transition-all duration-500 ease-in-out border-b border-indigo-900">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
+            <div class="flex items-center space-x-3">
+                <span class="flex h-3 w-3 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-sky-200"></span>
+                </span>
+                <div class="text-sm font-semibold tracking-wide">
+                    <span class="uppercase font-extrabold tracking-wider bg-black/30 px-2 py-0.5 rounded text-[11px] mr-2" id="manual-notice-tag">NOTICE</span>
+                    <span class="text-white/95 font-medium" id="manual-notice-headline">Loading local network update...</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3 self-end md:self-auto">
+                <button onclick="toggleManualNoticeDetails()" id="manual-notice-details-btn" class="hidden text-xs bg-white/20 hover:bg-white/35 text-white font-bold py-1 px-3 rounded-full transition">
+                    View Details
+                </button>
+            </div>
+        </div>
+        <div id="manual-notice-details" class="hidden mt-3 max-w-7xl mx-auto border-t border-white/20 pt-3 text-xs text-white/90 space-y-2">
+            <p id="manual-notice-desc"></p>
+        </div>
+    </div>
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         <a href="index.html" class="block group hover:opacity-90 transition-opacity">
           <header class="flex flex-col sm:flex-row items-center justify-between border-b border-sky-100 pb-6 mb-8 gap-4"> 
             <div class="logo-section text-center sm:text-left"> 
               <h1 class="text-4xl font-extrabold text-[#1e3d59] tracking-tight group-hover:text-sky-900 transition-colors">🌊 Mason's Weather</h1> 
-              <p class="text-sm font-semibold text-sky-700 tracking-wider">South Bay Marine & Coastal Weather • Station KCAREDON127</p> 
+              <p class="text-sm font-semibold text-sky-700 tracking-wider">South Bay Marine & Coastal Weather • Live Microclimate Mesh Network</p> 
             </div> 
           </header>
         </a>
@@ -85,27 +109,27 @@
                     </h3>
                     <p class="text-xs text-slate-500 mb-4">Select a coastal microclimate to update live stats and 24h trends:</p>
                     <div id="city-selector" class="flex flex-col gap-2">
-                        <button onclick="selectCity('Redondo Beach', 33.8492, -118.3884, this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-amber-100 text-amber-900 border border-amber-200 shadow-sm">
+                        <button onclick="selectCity('Redondo Beach', 33.8492, -118.3884, this, 'KCAREDON127')" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-amber-100 text-amber-900 border border-amber-200 shadow-sm">
                             <span>🏖️ Redondo Beach</span>
-                            <span class="text-xs px-2 py-0.5 rounded-full bg-white/60">Active</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-white/60">Coast</span>
                         </button>
-                        <button onclick="selectCity('Hermosa Beach', 33.8622, -118.3987, this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
+                        <button onclick="selectCity('Hermosa Beach', 33.8622, -118.3987, this, 'KCAHERMO17')" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
                             <span>🏄‍♂️ Hermosa Beach</span>
                             <span class="text-xs opacity-60">Coast</span>
                         </button>
-                        <button onclick="selectCity('Manhattan Beach', 33.8847, -118.4109, this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
+                        <button onclick="selectCity('Manhattan Beach', 33.8847, -118.4109, this, 'KCAMANHA40')" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
                             <span>🏐 Manhattan Beach</span>
                             <span class="text-xs opacity-60">Coast</span>
                         </button>
-                        <button onclick="selectCity('Palos Verdes', 33.7865, -118.3831, this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
+                        <button onclick="selectCity('Palos Verdes', 33.7865, -118.3831, this, 'KCAPALOS77')" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
                             <span>⛰️ Palos Verdes</span>
                             <span class="text-xs opacity-60">Cliffs</span>
                         </button>
-                        <button onclick="selectCity('Torrance', 33.8358, -118.3406, this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
-                            <span>🏡 Torrance Inland</span>
+                        <button onclick="selectCity('Torrance', 33.8358, -118.3406, this, 'KCATORRA170')" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
+                            <span>🏡 Torrance</span>
                             <span class="text-xs opacity-60">Inland</span>
                         </button>
-                        <button onclick="selectCity('El Segundo', 33.9192, -118.4165, this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
+                        <button onclick="selectCity('El Segundo', 33.9192, -118.4165, this, 'KCAELSEG23')" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
                             <span>✈️ El Segundo</span>
                             <span class="text-xs opacity-60">North</span>
                         </button>
@@ -115,12 +139,12 @@
                 <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-5 relative overflow-hidden">
                     <h4 class="text-sm uppercase tracking-wider text-teal-800 font-bold mb-2">📡 Station Infrastructure</h4>
                     <p class="text-xs text-slate-600 leading-relaxed mb-3">
-                        Operating on our newly deployed sensor array. Upgrades include enhanced haptic precipitation tracking, re-calibrated barometric modules, and an elevated anemometer positioning for superior coastal wind accuracy.
+                        Operating on localized high-fidelity Weather Underground sensor grids. Features include real-time ground telemetry, re-calibrated barometric sensors, and hyper-targeted ocean wind alignments.
                     </p>
                     <ul class="text-xs text-slate-500 list-disc pl-4 space-y-1">
-                        <li>High-gain Solar Radiation Shielding</li>
-                        <li>LoRaWAN Telemetry Link</li>
-                        <li>Sub-second API refresh rate</li>
+                        <li>High-gain Weather Underground Uplinks</li>
+                        <li>Multi-node Microclimate Mesh Mapping</li>
+                        <li>Sub-second API Refresh Target</li>
                     </ul>
                 </div>
 
@@ -153,7 +177,7 @@
                         <div>
                             <span class="text-xs font-bold tracking-widest text-sky-600 uppercase">Station Live Data</span>
                             <h2 id="current-city-title" class="text-3xl font-extrabold text-[#1e3d59]">Redondo Beach</h2>
-                            <p class="text-sm text-slate-500 mt-1">Real-time reports updating instantly</p>
+                            <p class="text-sm text-slate-500 mt-1">Real-time reports updating instantly via localized PWS arrays</p>
                         </div>
                         <div class="flex items-center space-x-4 mt-4 md:mt-0">
                             <img id="current-weather-nws-icon" class="w-16 h-16 rounded-full border border-sky-100 shadow-sm bg-white" src="https://api.weather.gov/icons/land/day/skc?size=medium" alt="NWS Weather Icon">
@@ -234,7 +258,6 @@
                 </div>
             </div>
 
-           
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-6">
                     <h4 class="text-base font-bold text-[#1e3d59] mb-4 flex items-center">🛰️ GOES West Satellite <span class="ml-2 text-xs font-normal text-slate-500">(Color/IR)</span></h4>
@@ -260,24 +283,23 @@
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="bg-white/50 border border-sky-100 rounded-2xl p-5 shadow-sm hover:shadow transition-all">
-                        <h4 class="text-xs uppercase tracking-wider text-sky-800 font-bold mb-2">Temperature Trend</h4>
+                        <h4 class="text-xs uppercase tracking-wider text-sky-850 font-bold mb-2">Temperature Trend</h4>
                         <p class="text-xs text-slate-600 leading-relaxed">Follows a standard coastal diurnal cycle, starting with cooler morning mist layers, climbing to afternoon highs, and dropping gradually back down after sunset.</p>
                     </div>
                     <div class="bg-white/50 border border-sky-100 rounded-2xl p-5 shadow-sm hover:shadow transition-all">
-                        <h4 class="text-xs uppercase tracking-wider text-sky-800 font-bold mb-2">Coastal Wind Trend</h4>
+                        <h4 class="text-xs uppercase tracking-wider text-sky-855 font-bold mb-2">Coastal Wind Trend</h4>
                         <p class="text-xs text-slate-600 leading-relaxed">Typically showcases light morning breezes that pick up to peak afternoon wind-swells (onshore flow) before settling into calm offshore breezes overnight.</p>
                     </div>
                     <div class="bg-white/50 border border-sky-100 rounded-2xl p-5 shadow-sm hover:shadow transition-all">
-                        <h4 class="text-xs uppercase tracking-wider text-sky-800 font-bold mb-2">Atmospheric Pressure</h4>
+                        <h4 class="text-xs uppercase tracking-wider text-sky-860 font-bold mb-2">Atmospheric Pressure</h4>
                         <p class="text-xs text-slate-600 leading-relaxed">Stabilizes the local marine layer; steady pressure indicates consistent coastal conditions, while drops alert to approaching marine cloud cover.</p>
                     </div>
                     <div class="bg-white/50 border border-sky-100 rounded-2xl p-5 shadow-sm hover:shadow transition-all">
-                        <h4 class="text-xs uppercase tracking-wider text-sky-800 font-bold mb-2">Rainfall Tracker</h4>
+                        <h4 class="text-xs uppercase tracking-wider text-sky-865 font-bold mb-2">Rainfall Tracker</h4>
                         <p class="text-xs text-slate-600 leading-relaxed">Tracks active precipitation rates (primarily measuring heavy coastal drizzle or morning marine mist condensation).</p>
                     </div>
                 </div>
             </div>
-
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-6">
@@ -310,9 +332,9 @@
                 <div class="flex flex-col border-b border-sky-100 pb-3 mb-4">
                     <div class="flex items-center justify-between">
                         <h3 class="text-xl font-bold text-[#1e3d59]">📋 Recent Telemetry Logs</h3>
-                        <span class="text-xs bg-[#1e3d59]/10 text-[#1e3d59] font-bold px-2 py-1 rounded-md">Live NWS / PWS Feed</span>
+                        <span id="nws-feed-label" class="text-xs bg-[#1e3d59]/10 text-[#1e3d59] font-bold px-2 py-1 rounded-md">Live NWS / PWS Feed</span>
                     </div>
-                    <p class="text-xs text-slate-500 mt-1">Sourced via official NWS KTOA & KCAREDON127 Local Arrays</p>
+                    <p id="nws-feed-source" class="text-xs text-slate-500 mt-1">Sourced via local NWS Grid Base Matrix Arrays</p>
                 </div>
                 <div class="min-w-[700px]">
                     <table class="w-full text-left text-sm text-slate-600 border-collapse rounded-xl overflow-hidden">
@@ -334,7 +356,7 @@
                     </table>
                 </div>
                 <div class="mt-4 p-4 bg-sky-50 border-l-4 border-[#1e3d59] text-xs text-slate-600 rounded-r-xl italic">
-                    <strong>📡 Station Infrastructure Note:</strong> These logs are processed natively via local NOAA/NWS APIs and supplemented by our localized PWS station array metrics.
+                    <strong>📡 Station Infrastructure Note:</strong> Historical trends update dynamically to match the nearest National Weather Service observation grid mapped to this specific location coordinate.
                 </div>
             </div>
 
@@ -417,8 +439,8 @@
     </div>
 
     <footer class="max-w-7xl mx-auto px-4 py-8 mt-4 text-center text-sm font-semibold text-sky-800/60 border-t border-sky-200/50">
-        &copy; 2026 Mason's Weather &bull; Station KCAREDON127 &bull; All Rights Reserved.<br>
-        <span class="text-xs font-normal opacity-80">Telemetry provided by NOAA, NWS, Mason Ramirez, and local sensor networks.</span>
+        &copy; 2026 Mason's Weather &bull; Real-time Weather Underground Integration &bull; All Rights Reserved.<br>
+        <span class="text-xs font-normal opacity-80">Telemetry provided by NOAA, NWS, Weather Underground network nodes, and local coastal assets.</span>
     </footer>
 
     <script>
@@ -426,6 +448,7 @@
         let currentCity = "Redondo Beach";
         let currentLat = 33.8492;
         let currentLon = -118.3884;
+        let currentStation = "KCAREDON127"; 
         let chartInstances = {};
 
         function switchTab(tabId) {
@@ -451,10 +474,18 @@
             if (details) details.classList.toggle('hidden');
         }
 
-        function selectCity(name, lat, lon, element) {
+        function toggleManualNoticeDetails() {
+            const details = document.getElementById('manual-notice-details');
+            if (details) {
+                details.classList.toggle('hidden');
+            }
+        }
+
+        function selectCity(name, lat, lon, element, stationId = "KCAREDON127") {
             currentCity = name;
             currentLat = lat;
             currentLon = lon;
+            currentStation = stationId; 
 
             document.querySelectorAll('.city-btn').forEach(btn => {
                 btn.className = "city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm";
@@ -466,7 +497,6 @@
             const currentBadge = element.querySelector('span:last-child');
             if (currentBadge) {
                 currentBadge.className = "text-xs px-2 py-0.5 rounded-full bg-white/60";
-                currentBadge.innerText = "Active";
             }
 
             document.getElementById('current-city-title').innerText = name;
@@ -492,35 +522,53 @@
             let pWSPressure = null;
             let pWSWindDir = null;
 
-            // 1. Fetch Primary Local KCAREDON127 PWS Telemetry
-            if (currentCity === "Redondo Beach") {
-                try {
-                    const pwsRes = await fetch("https://api.weather.com/v2/pws/observations/current?stationId=KCAREDON127&format=json&units=e&apiKey=1fee782e5bad4482ae782e5bad2482f5");
-                    if (pwsRes.ok) {
-                        const pwsJson = await pwsRes.json();
-                        const obs = parsePwsObservation(pwsJson);
-                        if (obs) {
-                            pWSTemp = obs.temp;
-                            pWSWind = obs.windSpeed;
-                            pWSHumidity = obs.humidity;
-                            pWSPressure = obs.pressure;
-                            pWSWindDir = obs.windDir;
-                        }
+            // 1. Fetch Targeted Weather Underground PWS telemetry
+            try {
+                const pwsRes = await fetch(`https://api.weather.com/v2/pws/observations/current?stationId=${currentStation}&format=json&units=e&apiKey=1fee782e5bad4482ae782e5bad2482f5`);
+                if (pwsRes.ok) {
+                    const pwsJson = await pwsRes.json();
+                    const obs = parsePwsObservation(pwsJson);
+                    if (obs) {
+                        pWSTemp = obs.temp;
+                        pWSWind = obs.windSpeed;
+                        pWSHumidity = obs.humidity;
+                        pWSPressure = obs.pressure;
+                        pWSWindDir = obs.windDir;
                     }
-                } catch (e) {
-                    console.warn("Could not query physical PWS station. Defaulting strictly to NWS observations.", e);
                 }
+            } catch (e) {
+                console.warn("Could not query dynamic PWS node infrastructure. Defaulting directly to NWS secondary maps.", e);
             }
 
-            // 2. Fetch Deep Historical Records from NWS KTOA (Torrance / South Bay Base Station)
+            // 2. Dynamically discover the closest NWS observation station based on current coordinates
+            let localNwsStationId = "KTOA"; // Standard fallback base station
             try {
-                const nwsObsRes = await fetch("https://api.weather.gov/stations/KTOA/observations?limit=24");
+                const pointStationsRes = await fetch(`https://api.weather.gov/points/${currentLat},${currentLon}/stations`);
+                if (pointStationsRes.ok) {
+                    const pointStationsData = await pointStationsRes.json();
+                    if (pointStationsData.features && pointStationsData.features.length > 0) {
+                        localNwsStationId = pointStationsData.features[0].properties.stationIdentifier || "KTOA";
+                    }
+                }
+            } catch (e) {
+                console.warn("Could not dynamically resolve nearest NWS airport node. Using standard fallback station.", e);
+            }
+
+            // Update UI element tags to accurately match the active telemetry provider node
+            const feedLabel = document.getElementById('nws-feed-label');
+            if (feedLabel) feedLabel.innerText = `Live NWS (${localNwsStationId}) / PWS Feed`;
+            
+            const feedSource = document.getElementById('nws-feed-source');
+            if (feedSource) feedSource.innerText = `Sourced via NWS ${localNwsStationId} Core Base Matrix Arrays`;
+
+            // 3. Fetch Base Historical Records from the resolved NWS Node for trends and secondary metrics
+            try {
+                const nwsObsRes = await fetch(`https://api.weather.gov/stations/${localNwsStationId}/observations?limit=24`);
                 if (!nwsObsRes.ok) throw new Error("NWS Observations fetch failed");
                 const nwsObsData = await nwsObsRes.json();
                 const obsFeatures = nwsObsData.features;
 
                 if (obsFeatures.length > 0) {
-                    // Extract most recent data point for immediate fallbacks and descriptions
                     const currentNWS = obsFeatures[0].properties;
 
                     const fallbackTemp = currentNWS.temperature.value !== null ? Math.round(currentNWS.temperature.value * 9/5 + 32) : "--";
@@ -529,7 +577,7 @@
                     const fallbackPress = currentNWS.barometricPressure.value !== null ? Math.round(currentNWS.barometricPressure.value / 100) : "--";
                     const fallbackWindDir = currentNWS.windDirection.value !== null ? currentNWS.windDirection.value : 0;
 
-                    // Hydrate Live Headers
+                    // Hydrate Live Weather Profile Headers
                     document.getElementById('current-weather-nws-icon').src = currentNWS.icon || "https://api.weather.gov/icons/land/day/skc?size=medium";
                     document.getElementById('current-weather-desc').innerText = currentNWS.textDescription || "Clear";
                     
@@ -560,7 +608,7 @@
                     else if (finalWindDir > 292.5 && finalWindDir <= 337.5) cardinal = "NW";
                     document.getElementById('metric-wind-dir').innerText = `Direction: ${cardinal} (${finalWindDir}°)`;
 
-                    // Parse Historical Graphing metrics (reverse the NWS array to show chronological data left-to-right)
+                    // Parse Trend Plot Configurations Chronologically
                     const chartData = [...obsFeatures].reverse();
                     const times = [];
                     const temps = [];
@@ -594,7 +642,7 @@
                     renderChart('pressureChart', times, [{ label: 'Atmospheric Pressure (hPa)', data: pressures, borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.1)', borderWidth: 3, fill: true, tension: 0.4 }]);
                     renderChart('precipChart', times, [{ label: 'Hourly Rain (in)', data: precip, borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.6)', borderWidth: 1, type: 'bar' }]);
 
-                    // Render Recent Telemetry Table
+                    // Populate Data Matrix Logging Table
                     const tableBody = document.getElementById('telemetry-tbody');
                     if (tableBody) {
                         tableBody.innerHTML = '';
@@ -633,11 +681,11 @@
                     }
                 }
 
-                // 3. Trigger standard NWS 7-Day Grid Outlook
+                // 4. Render Regional Extended 7-Day Matrix Forecast Profiles
                 fetchNWSForecast();
 
             } catch (err) {
-                console.error("Historical API NWS fallback fetch error: ", err);
+                console.error("Core dynamic tracking matrix encountered an extraction error: ", err);
             }
         }
 
@@ -732,7 +780,7 @@
                 });
 
             } catch (err) {
-                console.error("NWS Forecast System Error: ", err);
+                console.error("Extended grid forecasting map down: ", err);
             }
         }
 
@@ -756,6 +804,8 @@
                 try {
                     const rows = responseJSON.table.rows;
                     let southbayText = "";
+                    let manualNoticeHeadline = "";
+                    let manualNoticeDesc = "";
 
                     for (let row of rows) {
                         if (!row.c || row.c.length < 2) continue;
@@ -767,7 +817,10 @@
 
                         if (key === "southbay") {
                             southbayText = rawVal;
-                            break;
+                        } else if (key === "manualnotice" || key === "manualnoticeheadline") {
+                            manualNoticeHeadline = rawVal;
+                        } else if (key === "manualnoticedesc" || key === "manualnoticedescription") {
+                            manualNoticeDesc = rawVal;
                         }
                     }
 
@@ -780,8 +833,30 @@
                             summaryMeta.innerText = formatOutlookUpdateTimestamp();
                         }
                     }
+
+                    const manualNoticeBar = document.getElementById('manual-notice-bar');
+                    if (manualNoticeBar) {
+                        if (manualNoticeHeadline.trim().length > 0) {
+                            document.getElementById('manual-notice-headline').innerText = manualNoticeHeadline;
+                            manualNoticeBar.classList.remove('hidden');
+                            
+                            const descNode = document.getElementById('manual-notice-desc');
+                            const detailBtn = document.getElementById('manual-notice-details-btn');
+                            
+                            if (manualNoticeDesc.trim().length > 0) {
+                                descNode.innerHTML = `<strong>Details:</strong> ` + manualNoticeDesc.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+                                detailBtn.classList.remove('hidden');
+                            } else {
+                                descNode.innerHTML = "";
+                                detailBtn.classList.add('hidden');
+                                document.getElementById('manual-notice-details').classList.add('hidden');
+                            }
+                        } else {
+                            manualNoticeBar.classList.add('hidden');
+                        }
+                    }
                 } catch (err) {
-                    console.error("Error parsing Google Sheet response payload:", err);
+                    console.error("Live configuration link mapping parsed structural warning:", err);
                 } finally {
                     const tempScript = document.getElementById('g-sheet-jsonp-loader');
                     if (tempScript) tempScript.remove();
