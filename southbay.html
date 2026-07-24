@@ -1059,7 +1059,7 @@ if (tableBody) {
 
         async function fetchSurfData() {
             try {
-                const surfRes = await fetch("https://marine-api.open-meteo.com/v1/marine?latitude=33.85&longitude=-118.40&current=wave_height,wave_direction,wave_period,swell_wave_height,swell_wave_direction,swell_wave_period&hourly=wave_height,wave_period&timezone=America%2FLos_Angeles&length_unit=imperial");
+                const surfRes = await fetch("https://marine-api.open-meteo.com/v1/marine?latitude=33.85&longitude=-118.40&current=wave_height,wave_direction,wave_period,swell_wave_height,swell_wave_direction,swell_wave_period&hourly=wave_height,wave_period&timezone=America%2FLos_Angeles&length_unit=imperial&forecast_hours=24");
                 
                 if (!surfRes.ok) throw new Error("Marine API fetch failed");
                 const surfData = await surfRes.json();
@@ -1123,29 +1123,55 @@ if (tableBody) {
                 document.getElementById('spot-torrance-rating').className = `inline-block text-[11px] font-bold px-2 py-0.5 rounded mb-2 ${badgeClass}`;
 
                 if (surfData.hourly && surfData.hourly.time) {
-                    const times = surfData.hourly.time.slice(0, 24).map(t => new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-                    const waveHeights = surfData.hourly.wave_height.slice(0, 24).map(w => w !== null ? w.toFixed(1) : null);
-                    const periods = surfData.hourly.wave_period.slice(0, 24).map(p => p !== null ? Math.round(p) : null);
+                    const year = now.getFullYear();
+                    const month = String(now.getMonth() + 1).padStart(2, '0');
+                    const day = String(now.getDate()).padStart(2, '0');
+                    const hour = String(now.getHours()).padStart(2, '0');
+                    const currentIsoPrefix = `${year}-${month}-${day}T${hour}`;
+
+                    let startIndex = surfData.hourly.time.findIndex(t => t.startsWith(currentIsoPrefix));
+                    if (startIndex === -1) startIndex = 0;
+
+                    const times = surfData.hourly.time.slice(startIndex, startIndex + 24).map(t => {
+                        const d = new Date(t.replace('T', ' '));
+                        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    });
+                    const waveHeights = surfData.hourly.wave_height.slice(startIndex, startIndex + 24).map(w => w !== null ? w.toFixed(1) : null);
+                    const periods = surfData.hourly.wave_period.slice(startIndex, startIndex + 24).map(p => p !== null ? Math.round(p) : null);
 
                     renderChart('surfChart', times, [
                         { label: 'Wave Height (ft)', data: waveHeights, borderColor: '#0284c7', backgroundColor: 'rgba(2, 132, 199, 0.15)', borderWidth: 3, fill: true, tension: 0.4 },
                         { label: 'Wave Period (sec)', data: periods, borderColor: '#0d9488', backgroundColor: 'rgba(13, 148, 136, 0.05)', borderWidth: 2, borderDash: [4, 4], fill: false, tension: 0.4 }
                     ]);
                 }
-
             } catch (err) {
-                console.warn("Could not reach live Marine API. Loading default baseline coastal swell stats.", err);
-                document.getElementById('surf-swell-height').innerText = "2.8";
-                document.getElementById('surf-swell-period').innerText = "13";
-                document.getElementById('surf-swell-dir').innerText = "Direction: WNW (285°)";
-                document.getElementById('surf-overall-rating').innerText = "Fair";
-                document.getElementById('surf-last-updated').innerText = "Using Offline Buoy Baseline";
-                
-                renderChart('surfChart', ['6am', '9am', '12pm', '3pm', '6pm', '9pm', '12am', '3am'], [
-                    { label: 'Wave Height (ft)', data: [2.5, 2.8, 3.1, 3.3, 3.0, 2.7, 2.5, 2.4], borderColor: '#0284c7', backgroundColor: 'rgba(2, 132, 199, 0.15)', borderWidth: 3, fill: true, tension: 0.4 },
-                    { label: 'Wave Period (sec)', data: [14, 14, 13, 13, 12, 12, 11, 11], borderColor: '#0d9488', borderWidth: 2, borderDash: [4, 4], fill: false, tension: 0.4 }
-                ]);
+                console.error("Surf data fetch error:", err);
             }
+        }
+
+        function renderChart(canvasId, labels, datasets) {
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) return;
+            
+            if (chartInstances[canvasId]) {
+                chartInstances[canvasId].destroy();
+            }
+
+            chartInstances[canvasId] = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: 'top' }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: false }
+                    }
+                }
+            });
         }
 
         async function fetchNWSForecast() {
@@ -1328,21 +1354,26 @@ if (tableBody) {
             document.body.appendChild(script);
         }
 
-        function renderChart(canvasId, labels, datasets) {
-            if (chartInstances[canvasId]) chartInstances[canvasId].destroy();
-            const canvas = document.getElementById(canvasId);
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
+       function renderChart(canvasId, labels, datasets) {
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) return;
+            
+            if (chartInstances[canvasId]) {
+                chartInstances[canvasId].destroy();
+            }
+
             chartInstances[canvasId] = new Chart(ctx, {
-                type: datasets[0].type || 'line',
+                type: 'line',
                 data: { labels, datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: true, labels: { color: '#1e293b', font: { family: 'Plus Jakarta Sans', size: 11 } } } },
+                    plugins: {
+                        legend: { display: true, position: 'top' }
+                    },
                     scales: {
-                        y: { grid: { color: 'rgba(0,0,0,0.03)' }, ticks: { color: '#64748b', font: { family: 'Plus Jakarta Sans', size: 10 } } },
-                        x: { grid: { display: false }, ticks: { color: '#64748b', font: { family: 'Plus Jakarta Sans', size: 9 } } }
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: false }
                     }
                 }
             });
