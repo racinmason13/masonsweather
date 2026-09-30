@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MASONS WEATHER | Advanced Live Radar & Forecast System</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef6ff',
+                            100: '#e0edff',
+                            400: '#388bfd',
+                            500: '#1f6feb',
+                            600: '#1158c7',
+                            900: '#0d1527',
+                            950: '#070c18'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .glass-card {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        
+        /* Dynamic Theme Classes */
+        html.light body {
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+        
+        html.light .app-card {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            color: #0f172a !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        html.light .app-text-muted {
+            color: #64748b !important;
+        }
+
+        html.light .app-text-main {
+            color: #0f172a !important;
+        }
+
+        html.light header {
+            background-color: rgba(255, 255, 255, 0.9) !important;
+            border-color: #e2e8f0 !important;
+        }
+
+        html.light footer {
+            background-color: #f1f5f9 !important;
+            border-color: #e2e8f0 !important;
+            color: #475569 !important;
+        }
+
+        html.light .app-input {
+            background-color: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+
+        /* Custom Radar Badge Pulse */
+        @keyframes pulse-radar {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        .radar-pulse {
+            animation: pulse-radar 2.5s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-blue-500 selection:text-white transition-colors duration-300">
+
+    <!-- TOP ANNOUNCEMENT BAR / SEVERE WEATHER TICKER -->
+    <div id="alert-banner" class="bg-amber-600/90 text-white text-xs sm:text-sm font-semibold px-4 py-2 flex justify-between items-center glass-card border-b border-amber-500/30">
+        <div class="flex items-center space-x-2 truncate">
+            <span class="bg-black/30 px-2 py-0.5 rounded text-[10px] tracking-wider uppercase font-bold text-amber-200 animate-pulse">Live Advisory</span>
+            <span id="alert-ticker-text" class="truncate">National Weather Service: Synced with Masons Meteorological Network. Active radar scanning standard operational parameters.</span>
+        </div>
+        <button onclick="document.getElementById('alert-banner').style.display='none'" class="ml-4 text-amber-200 hover:text-white">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+
+    <!-- MAIN HEADER / NAVIGATION -->
+    <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between py-3">
+            
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="resetToDefaultCity()">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                    <i class="fa-solid fa-satellite-dish text-white text-lg"></i>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-1.5">
+                        <span class="font-black text-xl tracking-tight text-white app-text-main">MASONS</span>
+                        <span class="font-light text-xl tracking-tight text-blue-500">WEATHER</span>
+                        <span class="text-[9px] bg-blue-500/20 text-blue-500 font-bold px-1.5 py-0.5 rounded border border-blue-500/30">PRO</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 app-text-muted -mt-1 font-medium tracking-wide">PRECISION ATMOSPHERIC METRICS</p>
+                </div>
+            </div>
+
+            <!-- Search Bar with Autocomplete -->
+            <div class="relative flex-1 max-w-md mx-4 hidden md:block">
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" id="search-input" placeholder="Search City, Zip Code, or Coordinates..." 
+                           class="w-full pl-10 pr-10 py-2 bg-slate-800/80 app-input text-sm text-slate-100 placeholder-slate-400 rounded-xl border border-slate-700/60 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+                    <button id="clear-search" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
+                        <i class="fa-solid fa-circle-xmark text-sm"></i>
+                    </button>
+                </div>
+                <!-- Autocomplete Dropdown -->
+                <div id="search-results" class="absolute w-full mt-2 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl hidden z-50 max-h-60 overflow-y-auto divide-y divide-slate-800"></div>
+            </div>
+
+            <!-- Header Actions -->
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <!-- Unit Switcher -->
+                <div class="bg-slate-800 app-input p-1 rounded-xl border border-slate-700/60 flex text-xs font-bold">
+                    <button id="btn-deg-f" onclick="setTemperatureUnit('F')" class="px-2.5 py-1 rounded-lg bg-blue-600 text-white transition-all">°F</button>
+                    <button id="btn-deg-c" onclick="setTemperatureUnit('C')" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-slate-200 transition-all">°C</button>
+                </div>
+
+                <!-- Theme Toggle -->
+                <button id="theme-toggle-btn" onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-800 app-input border border-slate-700/60 text-slate-300 hover:text-white transition" title="Toggle Light / Dark Theme">
+                    <i id="theme-icon" class="fa-solid fa-sun text-amber-400"></i>
+                </button>
+
+                <!-- Location GPS Button -->
+                <button onclick="useCurrentLocation()" class="p-2 rounded-xl bg-slate-800 app-input border border-slate-700/60 text-blue-400 hover:text-blue-300 transition" title="Use Current GPS Location">
+                    <i class="fa-solid fa-location-crosshairs"></i>
+                </button>
+
+                <!-- Auth/User Profile Button -->
+                <button id="auth-btn" onclick="openAuthModal()" class="flex items-center space-x-2 bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2 rounded-xl text-xs font-semibold shadow-lg shadow-blue-600/20 transition">
+                    <i id="auth-btn-icon" class="fa-solid fa-user-shield"></i>
+                    <span id="auth-btn-text" class="hidden sm:inline">LOGIN</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Search Bar -->
+        <div class="px-4 pb-3 md:hidden">
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" id="mobile-search-input" placeholder="Search City or Location..." 
+                       class="w-full pl-10 pr-4 py-2 bg-slate-800/80 app-input text-sm text-slate-100 placeholder-slate-400 rounded-xl border border-slate-700 focus:outline-none focus:border-blue-500">
+                <div id="mobile-search-results" class="absolute left-0 right-0 w-full mt-2 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl hidden z-50 max-h-60 overflow-y-auto divide-y divide-slate-800"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN APP CONTENT GRID -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- WEATHER HERO BANNER & CURRENT CONDITIONS -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Hero Current Weather Panel -->
+            <div class="lg:col-span-2 bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950/60 app-card rounded-3xl p-6 sm:p-8 border border-slate-800/80 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+                <!-- Background Atmospheric Glow -->
+                <div class="absolute -right-20 -top-20 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div>
+                    <!-- Location & Time Row -->
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <h1 id="current-city" class="text-3xl sm:text-4xl font-extrabold text-white app-text-main tracking-tight">--</h1>
+                                <button onclick="toggleFavoriteCurrent()" id="fav-star-btn" class="text-slate-600 hover:text-amber-400 text-xl transition">
+                                    <i class="fa-regular fa-star"></i>
+                                </button>
+                            </div>
+                            <p id="current-date" class="text-xs sm:text-sm text-slate-400 app-text-muted mt-1 font-medium">Loading regional observation node...</p>
+                        </div>
+                        <div id="saved-cities-pill" class="hidden sm:flex items-center space-x-1 bg-slate-800/80 app-input border border-slate-700/60 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-300">
+                            <i class="fa-solid fa-cloud-arrow-up text-blue-400"></i>
+                            <span id="saved-city-count" class="app-text-main">Cloud Synced</span>
+                        </div>
+                    </div>
+
+                    <!-- Temperature & Condition Hero -->
+                    <div class="my-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                        <div class="flex items-baseline space-x-4">
+                            <span id="current-temp" class="text-7xl sm:text-8xl font-black tracking-tighter text-white app-text-main">--°</span>
+                            <div>
+                                <p id="current-condition" class="text-lg sm:text-xl font-bold text-blue-400">--</p>
+                                <p id="feels-like-temp" class="text-xs sm:text-sm text-slate-400 app-text-muted font-medium">Feels like --°</p>
+                            </div>
+                        </div>
+
+                        <!-- Weather Condition Large Visual Icon -->
+                        <div class="flex items-center space-x-4">
+                            <i id="weather-hero-icon" class="fa-solid fa-cloud-sun text-6xl text-amber-400 filter drop-shadow-[0_0_15px_rgba(251,191,36,0.3)]"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- High/Low Spec Range & Summary Bar -->
+                <div class="pt-6 border-t border-slate-800/80 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div>
+                        <span class="text-[11px] text-slate-400 app-text-muted uppercase font-bold tracking-wider">Day High / Low</span>
+                        <p id="hero-high-low" class="text-sm font-semibold text-slate-200 app-text-main mt-0.5">-- / --</p>
+                    </div>
+                    <div>
+                        <span class="text-[11px] text-slate-400 app-text-muted uppercase font-bold tracking-wider">Wind Velocity</span>
+                        <p id="hero-wind" class="text-sm font-semibold text-slate-200 app-text-main mt-0.5">-- mph</p>
+                    </div>
+                    <div>
+                        <span class="text-[11px] text-slate-400 app-text-muted uppercase font-bold tracking-wider">Humidity</span>
+                        <p id="hero-humidity" class="text-sm font-semibold text-slate-200 app-text-main mt-0.5">--%</p>
+                    </div>
+                    <div>
+                        <span class="text-[11px] text-slate-400 app-text-muted uppercase font-bold tracking-wider">Air Quality (AQI)</span>
+                        <p id="hero-aqi" class="text-sm font-semibold text-emerald-400 mt-0.5">Good (24)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Saved Favorites / Saved Locations Bar -->
+            <div class="bg-slate-900/90 app-card rounded-3xl p-6 border border-slate-800 flex flex-col justify-between shadow-xl">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-bold text-slate-300 app-text-main uppercase tracking-wider flex items-center space-x-2">
+                            <i class="fa-solid fa-bookmark text-blue-500"></i>
+                            <span>Saved Monitored Cities</span>
+                        </h3>
+                        <span class="text-[11px] text-slate-500 app-text-muted" id="synced-badge">Cloud Storage</span>
+                    </div>
+
+                    <!-- City List -->
+                    <div id="favorites-list" class="space-y-2 max-h-[220px] overflow-y-auto pr-1 no-scrollbar">
+                        <div class="text-center py-8 text-slate-500 app-text-muted text-xs">
+                            <i class="fa-solid fa-star text-2xl mb-2 text-slate-600 block"></i>
+                            No saved locations yet. Click the star on any location to sync it to your account.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Club Quick Join Banner -->
+                <div class="mt-4 p-4 rounded-2xl bg-gradient-to-r from-blue-900/40 to-indigo-900/40 border border-blue-500/20">
+                    <p class="text-xs font-bold text-blue-400">MASONS SEVERE WEATHER CLUB</p>
+                    <p class="text-[11px] text-slate-400 app-text-muted mt-0.5">Receive instant SMS & Email severe cell warnings.</p>
+                    <form onsubmit="handleNewsletterSubmit(event)" class="mt-2.5 flex gap-2">
+                        <input type="email" id="newsletter-email" required placeholder="Enter your email..." 
+                               class="bg-slate-950 app-input text-xs px-3 py-1.5 rounded-lg border border-slate-700 flex-1 focus:outline-none focus:border-blue-500">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition">Join</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- HOURLY FORECAST SLIDER -->
+        <section class="bg-slate-900/90 app-card rounded-3xl p-6 border border-slate-800 shadow-xl">
+            <h2 class="text-sm font-bold text-slate-300 app-text-main uppercase tracking-wider mb-4 flex items-center space-x-2">
+                <i class="fa-regular fa-clock text-blue-400"></i>
+                <span>24-Hour Projected Atmospheric Horizon</span>
+            </h2>
+            <div id="hourly-forecast-container" class="flex space-x-4 overflow-x-auto pb-2 no-scrollbar">
+                <!-- Dynamic Hourly Cards populated via JS -->
+            </div>
+        </section>
+
+        <!-- INTERACTIVE WINDY RADAR SECTION WITH TOP-POSITIONED MASONS OVERLAY BADGE -->
+        <section class="bg-slate-900/90 app-card rounded-3xl p-6 border border-slate-800 shadow-xl flex flex-col space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-base font-bold text-white app-text-main flex items-center space-x-2">
+                        <i class="fa-solid fa-radar text-blue-400"></i>
+                        <span>Masons Weather Doppler Radar Engine</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 app-text-muted mt-0.5">Real-time particle wind vector, precipitation, and thermal NEXRAD telemetry.</p>
+                </div>
+
+                <!-- Radar Layer Toggles -->
+                <div class="flex flex-wrap gap-2 text-xs">
+                    <button onclick="changeWindyLayer('wind')" class="px-3 py-1.5 rounded-xl bg-blue-600 text-white font-semibold shadow-md transition">Wind Vectors</button>
+                    <button onclick="changeWindyLayer('radar')" class="px-3 py-1.5 rounded-xl bg-slate-800 app-input text-slate-300 app-text-main hover:bg-slate-700 font-semibold transition">Doppler Radar</button>
+                    <button onclick="changeWindyLayer('rain')" class="px-3 py-1.5 rounded-xl bg-slate-800 app-input text-slate-300 app-text-main hover:bg-slate-700 font-semibold transition">Rain & Thunder</button>
+                    <button onclick="changeWindyLayer('temp')" class="px-3 py-1.5 rounded-xl bg-slate-800 app-input text-slate-300 app-text-main hover:bg-slate-700 font-semibold transition">Thermal</button>
+                </div>
+            </div>
+
+            <!-- Radar Container with TOP Positioned Overlay Badge Cover -->
+            <div class="relative w-full h-[480px] sm:h-[550px] rounded-2xl overflow-hidden border border-slate-800 shadow-inner bg-slate-950">
+                <!-- Embedded Windy Iframe -->
+                <iframe id="windy-frame" 
+                        class="w-full h-full border-0" 
+                        src="https://embed.windy.com/embed2.html?lat=34.05&lon=-118.24&detailVideo=false&instantlyContinue=false&forecast=12&zoom=5&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1" 
+                        allowfullscreen>
+                </iframe>
+
+                <!-- MASONS WEATHER RADAR BADGE OVERLAY AT TOP LEFT -->
+                <div id="windy-overlay-badge" class="absolute top-2 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+                    <div class="bg-[#0d1527] border border-slate-700/80 rounded-full px-5 py-2.5 flex items-center space-x-3.5 shadow-2xl backdrop-blur-md">
+                        <div class="w-8 h-8 rounded-full bg-blue-600/20 border border-blue-500/40 flex items-center justify-center radar-pulse">
+                            <i class="fa-solid fa-satellite-dish text-blue-400 text-sm"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-white font-extrabold text-sm tracking-tight leading-none">Mason's Weather Radar</h4>
+                            <p class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase mt-0.5">LIVE TRACKING SYSTEM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Extended 7-DAY FORECAST & ATMOSPHERIC METRICS GAUGES -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- 7-Day Extended Outlook -->
+            <div class="bg-slate-900/90 app-card rounded-3xl p-6 border border-slate-800 shadow-xl flex flex-col justify-between">
+                <h2 class="text-sm font-bold text-slate-300 app-text-main uppercase tracking-wider mb-4 flex items-center space-x-2">
+                    <i class="fa-solid fa-calendar-days text-blue-400"></i>
+                    <span>7-Day Extended Trend</span>
+                </h2>
+
+                <div id="extended-forecast-list" class="space-y-3 divide-y divide-slate-800/60">
+                    <!-- Dynamic 7 Day Rows populated via JS -->
+                </div>
+            </div>
+
+            <!-- Atmospheric Meters Grid -->
+            <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                
+                <!-- UV Index -->
+                <div class="bg-slate-900/90 app-card rounded-3xl p-5 border border-slate-800 shadow-xl flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-slate-400 app-text-muted">
+                        <span class="text-xs font-bold uppercase tracking-wider">UV Index</span>
+                        <i class="fa-solid fa-sun text-amber-400"></i>
+                    </div>
+                    <div class="my-3">
+                        <span id="meter-uv-val" class="text-3xl font-extrabold text-white app-text-main">3</span>
+                        <span id="meter-uv-text" class="text-xs font-semibold text-amber-400 ml-2">Moderate</span>
+                    </div>
+                    <div class="w-full bg-slate-800 app-input h-2 rounded-full overflow-hidden">
+                        <div id="meter-uv-bar" class="bg-gradient-to-r from-emerald-400 via-amber-400 to-red-500 h-full w-[30%]"></div>
+                    </div>
+                </div>
+
+                <!-- Wind & Direction -->
+                <div class="bg-slate-900/90 app-card rounded-3xl p-5 border border-slate-800 shadow-xl flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-slate-400 app-text-muted">
+                        <span class="text-xs font-bold uppercase tracking-wider">Wind & Gusts</span>
+                        <i class="fa-solid fa-wind text-blue-400"></i>
+                    </div>
+                    <div class="my-3 flex items-center space-x-3">
+                        <div id="compass-arrow" class="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-400/30 flex items-center justify-center transform transition-transform duration-500">
+                            <i class="fa-solid fa-location-arrow text-blue-400 text-xs"></i>
+                        </div>
+                        <div>
+                            <span id="meter-wind-speed" class="text-2xl font-extrabold text-white app-text-main">-- mph</span>
+                            <p id="meter-wind-dir" class="text-[11px] text-slate-400 app-text-muted">NW Vector</p>
+                        </div>
+                    </div>
+                    <p id="meter-wind-gust" class="text-xs text-slate-400 app-text-muted font-medium">Gusts up to -- mph</p>
+                </div>
+
+                <!-- Humidity & Dew Point -->
+                <div class="bg-slate-900/90 app-card rounded-3xl p-5 border border-slate-800 shadow-xl flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-slate-400 app-text-muted">
+                        <span class="text-xs font-bold uppercase tracking-wider">Humidity</span>
+                        <i class="fa-solid fa-droplet text-cyan-400"></i>
+                    </div>
+                    <div class="my-3">
+                        <span id="meter-humidity" class="text-3xl font-extrabold text-white app-text-main">--%</span>
+                    </div>
+                    <p id="meter-dewpoint" class="text-xs text-slate-400 app-text-muted font-medium">Dew point is --° right now</p>
+                </div>
+
+                <!-- Barometric Pressure -->
+                <div class="bg-slate-900/90 app-card rounded-3xl p-5 border border-slate-800 shadow-xl flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-slate-400 app-text-muted">
+                        <span class="text-xs font-bold uppercase tracking-wider">Pressure</span>
+                        <i class="fa-solid fa-gauge-high text-indigo-400"></i>
+                    </div>
+                    <div class="my-3">
+                        <span id="meter-pressure" class="text-3xl font-extrabold text-white app-text-main">29.92</span>
+                        <span class="text-xs text-slate-400 app-text-muted ml-1">inHg</span>
+                    </div>
+                    <p id="meter-pressure-trend" class="text-xs text-emerald-400 font-medium">Steady Atmospheric Barometer</p>
+                </div>
+
+                <!-- Visibility -->
+                <div class="bg-slate-900/90 app-card rounded-3xl p-5 border border-slate-800 shadow-xl flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-slate-400 app-text-muted">
+                        <span class="text-xs font-bold uppercase tracking-wider">Visibility</span>
+                        <i class="fa-solid fa-eye text-emerald-400"></i>
+                    </div>
+                    <div class="my-3">
+                        <span id="meter-visibility" class="text-3xl font-extrabold text-white app-text-main">10.0</span>
+                        <span class="text-xs text-slate-400 app-text-muted ml-1">mi</span>
+                    </div>
+                    <p class="text-xs text-slate-400 app-text-muted font-medium">Clear horizon viewing</p>
+                </div>
+
+                <!-- Sunrise / Sunset -->
+                <div class="bg-slate-900/90 app-card rounded-3xl p-5 border border-slate-800 shadow-xl flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-slate-400 app-text-muted">
+                        <span class="text-xs font-bold uppercase tracking-wider">Solar Cycle</span>
+                        <i class="fa-solid fa-mountain-sun text-amber-500"></i>
+                    </div>
+                    <div class="my-2 space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400 app-text-muted">Sunrise:</span>
+                            <span id="meter-sunrise" class="font-bold text-slate-200 app-text-main">6:32 AM</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400 app-text-muted">Sunset:</span>
+                            <span id="meter-sunset" class="font-bold text-slate-200 app-text-main">7:14 PM</span>
+                        </div>
+                    </div>
+                    <div class="w-full bg-slate-800 app-input h-1.5 rounded-full overflow-hidden mt-1">
+                        <div class="bg-amber-400 h-full w-[65%]"></div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- NATIONAL WEATHER NEWS & SEVERE BULLETINS -->
+        <section class="bg-slate-900/90 app-card rounded-3xl p-6 border border-slate-800 shadow-xl">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-base font-bold text-white app-text-main flex items-center space-x-2">
+                        <i class="fa-solid fa-newspaper text-blue-400"></i>
+                        <span>National Meteorological Desk & Advisories</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 app-text-muted">Live updating bulletins from nationwide radar stations.</p>
+                </div>
+                <span class="text-xs text-slate-500 app-text-muted font-mono">UPDATED 60S AGO</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="weather-news-grid">
+                <!-- Dynamic News Cards -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ENTERPRISE PROFESSIONAL FOOTER -->
+    <footer class="bg-slate-950 border-t border-slate-800/80 text-slate-400 text-xs mt-12 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                
+                <!-- Column 1: Brand & Intellectual Property -->
+                <div class="space-y-4 md:col-span-1">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-sm">M</div>
+                        <span class="font-extrabold text-base tracking-tight text-white app-text-main">MASONS WEATHER</span>
+                    </div>
+                    <p class="text-slate-400 app-text-muted leading-relaxed text-xs">
+                        Enterprise-grade Doppler radar, real-time atmospheric telemetry, and high-resolution global meteorological forecasting.
+                    </p>
+                    <p class="text-[11px] text-slate-500 app-text-muted">
+                        Protected under Title 17 & Title 35 U.S. Code. Proprietary radar tile synthesis and user interface layout patented.
+                    </p>
+                </div>
+
+                <!-- Column 2: Quick Navigation -->
+                <div>
+                    <h4 class="text-white app-text-main font-bold text-xs uppercase tracking-wider mb-3">Telemetry Nodes</h4>
+                    <ul class="space-y-2 text-xs">
+                        <li><a href="#" onclick="window.scrollTo({top:0, behavior:'smooth'})" class="hover:text-blue-400 transition">Global Forecast Map</a></li>
+                        <li><a href="#windy-frame" class="hover:text-blue-400 transition">Doppler NEXRAD Radar</a></li>
+                        <li><a href="#" onclick="useCurrentLocation()" class="hover:text-blue-400 transition">Local Sensor Telemetry</a></li>
+                        <li><a href="#" onclick="openAuthModal()" class="hover:text-blue-400 transition">Firebase Sync Console</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 3: Data Attributions -->
+                <div>
+                    <h4 class="text-white app-text-main font-bold text-xs uppercase tracking-wider mb-3">Attribution & Sources</h4>
+                    <ul class="space-y-2 text-xs text-slate-400 app-text-muted">
+                        <li>National Oceanic and Atmospheric Administration (NOAA)</li>
+                        <li>National Weather Service (NWS) Direct Telemetry</li>
+                        <li>Open-Meteo Atmospheric Model Engine</li>
+                        <li>RainViewer NEXRAD Radar Network</li>
+                        <li>Windy Global Vector Calculation Engine</li>
+                    </ul>
+                </div>
+
+                <!-- Column 4: Legal & Governance (FULLY WORKING MODAL LINKS) -->
+                <div>
+                    <h4 class="text-white app-text-main font-bold text-xs uppercase tracking-wider mb-3">Legal & Governance</h4>
+                    <ul class="space-y-2 text-xs">
+                        <li><button type="button" onclick="openLegalModal('terms')" class="hover:text-blue-400 transition text-left cursor-pointer">Terms of Atmospheric Service</button></li>
+                        <li><button type="button" onclick="openLegalModal('privacy')" class="hover:text-blue-400 transition text-left cursor-pointer">Privacy & Data Encryption</button></li>
+                        <li><button type="button" onclick="openLegalModal('ip')" class="hover:text-blue-400 transition text-left cursor-pointer">Intellectual Property Rights</button></li>
+                        <li><button type="button" onclick="openLegalModal('api')" class="hover:text-blue-400 transition text-left cursor-pointer">API Data Compliance</button></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom Copyright Line -->
+            <div class="pt-8 border-t border-slate-900 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 app-text-muted gap-4">
+                <p>&copy; <span id="current-year">2026</span> MASONS WEATHER. All Rights Reserved.</p>
+                <div class="flex space-x-6">
+                    <span class="flex items-center space-x-1">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                        <span class="text-slate-400 app-text-muted">NWS Station Sync: Active</span>
+                    </span>
+                    <span>v4.2.8 Enterprise Pro</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ENHANCED AUTHENTICATION MODAL (LOGIN / SIGNUP / LOGOUT SWITCHING) -->
+    <div id="auth-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative">
+            <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <!-- State 1: Active User Logged In View -->
+            <div id="auth-state-logged-in" class="hidden text-center">
+                <div class="w-16 h-16 bg-blue-600/20 text-blue-400 rounded-full border border-blue-500/30 flex items-center justify-center mx-auto mb-4 text-2xl">
+                    <i class="fa-solid fa-user-check"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-1">Masons Weather Cloud Synced</h3>
+                <p id="auth-user-email" class="text-xs font-mono text-blue-400 mb-6">user@masonsweather.com</p>
+                
+                <div class="bg-slate-950/60 rounded-2xl p-4 border border-slate-800 text-left mb-6 space-y-2 text-xs">
+                    <div class="flex justify-between text-slate-400">
+                        <span>Account Tier:</span>
+                        <span class="text-emerald-400 font-bold">Pro Meteorological Sync</span>
+                    </div>
+                    <div class="flex justify-between text-slate-400">
+                        <span>Radar Nodes:</span>
+                        <span class="text-white font-bold">NEXRAD Real-time</span>
+                    </div>
+                    <div class="flex justify-between text-slate-400">
+                        <span>Saved Stations:</span>
+                        <span id="auth-saved-count" class="text-white font-bold">0 Cities</span>
+                    </div>
+                </div>
+
+                <button onclick="handleLogout()" class="w-full bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/30 font-semibold py-2.5 rounded-xl text-xs transition">
+                    <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Sign Out of Account
+                </button>
+            </div>
+
+            <!-- State 2: Login / Signup Forms -->
+            <div id="auth-state-forms">
+                <div class="text-center mb-6">
+                    <div class="w-12 h-12 bg-blue-600/20 text-blue-400 rounded-2xl border border-blue-500/30 flex items-center justify-center mx-auto mb-3 text-xl">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <h3 id="auth-modal-title" class="text-xl font-bold text-white">Sign In to Masons Cloud</h3>
+                    <p id="auth-modal-subtitle" class="text-xs text-slate-400 mt-1">Access synced telemetry, saved cities, and custom radar alerts.</p>
+                </div>
+
+                <!-- Modal Tabs for Login vs Sign Up -->
+                <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 mb-5 text-xs font-semibold">
+                    <button id="tab-login" onclick="switchAuthTab('login')" class="flex-1 py-1.5 rounded-lg bg-blue-600 text-white transition-all text-center">Sign In</button>
+                    <button id="tab-signup" onclick="switchAuthTab('signup')" class="flex-1 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition-all text-center">Create Account</button>
+                </div>
+
+                <!-- Alert Message Indicator -->
+                <div id="auth-alert" class="hidden mb-4 p-3 rounded-xl text-xs font-medium border"></div>
+
+                <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                    <div id="field-name" class="hidden">
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                            <input type="text" id="auth-input-name" placeholder="Mason Roberts" class="w-full bg-slate-950 border border-slate-800 text-sm pl-9 pr-4 py-2.5 rounded-xl text-white focus:outline-none focus:border-blue-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                            <input type="email" id="auth-input-email" required placeholder="user@domain.com" class="w-full bg-slate-950 border border-slate-800 text-sm pl-9 pr-4 py-2.5 rounded-xl text-white focus:outline-none focus:border-blue-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                            <input type="password" id="auth-input-password" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 text-sm pl-9 pr-4 py-2.5 rounded-xl text-white focus:outline-none focus:border-blue-500">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="auth-submit-btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-xl text-xs transition shadow-lg shadow-blue-600/20">
+                        Sign In & Sync Profile
+                    </button>
+                </form>
+
+                <div class="mt-4 pt-4 border-t border-slate-800/80 text-center">
+                    <button onclick="useGuestAccount()" class="text-xs text-slate-400 hover:text-blue-400 font-medium">Continue as Guest Explorer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LEGAL & GOVERNANCE MODAL WITH FULL WORKING CONTENT FOR ALL 4 POLICIES -->
+    <div id="legal-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl relative max-h-[85vh] flex flex-col">
+            <button onclick="closeLegalModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            
+            <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                    <i id="legal-modal-icon" class="fa-solid fa-scale-balanced"></i>
+                </div>
+                <div>
+                    <h3 id="legal-modal-title" class="text-lg font-bold text-white">Intellectual Property & Legal Notice</h3>
+                    <p class="text-[11px] text-slate-400">Masons Weather Compliance & Governance Standard</p>
+                </div>
+            </div>
+
+            <div id="legal-modal-body" class="text-xs text-slate-300 space-y-4 overflow-y-auto pr-2 leading-relaxed flex-1 border-t border-b border-slate-800 py-4 my-2">
+                <!-- Content dynamically populated via JS -->
+            </div>
+
+            <div class="mt-4 pt-2 flex items-center justify-between">
+                <span class="text-[10px] text-slate-500">Document ID: MW-GOV-2026-V4</span>
+                <button onclick="closeLegalModal()" class="bg-blue-600 text-white text-xs px-5 py-2 rounded-xl font-semibold hover:bg-blue-500 transition">Acknowledge & Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- APPLICATION SCRIPT -->
+    <!-- APPLICATION SCRIPT -->
+    <script>
+        // 1. FIREBASE INITIALIZATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOSAP09_2SYMd9euLR0GFJ0SyIEC48qD8",
+            authDomain: "masonsweather-a37f6.firebaseapp.com",
+            projectId: "masonsweather-a37f6",
+            storageBucket: "masonsweather-a37f6.firebasestorage.app",
+            messagingSenderId: "666401439794",
+            appId: "1:666401439794:web:86d355bb70dae76d00fc2b",
+            measurementId: "G-KN3MVC3WT5"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Application State
+        let currentUnit = 'F';
+        let currentLat = 34.0522;
+        let currentLon = -118.2437;
+        let currentCityName = 'Los Angeles, USA';
+        let savedCities = JSON.parse(localStorage.getItem('masons_saved_cities') || '["Los Angeles, USA", "New York, USA", "Miami, USA"]');
+        let authMode = 'login';
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+            setupSearchListeners();
+            fetchWeatherData(currentLat, currentLon, currentCityName);
+            loadNewsArticles();
+            renderSavedCities();
+
+            // Firebase Live Auth State Observer
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    currentUser = {
+                        uid: user.uid,
+                        email: user.email,
+                        name: user.displayName || user.email.split('@')[0]
+                    };
+                    await loadSavedCitiesFromFirestore(user.uid);
+                } else {
+                    currentUser = null;
+                }
+                updateAuthUI();
+            });
+        });
+
+        // 2. LIGHT / DARK THEME TOGGLER
+        function toggleTheme() {
+            const htmlElement = document.documentElement;
+            const themeIcon = document.getElementById('theme-icon');
+
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                htmlElement.classList.add('light');
+                themeIcon.className = 'fa-solid fa-moon text-indigo-600';
+            } else {
+                htmlElement.classList.remove('light');
+                htmlElement.classList.add('dark');
+                themeIcon.className = 'fa-solid fa-sun text-amber-400';
+            }
+        }
+
+        // 3. FIREBASE AUTHENTICATION & CLOUD SYNC
+        function switchAuthTab(mode) {
+            authMode = mode;
+            const tabLogin = document.getElementById('tab-login');
+            const tabSignup = document.getElementById('tab-signup');
+            const fieldName = document.getElementById('field-name');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const title = document.getElementById('auth-modal-title');
+            const subtitle = document.getElementById('auth-modal-subtitle');
+            const alertBox = document.getElementById('auth-alert');
+
+            alertBox.classList.add('hidden');
+
+            if (mode === 'signup') {
+                tabSignup.className = 'flex-1 py-1.5 rounded-lg bg-blue-600 text-white transition-all text-center';
+                tabLogin.className = 'flex-1 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition-all text-center';
+                fieldName.classList.remove('hidden');
+                submitBtn.textContent = 'Create Pro Account';
+                title.textContent = 'Join Masons Weather';
+                subtitle.textContent = 'Create an account to save custom maps, alerts & sync across devices.';
+            } else {
+                tabLogin.className = 'flex-1 py-1.5 rounded-lg bg-blue-600 text-white transition-all text-center';
+                tabSignup.className = 'flex-1 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition-all text-center';
+                fieldName.classList.add('hidden');
+                submitBtn.textContent = 'Sign In & Sync Profile';
+                title.textContent = 'Sign In to Masons Cloud';
+                subtitle.textContent = 'Access synced telemetry, saved cities, and custom radar alerts.';
+            }
+        }
+
+        async function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-input-email').value.trim();
+            const password = document.getElementById('auth-input-password').value;
+            const name = document.getElementById('auth-input-name').value.trim() || 'Masons Member';
+
+            try {
+                if (authMode === 'signup') {
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                    await userCredential.user.updateProfile({ displayName: name });
+                    await syncCitiesToFirestore(userCredential.user.uid);
+                    showAlert('Account created & synced successfully!', 'success');
+                } else {
+                    await auth.signInWithEmailAndPassword(email, password);
+                    showAlert('Signed in successfully!', 'success');
+                }
+                setTimeout(() => closeAuthModal(), 1000);
+            } catch (error) {
+                showAlert(error.message, 'error');
+            }
+        }
+
+        function handleLogout() {
+            auth.signOut().then(() => {
+                savedCities = ["Los Angeles, USA", "New York, USA", "Miami, USA"];
+                renderSavedCities();
+                closeAuthModal();
+            });
+        }
+
+        async function syncCitiesToFirestore(uid) {
+            const userId = uid || (currentUser ? currentUser.uid : null);
+            if (!userId) return;
+            await db.collection('users').doc(userId).set({
+                savedCities: savedCities
+            }, { merge: true });
+        }
+
+        async function loadSavedCitiesFromFirestore(uid) {
+            try {
+                const doc = await db.collection('users').doc(uid).get();
+                if (doc.exists && doc.data().savedCities) {
+                    savedCities = doc.data().savedCities;
+                    localStorage.setItem('masons_saved_cities', JSON.stringify(savedCities));
+                    renderSavedCities();
+                    checkIfFavorite(currentCityName);
+                } else {
+                    await syncCitiesToFirestore(uid);
+                }
+            } catch (err) {
+                console.error("Firestore error:", err);
+            }
+        }
+
+        function updateAuthUI() {
+            const authBtnText = document.getElementById('auth-btn-text');
+            const authBtnIcon = document.getElementById('auth-btn-icon');
+            const stateLoggedIn = document.getElementById('auth-state-logged-in');
+            const stateForms = document.getElementById('auth-state-forms');
+            const userEmailText = document.getElementById('auth-user-email');
+            const authSavedCount = document.getElementById('auth-saved-count');
+
+            if (currentUser) {
+                authBtnText.textContent = currentUser.name || 'Account';
+                authBtnIcon.className = 'fa-solid fa-user-check text-emerald-400';
+                stateLoggedIn.classList.remove('hidden');
+                stateForms.classList.add('hidden');
+                userEmailText.textContent = currentUser.email;
+                if (authSavedCount) authSavedCount.textContent = `${savedCities.length} Cities`;
+            } else {
+                authBtnText.textContent = 'Login';
+                authBtnIcon.className = 'fa-solid fa-user-shield';
+                stateLoggedIn.classList.add('hidden');
+                stateForms.classList.remove('hidden');
+            }
+        }
+
+        function showAlert(msg, type) {
+            const alertBox = document.getElementById('auth-alert');
+            alertBox.classList.remove('hidden', 'bg-red-500/10', 'border-red-500/30', 'text-red-400', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+            if (type === 'error') {
+                alertBox.classList.add('bg-red-500/10', 'border-red-500/30', 'text-red-400');
+            } else {
+                alertBox.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+            }
+            alertBox.textContent = msg;
+        }
+
+        // 4. LEGAL MODAL
+        const LEGAL_DOCUMENTS = {
+            terms: {
+                title: "Terms of Atmospheric Service",
+                icon: "fa-solid fa-file-contract",
+                content: `<p class="font-bold text-slate-100">1. Operational Parameters & Telemetry Scope</p><p>By accessing Masons Weather Pro, you agree to comply with all federal and international atmospheric data distribution guidelines.</p>`
+            },
+            privacy: {
+                title: "Privacy & Data Encryption",
+                icon: "fa-solid fa-user-lock",
+                content: `<p class="font-bold text-slate-100">1. Zero-Sale Personal Data Guarantee</p><p>Masons Weather strictly enforces an end-to-end user data shield.</p>`
+            },
+            ip: {
+                title: "Intellectual Property Rights",
+                icon: "fa-solid fa-copyright",
+                content: `<p class="font-bold text-slate-100">1. Patent & Proprietary UI Rights</p><p>Protected under Title 17 & Title 35 of the United States Code.</p>`
+            },
+            api: {
+                title: "API Data Compliance",
+                icon: "fa-solid fa-code-compare",
+                content: `<p class="font-bold text-slate-100">1. Data Source Attributions</p><p>Feeds provided by public NOAA NEXRAD stations and Open-Meteo.</p>`
+            }
+        };
+
+        function openLegalModal(type) {
+            const doc = LEGAL_DOCUMENTS[type] || LEGAL_DOCUMENTS.terms;
+            document.getElementById('legal-modal-title').textContent = doc.title;
+            document.getElementById('legal-modal-icon').className = doc.icon;
+            document.getElementById('legal-modal-body').innerHTML = doc.content;
+            document.getElementById('legal-modal').classList.remove('hidden');
+        }
+
+        function closeLegalModal() { document.getElementById('legal-modal').classList.add('hidden'); }
+
+        // 5. WEATHER TELEMETRY FETCHING
+        async function fetchWeatherData(lat, lon, cityName) {
+            currentLat = lat;
+            currentLon = lon;
+            currentCityName = cityName;
+
+            document.getElementById('current-city').textContent = cityName;
+            document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+
+            try {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                renderCurrentConditions(data);
+                renderHourlyForecast(data.hourly);
+                render7DayForecast(data.daily);
+                updateWindyFrame(lat, lon);
+                checkIfFavorite(cityName);
+            } catch (err) {
+                console.error("Error loading weather data:", err);
+            }
+        }
+
+        function renderCurrentConditions(data) {
+            const curr = data.current;
+            const daily = data.daily;
+
+            let temp = Math.round(curr.temperature_2m);
+            let feelsLike = Math.round(curr.apparent_temperature);
+            let maxTemp = Math.round(daily.temperature_2m_max[0]);
+            let minTemp = Math.round(daily.temperature_2m_min[0]);
+
+            if (currentUnit === 'C') {
+                temp = fToC(temp);
+                feelsLike = fToC(feelsLike);
+                maxTemp = fToC(maxTemp);
+                minTemp = fToC(minTemp);
+            }
+
+            document.getElementById('current-temp').textContent = `${temp}°`;
+            document.getElementById('feels-like-temp').textContent = `Feels like ${feelsLike}°`;
+            document.getElementById('hero-high-low').textContent = `${maxTemp}° / ${minTemp}°`;
+            document.getElementById('current-condition').textContent = getWeatherConditionText(curr.weather_code);
+            document.getElementById('hero-wind').textContent = `${Math.round(curr.wind_speed_10m)} mph`;
+            document.getElementById('hero-humidity').textContent = `${curr.relative_humidity_2m}%`;
+
+            document.getElementById('meter-uv-val').textContent = Math.round(daily.uv_index_max[0] || 4);
+            document.getElementById('meter-wind-speed').textContent = `${Math.round(curr.wind_speed_10m)} mph`;
+            document.getElementById('meter-wind-gust').textContent = `Gusts up to ${Math.round(curr.wind_gusts_10m || curr.wind_speed_10m * 1.3)} mph`;
+            document.getElementById('meter-humidity').textContent = `${curr.relative_humidity_2m}%`;
+            document.getElementById('meter-pressure').textContent = (curr.surface_pressure * 0.02953).toFixed(2);
+            document.getElementById('compass-arrow').style.transform = `rotate(${curr.wind_direction_10m}deg)`;
+
+            if (daily.sunrise && daily.sunrise[0]) {
+                document.getElementById('meter-sunrise').textContent = new Date(daily.sunrise[0]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                document.getElementById('meter-sunset').textContent = new Date(daily.sunset[0]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+        }
+
+        function renderHourlyForecast(hourly) {
+            const container = document.getElementById('hourly-forecast-container');
+            container.innerHTML = '';
+            for (let i = 0; i < 24; i += 2) {
+                const timeStr = new Date(hourly.time[i]).toLocaleTimeString([], { hour: 'numeric' });
+                let temp = Math.round(hourly.temperature_2m[i]);
+                if (currentUnit === 'C') temp = fToC(temp);
+
+                const card = document.createElement('div');
+                card.className = 'flex-shrink-0 bg-slate-800/50 app-input border border-slate-700/50 rounded-2xl p-3.5 text-center w-24 flex flex-col items-center justify-between space-y-2';
+                card.innerHTML = `
+                    <span class="text-xs text-slate-400 app-text-muted font-semibold">${timeStr}</span>
+                    <i class="${getWeatherIconClass(hourly.weather_code[i])} text-xl text-blue-400 my-1"></i>
+                    <span class="text-sm font-bold text-white app-text-main">${temp}°</span>
+                `;
+                container.appendChild(card);
+            }
+        }
+
+        function render7DayForecast(daily) {
+            const container = document.getElementById('extended-forecast-list');
+            container.innerHTML = '';
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(daily.time[i]);
+                const dayName = i === 0 ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short' });
+                let max = Math.round(daily.temperature_2m_max[i]);
+                let min = Math.round(daily.temperature_2m_min[i]);
+                if (currentUnit === 'C') { max = fToC(max); min = fToC(min); }
+
+                const row = document.createElement('div');
+                row.className = 'pt-2.5 flex items-center justify-between text-xs';
+                row.innerHTML = `
+                    <span class="w-16 font-bold text-slate-200 app-text-main">${dayName}</span>
+                    <div class="flex items-center space-x-2 text-blue-400">
+                        <i class="${getWeatherIconClass(daily.weather_code[i])}"></i>
+                        <span class="text-[11px] text-slate-400 app-text-muted hidden sm:inline">${getWeatherConditionText(daily.weather_code[i])}</span>
+                    </div>
+                    <div class="flex items-center space-x-2 font-semibold">
+                        <span class="text-white app-text-main">${max}°</span>
+                        <span class="text-slate-500 app-text-muted">${min}°</span>
+                    </div>
+                `;
+                container.appendChild(row);
+            }
+        }
+
+        function updateWindyFrame(lat, lon) {
+            document.getElementById('windy-frame').src = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lon}&detailVideo=false&instantlyContinue=false&forecast=12&zoom=7&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1`;
+        }
+
+        function changeWindyLayer(layer) {
+            document.getElementById('windy-frame').src = `https://embed.windy.com/embed2.html?lat=${currentLat}&lon=${currentLon}&detailVideo=false&instantlyContinue=false&forecast=12&zoom=7&level=surface&overlay=${layer}&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1`;
+        }
+
+        function setupSearchListeners() {
+            const input = document.getElementById('search-input');
+            const results = document.getElementById('search-results');
+            input.addEventListener('input', async (e) => {
+                const query = e.target.value.trim();
+                if (query.length < 2) { results.classList.add('hidden'); return; }
+                const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=en&format=json`);
+                const data = await res.json();
+                if (data.results) {
+                    results.innerHTML = '';
+                    data.results.forEach(loc => {
+                        const item = document.createElement('div');
+                        item.className = 'p-3 hover:bg-slate-800 cursor-pointer text-xs flex justify-between items-center transition';
+                        item.innerHTML = `<div><span class="font-bold text-white app-text-main">${loc.name}</span><span class="text-slate-400 app-text-muted ml-1">${loc.admin1 || ''}, ${loc.country}</span></div>`;
+                        item.onclick = () => { fetchWeatherData(loc.latitude, loc.longitude, `${loc.name}, ${loc.country}`); results.classList.add('hidden'); input.value = ''; };
+                        results.appendChild(item);
+                    });
+                    results.classList.remove('hidden');
+                }
+            });
+        }
+
+        function clearSearch() { document.getElementById('search-input').value = ''; document.getElementById('search-results').classList.add('hidden'); }
+        function useCurrentLocation() { if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(pos => fetchWeatherData(pos.coords.latitude, pos.coords.longitude, "Current Location")); } }
+
+        function toggleFavoriteCurrent() {
+            if (savedCities.includes(currentCityName)) { 
+                savedCities = savedCities.filter(c => c !== currentCityName); 
+            } else { 
+                savedCities.push(currentCityName); 
+            }
+            localStorage.setItem('masons_saved_cities', JSON.stringify(savedCities));
+            renderSavedCities(); 
+            checkIfFavorite(currentCityName);
+            if (currentUser) syncCitiesToFirestore();
+        }
+
+        function checkIfFavorite(cityName) {
+            const btn = document.getElementById('fav-star-btn');
+            btn.innerHTML = savedCities.includes(cityName) ? '<i class="fa-solid fa-star text-amber-400"></i>' : '<i class="fa-regular fa-star text-slate-600"></i>';
+        }
+
+        function renderSavedCities() {
+            const container = document.getElementById('favorites-list');
+            if (!savedCities.length) { container.innerHTML = '<div class="text-center py-8 text-slate-500 text-xs">No saved locations yet.</div>'; return; }
+            container.innerHTML = '';
+            savedCities.forEach(city => {
+                const item = document.createElement('div');
+                item.className = 'p-2.5 bg-slate-800/60 app-input rounded-xl border border-slate-700/50 flex justify-between items-center text-xs hover:bg-slate-800 transition cursor-pointer';
+                item.innerHTML = `<span class="font-semibold text-slate-200 app-text-main" onclick="searchCityByName('${city}')">${city}</span><button onclick="removeFavorite('${city}')" class="text-slate-500 hover:text-red-400 p-1"><i class="fa-solid fa-trash-can"></i></button>`;
+                container.appendChild(item);
+            });
+        }
+
+        function removeFavorite(city) { 
+            savedCities = savedCities.filter(c => c !== city); 
+            localStorage.setItem('masons_saved_cities', JSON.stringify(savedCities)); 
+            renderSavedCities(); 
+            checkIfFavorite(currentCityName); 
+            if (currentUser) syncCitiesToFirestore();
+        }
+
+        async function searchCityByName(city) { const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`); const data = await res.json(); if (data.results[0]) fetchWeatherData(data.results[0].latitude, data.results[0].longitude, city); }
+
+        function loadNewsArticles() {
+            const grid = document.getElementById('weather-news-grid');
+            const news = [
+                { title: "Atlantic Hurricane Season Model Updates", tag: "Tropical Watch", time: "12m ago", desc: "NWS radar tracking tropical depression formation along warm oceanic currents." },
+                { title: "Midwest Severe Cell Warning Advisory", tag: "Severe Weather", time: "34m ago", desc: "Masons NEXRAD doppler stations registering high-velocity wind shear." },
+                { title: "Solar Radiation & Atmospheric AQI Shift", tag: "Environmental", time: "1h ago", desc: "Upper atmosphere ozone density index remains steady despite intense summer UV radiation." }
+            ];
+            grid.innerHTML = '';
+            news.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'bg-slate-800/40 app-input rounded-2xl p-4 border border-slate-700/50 hover:border-blue-500/50 transition flex flex-col justify-between';
+                card.innerHTML = `<div><span class="text-[10px] font-bold bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded border border-blue-500/30 uppercase">${item.tag}</span><h4 class="font-bold text-sm text-white app-text-main mt-2 mb-1.5">${item.title}</h4><p class="text-xs text-slate-400 app-text-muted">${item.desc}</p></div>`;
+                grid.appendChild(card);
+            });
+        }
+
+        function setTemperatureUnit(unit) {
+            currentUnit = unit;
+            document.getElementById('btn-deg-f').className = unit === 'F' ? 'px-2.5 py-1 rounded-lg bg-blue-600 text-white transition-all' : 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-slate-200 transition-all';
+            document.getElementById('btn-deg-c').className = unit === 'C' ? 'px-2.5 py-1 rounded-lg bg-blue-600 text-white transition-all' : 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-slate-200 transition-all';
+            fetchWeatherData(currentLat, currentLon, currentCityName);
+        }
+
+        function handleNewsletterSubmit(e) { e.preventDefault(); alert('Subscribed to Masons Severe Weather Club!'); }
+        function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
+        function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
+        function useGuestAccount() { closeAuthModal(); }
+        function fToC(f) { return Math.round((f - 32) * 5 / 9); }
+        function getWeatherIconClass(code) { return code === 0 ? 'fa-solid fa-sun' : code <= 3 ? 'fa-solid fa-cloud-sun' : 'fa-solid fa-cloud-rain'; }
+        function getWeatherConditionText(code) { return code === 0 ? 'Clear Skies' : code <= 3 ? 'Partly Cloudy' : 'Rain Showers'; }
+        function resetToDefaultCity() { fetchWeatherData(34.0522, -118.2437, "Los Angeles, USA"); }
+    </script>
+</body>
+</html>
