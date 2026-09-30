@@ -82,14 +82,32 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        <a href="index.html" class="block group hover:opacity-90 transition-opacity">
-          <header class="flex flex-col sm:flex-row items-center justify-between border-b border-sky-100 pb-6 mb-8 gap-4"> 
-            <div class="logo-section text-center sm:text-left"> 
-              <h1 class="text-4xl font-extrabold text-[#1e3d59] tracking-tight group-hover:text-sky-900 transition-colors">🌊 Mason's Weather</h1> 
-              <p class="text-sm font-semibold text-sky-700 tracking-wider">South Bay Marine & Coastal Weather • Live Microclimate Mesh Network</p> 
-            </div> 
-          </header>
-        </a>
+        <header class="flex flex-col sm:flex-row items-center justify-between border-b border-sky-100 pb-6 mb-8 gap-4"> 
+            <a href="index.html" class="block group hover:opacity-90 transition-opacity text-center sm:text-left">
+              <div class="logo-section"> 
+                <h1 class="text-4xl font-extrabold text-[#1e3d59] tracking-tight group-hover:text-sky-900 transition-colors">🌊 Mason's Weather</h1> 
+                <p class="text-sm font-semibold text-sky-700 tracking-wider">South Bay Marine & Coastal Weather • Live Microclimate Mesh Network</p> 
+              </div> 
+            </a>
+
+            <!-- AUTH ACTION AREA -->
+            <div class="flex items-center gap-3">
+                <div id="auth-guest-view" class="flex items-center gap-2">
+                    <button onclick="openAuthModal('login')" class="text-xs font-bold text-[#1e3d59] bg-white/80 hover:bg-white border border-sky-200/80 px-4 py-2 rounded-full shadow-sm hover:shadow transition">
+                        Log In
+                    </button>
+                    <button onclick="openAuthModal('signup')" class="text-xs font-bold text-white bg-[#1e3d59] hover:bg-sky-900 px-4 py-2 rounded-full shadow-sm hover:shadow transition">
+                        Sign Up
+                    </button>
+                </div>
+                <div id="auth-user-view" class="hidden flex items-center gap-3 bg-white/60 border border-sky-100 rounded-full px-4 py-1.5 shadow-sm">
+                    <span id="user-display-email" class="text-xs font-bold text-[#1e3d59]">user@example.com</span>
+                    <button onclick="handleLogout()" class="text-[11px] font-semibold text-red-600 hover:text-red-800 underline">
+                        Log Out
+                    </button>
+                </div>
+            </div>
+        </header>
 
         <div class="header-live-temp flex flex-col items-center sm:items-end -mt-4 mb-8">
             <div class="temp text-4xl font-extrabold text-[#1e3d59]" id="header-big-temp">--°F</div>
@@ -777,6 +795,50 @@
 
     </div>
 
+    <!-- AUTHENTICATION MODAL -->
+    <div id="auth-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-sky-100 relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-lg w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition">
+                ✕
+            </button>
+            <div class="text-center mb-6">
+                <h3 id="auth-modal-title" class="text-2xl font-extrabold text-[#1e3d59]">Log In</h3>
+                <p id="auth-modal-subtitle" class="text-xs text-slate-500 mt-1">Access your South Bay weather dashboard</p>
+            </div>
+            
+            <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div id="auth-name-field" class="hidden space-y-1 text-left">
+                    <label class="block text-xs font-bold text-[#1e3d59]">Full Name</label>
+                    <input type="text" id="auth-name" placeholder="Mason Ramirez" class="w-full px-4 py-2.5 rounded-xl border border-sky-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+                </div>
+                <div class="space-y-1 text-left">
+                    <label class="block text-xs font-bold text-[#1e3d59]">Email Address</label>
+                    <input type="email" id="auth-email" required placeholder="mason@example.com" class="w-full px-4 py-2.5 rounded-xl border border-sky-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+                </div>
+                <div class="space-y-1 text-left">
+                    <label class="block text-xs font-bold text-[#1e3d59]">Password</label>
+                    <input type="password" id="auth-password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-sky-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+                </div>
+                
+                <div id="auth-email-sync-option" class="flex items-center space-x-2 text-left pt-1">
+                    <input type="checkbox" id="auth-sync-email" checked class="h-4 w-4 rounded border-sky-300 text-sky-600 focus:ring-sky-500">
+                    <label for="auth-sync-email" class="text-xs text-slate-600 font-medium">Automatically sync account email to South Bay daily weather list</label>
+                </div>
+
+                <button type="submit" id="auth-submit-btn" class="w-full py-3 bg-[#1e3d59] hover:bg-sky-900 text-white font-bold rounded-xl shadow-md transition-all text-sm mt-2">
+                    Log In
+                </button>
+            </form>
+
+            <div class="mt-6 text-center text-xs text-slate-500 border-t border-sky-100 pt-4">
+                <span id="auth-toggle-text">Don't have an account?</span>
+                <button type="button" onclick="toggleAuthMode()" id="auth-toggle-btn" class="font-bold text-sky-700 hover:underline ml-1">
+                    Sign Up
+                </button>
+            </div>
+        </div>
+    </div>
+
     <footer class="max-w-7xl mx-auto px-4 py-8 mt-4 text-center text-sm font-semibold text-sky-800/60 border-t border-sky-200/50">
         &copy; 2026 Mason's Weather &bull; Real-time Weather &bull; All Rights Reserved.<br>
         <span class="text-xs font-normal opacity-80">Telemetry provided by Mason Ramirez, NOAA, NWS, WU, network nodes, and local coastal assets.</span>
@@ -789,6 +851,108 @@
         let currentLon = -118.3884;
         let currentStation = "KCAREDON127"; 
         let chartInstances = {};
+        let authMode = 'login'; // 'login' or 'signup'
+
+        // AUTHENTICATION & EMAIL LIST AUTO-SYNC
+        function openAuthModal(mode = 'login') {
+            authMode = mode;
+            const modal = document.getElementById('auth-modal');
+            if (modal) modal.classList.remove('hidden');
+            updateAuthModalUI();
+        }
+
+        function closeAuthModal() {
+            const modal = document.getElementById('auth-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function toggleAuthMode() {
+            authMode = (authMode === 'login') ? 'signup' : 'login';
+            updateAuthModalUI();
+        }
+
+        function updateAuthModalUI() {
+            const title = document.getElementById('auth-modal-title');
+            const subtitle = document.getElementById('auth-modal-subtitle');
+            const nameField = document.getElementById('auth-name-field');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const toggleText = document.getElementById('auth-toggle-text');
+            const toggleBtn = document.getElementById('auth-toggle-btn');
+
+            if (authMode === 'signup') {
+                title.innerText = 'Create Account';
+                subtitle.innerText = 'Join Mason\'s Weather microclimate network';
+                nameField.classList.remove('hidden');
+                submitBtn.innerText = 'Create Account & Sync';
+                toggleText.innerText = 'Already have an account?';
+                toggleBtn.innerText = 'Log In';
+            } else {
+                title.innerText = 'Log In';
+                subtitle.innerText = 'Access your South Bay weather dashboard';
+                nameField.classList.add('hidden');
+                submitBtn.innerText = 'Log In';
+                toggleText.innerText = 'Don\'t have an account?';
+                toggleBtn.innerText = 'Sign Up';
+            }
+        }
+
+        function syncEmailToList(email, name = '') {
+            let emailList = JSON.parse(localStorage.getItem('masons_weather_email_list') || '[]');
+            const exists = emailList.some(item => item.email.toLowerCase() === email.toLowerCase());
+            if (!exists) {
+                emailList.push({
+                    email: email,
+                    name: name,
+                    subscribedAt: new Date().toISOString(),
+                    source: 'Account Sync'
+                });
+                localStorage.setItem('masons_weather_email_list', JSON.stringify(emailList));
+            }
+        }
+
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value.trim();
+            const name = document.getElementById('auth-name').value.trim();
+            const autoSync = document.getElementById('auth-sync-email').checked;
+
+            if (!email) return;
+
+            const userData = { email, name: name || email.split('@')[0] };
+            localStorage.setItem('masons_weather_user', JSON.stringify(userData));
+
+            // Auto sync email to subscriber list upon login or sign up
+            if (autoSync) {
+                syncEmailToList(email, userData.name);
+            }
+
+            checkAuthState();
+            closeAuthModal();
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('masons_weather_user');
+            checkAuthState();
+        }
+
+        function checkAuthState() {
+            const user = JSON.parse(localStorage.getItem('masons_weather_user'));
+            const guestView = document.getElementById('auth-guest-view');
+            const userView = document.getElementById('auth-user-view');
+            const userDisplay = document.getElementById('user-display-email');
+
+            if (user && user.email) {
+                if (guestView) guestView.classList.add('hidden');
+                if (userView) userView.classList.remove('hidden');
+                if (userDisplay) userDisplay.innerText = user.email;
+
+                // Enforce email sync on logged-in state
+                syncEmailToList(user.email, user.name);
+            } else {
+                if (guestView) guestView.classList.remove('hidden');
+                if (userView) userView.classList.add('hidden');
+            }
+        }
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
@@ -1192,7 +1356,7 @@
 
                     const hum = document.createElement('span');
                     hum.className = "text-[9px] font-bold text-indigo-500/90";
-                    hum.innerText = (calculatedRH !== null) ? `🌫️ ${calculatedRH}% RH` : `🌫️ --% RH`;
+                    hum.innerText = (calculatedRH !== null) ? `🌫️ ${calculatedRH}% RH` : `🌫️️ --% RH`;
 
                     detailsContainer.appendChild(details);
                     detailsContainer.appendChild(wind);
@@ -1364,6 +1528,7 @@
             const yearDisplay = document.getElementById('current-year-display');
             if (yearDisplay) yearDisplay.innerText = currentYear;
 
+            checkAuthState();
             fetchWeatherData();
             fetchSurfData();
             fetchNWSAlerts();
