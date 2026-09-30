@@ -1085,7 +1085,31 @@
             fetchWeatherData(currentLat, currentLon, currentCityName);
         }
 
-        function handleNewsletterSubmit(e) { e.preventDefault(); alert('Subscribed to Masons Severe Weather Club!'); }
+        async function handleNewsletterSubmit(e) {
+            e.preventDefault();
+            
+            const emailInput = document.getElementById('newsletter-email');
+            const email = emailInput ? emailInput.value.trim() : '';
+
+            if (!email) {
+                alert('Please enter a valid email address.');
+                return;
+            }
+
+            try {
+                // Save subscriber email to 'newsletter_subscribers' collection in Firestore
+                await db.collection('newsletter_subscribers').add({
+                    email: email,
+                    subscribedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                alert('Subscribed to Masons Severe Weather Club!');
+                if (emailInput) emailInput.value = '';
+            } catch (error) {
+                console.error("Newsletter submission failed:", error);
+                alert('Error saving subscription: ' + error.message);
+            }
+        }
         function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
         function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
         function useGuestAccount() { closeAuthModal(); }
