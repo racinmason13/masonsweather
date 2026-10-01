@@ -82,32 +82,14 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        <header class="flex flex-col sm:flex-row items-center justify-between border-b border-sky-100 pb-6 mb-8 gap-4"> 
-            <a href="index.html" class="block group hover:opacity-90 transition-opacity text-center sm:text-left">
-              <div class="logo-section"> 
-                <h1 class="text-4xl font-extrabold text-[#1e3d59] tracking-tight group-hover:text-sky-900 transition-colors">🌊 Mason's Weather</h1> 
-                <p class="text-sm font-semibold text-sky-700 tracking-wider">South Bay Marine & Coastal Weather • Live Microclimate Mesh Network</p> 
-              </div> 
-            </a>
-
-            <!-- AUTH ACTION AREA -->
-            <div class="flex items-center gap-3">
-                <div id="auth-guest-view" class="flex items-center gap-2">
-                    <button onclick="openAuthModal('login')" class="text-xs font-bold text-[#1e3d59] bg-white/80 hover:bg-white border border-sky-200/80 px-4 py-2 rounded-full shadow-sm hover:shadow transition">
-                        Log In
-                    </button>
-                    <button onclick="openAuthModal('signup')" class="text-xs font-bold text-white bg-[#1e3d59] hover:bg-sky-900 px-4 py-2 rounded-full shadow-sm hover:shadow transition">
-                        Sign Up
-                    </button>
-                </div>
-                <div id="auth-user-view" class="hidden flex items-center gap-3 bg-white/60 border border-sky-100 rounded-full px-4 py-1.5 shadow-sm">
-                    <span id="user-display-email" class="text-xs font-bold text-[#1e3d59]">user@example.com</span>
-                    <button onclick="handleLogout()" class="text-[11px] font-semibold text-red-600 hover:text-red-800 underline">
-                        Log Out
-                    </button>
-                </div>
-            </div>
-        </header>
+        <a href="index.html" class="block group hover:opacity-90 transition-opacity">
+          <header class="flex flex-col sm:flex-row items-center justify-between border-b border-sky-100 pb-6 mb-8 gap-4"> 
+            <div class="logo-section text-center sm:text-left"> 
+              <h1 class="text-4xl font-extrabold text-[#1e3d59] tracking-tight group-hover:text-sky-900 transition-colors">🌊 Mason's Weather</h1> 
+              <p class="text-sm font-semibold text-sky-700 tracking-wider">South Bay Marine & Coastal Weather • Live Microclimate Mesh Network</p> 
+            </div> 
+          </header>
+        </a>
 
         <div class="header-live-temp flex flex-col items-center sm:items-end -mt-4 mb-8">
             <div class="temp text-4xl font-extrabold text-[#1e3d59]" id="header-big-temp">--°F</div>
@@ -145,7 +127,7 @@
                     <p class="text-xs text-slate-500 mb-4">Select a coastal microclimate to update live stats and 24h trends:</p>
                     <div id="city-selector" class="flex flex-col gap-2">
                         <button onclick="selectCity('Redondo Beach', 33.8492, -118.3884, this, 'KCAREDON127')" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-amber-100 text-amber-900 border border-amber-200 shadow-sm">
-                            <span>🏖️ Redondo Beach</span>
+                            <span>🏖️️ Redondo Beach</span>
                             <span class="text-xs px-2 py-0.5 rounded-full bg-white/60">Coast</span>
                         </button>
                         <button onclick="selectCity('Hermosa Beach', 33.8622, -118.3987, this, 'KCAHERMO17')" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
@@ -185,8 +167,8 @@
 
                 <div class="bg-[#1e3d59] text-white shadow-xl rounded-3xl p-5 relative overflow-hidden">
                     <h4 class="text-sm uppercase tracking-wider text-sky-300 font-bold mb-1">Ocean Swell Brief</h4>
-                    <p class="text-xs text-sky-100 leading-relaxed">
-                        Afternoon wind-swell expected to peak around 4:30 PM. Swell holding at 2-3ft with clean faces. Marine fog layers expected to roll back in late tonight. Keep track of deep water buoy data under Ocean & Surf!
+                    <p class="text-xs text-sky-100 leading-relaxed" id="osb-text">
+                        Loading Ocean Swell Brief from sheet...
                     </p>
                 </div>
             </aside>
@@ -268,8 +250,8 @@
                         <div class="text-3xl mt-1">🐚</div>
                         <div>
                             <h4 class="font-bold text-amber-950 text-base">Water & Swim Temp Report</h4>
-                            <p class="text-xs text-amber-900/80 leading-relaxed mt-1">
-                                Ocean Temp is currently sitting around <strong>69°F-73°F</strong>. Ideal for a standard fullsuit or springsuit depending on your sensitivity. Clean, glassy sets coming through. Water is beginning to warm with currents from South America!
+                            <p class="text-xs text-amber-900/80 leading-relaxed mt-1" id="wstr-text">
+                                Loading Water & Swim Temp Report from sheet...
                             </p>
                         </div>
                     </div>
@@ -793,50 +775,24 @@
             </div>
         </div>
 
-    </div>
+        <!-- FIREBASE NEWSLETTER SUBSCRIPTION CARD -->
+        <div class="mt-12 bg-gradient-to-br from-[#1e3d59] to-indigo-900 text-white rounded-3xl p-6 md:p-8 shadow-xl border border-sky-300/20 relative overflow-hidden">
+            <div class="max-w-3xl">
+                <span class="text-xs font-bold uppercase tracking-widest text-sky-300 bg-white/10 px-3 py-1 rounded-full">Stay Updated</span>
+                <h3 class="text-2xl font-extrabold mt-3 mb-2">📩 Subscribe to Mason's Coastal Weather Updates</h3>
+                <p class="text-sm text-sky-100 mb-6">Get local microclimate alerts, surf conditions, and severe weather warnings delivered directly to your inbox.</p>
 
-    <!-- AUTHENTICATION MODAL -->
-    <div id="auth-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-sky-100 relative">
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-lg w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition">
-                ✕
-            </button>
-            <div class="text-center mb-6">
-                <h3 id="auth-modal-title" class="text-2xl font-extrabold text-[#1e3d59]">Log In</h3>
-                <p id="auth-modal-subtitle" class="text-xs text-slate-500 mt-1">Access your South Bay weather dashboard</p>
-            </div>
-            
-            <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
-                <div id="auth-name-field" class="hidden space-y-1 text-left">
-                    <label class="block text-xs font-bold text-[#1e3d59]">Full Name</label>
-                    <input type="text" id="auth-name" placeholder="Mason Ramirez" class="w-full px-4 py-2.5 rounded-xl border border-sky-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
-                </div>
-                <div class="space-y-1 text-left">
-                    <label class="block text-xs font-bold text-[#1e3d59]">Email Address</label>
-                    <input type="email" id="auth-email" required placeholder="mason@example.com" class="w-full px-4 py-2.5 rounded-xl border border-sky-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
-                </div>
-                <div class="space-y-1 text-left">
-                    <label class="block text-xs font-bold text-[#1e3d59]">Password</label>
-                    <input type="password" id="auth-password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-sky-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
-                </div>
-                
-                <div id="auth-email-sync-option" class="flex items-center space-x-2 text-left pt-1">
-                    <input type="checkbox" id="auth-sync-email" checked class="h-4 w-4 rounded border-sky-300 text-sky-600 focus:ring-sky-500">
-                    <label for="auth-sync-email" class="text-xs text-slate-600 font-medium">Automatically sync account email to South Bay daily weather list</label>
-                </div>
-
-                <button type="submit" id="auth-submit-btn" class="w-full py-3 bg-[#1e3d59] hover:bg-sky-900 text-white font-bold rounded-xl shadow-md transition-all text-sm mt-2">
-                    Log In
-                </button>
-            </form>
-
-            <div class="mt-6 text-center text-xs text-slate-500 border-t border-sky-100 pt-4">
-                <span id="auth-toggle-text">Don't have an account?</span>
-                <button type="button" onclick="toggleAuthMode()" id="auth-toggle-btn" class="font-bold text-sky-700 hover:underline ml-1">
-                    Sign Up
-                </button>
+                <form id="newsletter-form" class="flex flex-col sm:flex-row gap-3">
+                    <input type="text" id="newsletter-name" placeholder="Your Name" required class="px-4 py-3 rounded-2xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 font-medium flex-1">
+                    <input type="email" id="newsletter-email" placeholder="Your Email Address" required class="px-4 py-3 rounded-2xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 font-medium flex-1">
+                    <button type="submit" id="newsletter-btn" class="bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold px-6 py-3 rounded-2xl transition duration-200 text-sm shadow-md flex items-center justify-center min-w-[140px]">
+                        Subscribe
+                    </button>
+                </form>
+                <div id="newsletter-msg" class="mt-3 text-xs font-semibold hidden"></div>
             </div>
         </div>
+
     </div>
 
     <footer class="max-w-7xl mx-auto px-4 py-8 mt-4 text-center text-sm font-semibold text-sky-800/60 border-t border-sky-200/50">
@@ -851,108 +807,6 @@
         let currentLon = -118.3884;
         let currentStation = "KCAREDON127"; 
         let chartInstances = {};
-        let authMode = 'login'; // 'login' or 'signup'
-
-        // AUTHENTICATION & EMAIL LIST AUTO-SYNC
-        function openAuthModal(mode = 'login') {
-            authMode = mode;
-            const modal = document.getElementById('auth-modal');
-            if (modal) modal.classList.remove('hidden');
-            updateAuthModalUI();
-        }
-
-        function closeAuthModal() {
-            const modal = document.getElementById('auth-modal');
-            if (modal) modal.classList.add('hidden');
-        }
-
-        function toggleAuthMode() {
-            authMode = (authMode === 'login') ? 'signup' : 'login';
-            updateAuthModalUI();
-        }
-
-        function updateAuthModalUI() {
-            const title = document.getElementById('auth-modal-title');
-            const subtitle = document.getElementById('auth-modal-subtitle');
-            const nameField = document.getElementById('auth-name-field');
-            const submitBtn = document.getElementById('auth-submit-btn');
-            const toggleText = document.getElementById('auth-toggle-text');
-            const toggleBtn = document.getElementById('auth-toggle-btn');
-
-            if (authMode === 'signup') {
-                title.innerText = 'Create Account';
-                subtitle.innerText = 'Join Mason\'s Weather microclimate network';
-                nameField.classList.remove('hidden');
-                submitBtn.innerText = 'Create Account & Sync';
-                toggleText.innerText = 'Already have an account?';
-                toggleBtn.innerText = 'Log In';
-            } else {
-                title.innerText = 'Log In';
-                subtitle.innerText = 'Access your South Bay weather dashboard';
-                nameField.classList.add('hidden');
-                submitBtn.innerText = 'Log In';
-                toggleText.innerText = 'Don\'t have an account?';
-                toggleBtn.innerText = 'Sign Up';
-            }
-        }
-
-        function syncEmailToList(email, name = '') {
-            let emailList = JSON.parse(localStorage.getItem('masons_weather_email_list') || '[]');
-            const exists = emailList.some(item => item.email.toLowerCase() === email.toLowerCase());
-            if (!exists) {
-                emailList.push({
-                    email: email,
-                    name: name,
-                    subscribedAt: new Date().toISOString(),
-                    source: 'Account Sync'
-                });
-                localStorage.setItem('masons_weather_email_list', JSON.stringify(emailList));
-            }
-        }
-
-        function handleAuthSubmit(e) {
-            e.preventDefault();
-            const email = document.getElementById('auth-email').value.trim();
-            const name = document.getElementById('auth-name').value.trim();
-            const autoSync = document.getElementById('auth-sync-email').checked;
-
-            if (!email) return;
-
-            const userData = { email, name: name || email.split('@')[0] };
-            localStorage.setItem('masons_weather_user', JSON.stringify(userData));
-
-            // Auto sync email to subscriber list upon login or sign up
-            if (autoSync) {
-                syncEmailToList(email, userData.name);
-            }
-
-            checkAuthState();
-            closeAuthModal();
-        }
-
-        function handleLogout() {
-            localStorage.removeItem('masons_weather_user');
-            checkAuthState();
-        }
-
-        function checkAuthState() {
-            const user = JSON.parse(localStorage.getItem('masons_weather_user'));
-            const guestView = document.getElementById('auth-guest-view');
-            const userView = document.getElementById('auth-user-view');
-            const userDisplay = document.getElementById('user-display-email');
-
-            if (user && user.email) {
-                if (guestView) guestView.classList.add('hidden');
-                if (userView) userView.classList.remove('hidden');
-                if (userDisplay) userDisplay.innerText = user.email;
-
-                // Enforce email sync on logged-in state
-                syncEmailToList(user.email, user.name);
-            } else {
-                if (guestView) guestView.classList.remove('hidden');
-                if (userView) userView.classList.add('hidden');
-            }
-        }
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
@@ -1305,7 +1159,6 @@
                 const detailedGrid = document.getElementById('detailed-outlook-grid');
                 if (detailedGrid) detailedGrid.innerHTML = '';
 
-                // Extended to display full 14 forecast periods (7 day/night cycles)
                 periods.slice(0, 14).forEach(period => {
                     const block = document.createElement('div');
                     block.className = "text-center p-3 bg-white/50 hover:bg-white/80 rounded-2xl border border-sky-100 flex flex-col items-center justify-start shadow-sm hover:shadow transition-all duration-300";
@@ -1356,7 +1209,7 @@
 
                     const hum = document.createElement('span');
                     hum.className = "text-[9px] font-bold text-indigo-500/90";
-                    hum.innerText = (calculatedRH !== null) ? `🌫️ ${calculatedRH}% RH` : `🌫️️ --% RH`;
+                    hum.innerText = (calculatedRH !== null) ? `🌫️ ${calculatedRH}% RH` : `🌫️ --% RH`;
 
                     detailsContainer.appendChild(details);
                     detailsContainer.appendChild(wind);
@@ -1370,7 +1223,6 @@
                     
                     forecastGrid.appendChild(block);
 
-                    // Render Detailed Outlook Cards matching the reference screenshot layout
                     if (detailedGrid) {
                         const card = document.createElement('div');
                         card.className = "bg-amber-50/40 border border-amber-200/50 rounded-2xl p-4 shadow-sm hover:shadow transition-all flex flex-col justify-between";
@@ -1416,13 +1268,14 @@
                     let southbayText = "";
                     let manualNoticeHeadline = "";
                     let manualNoticeDesc = "";
+                    let wstrText = "";
+                    let osbText = "";
 
-                    for (let row of rows) {
-                        if (!row.c || row.c.length < 2) continue;
+                    rows.forEach((row, index) => {
+                        if (!row.c) return;
 
                         const rawKey = row.c[0] && row.c[0].v ? row.c[0].v.toString() : "";
                         const rawVal = row.c[1] && row.c[1].v ? row.c[1].v.toString() : "";
-
                         const key = rawKey.toLowerCase().replace(/\s+/g, '');
 
                         if (key === "southbay") {
@@ -1431,8 +1284,12 @@
                             manualNoticeHeadline = rawVal;
                         } else if (key === "manualnoticedesc" || key === "manualnoticedescription") {
                             manualNoticeDesc = rawVal;
+                        } else if (key === "wstr" || index === 5) { // Row 6 (A6 / B6)
+                            if (rawVal) wstrText = rawVal;
+                        } else if (key === "osb" || index === 6) { // Row 7 (A7 / B7)
+                            if (rawVal) osbText = rawVal;
                         }
-                    }
+                    });
 
                     const summaryBox = document.getElementById('coastal-summary-text');
                     if (summaryBox && southbayText) {
@@ -1442,6 +1299,18 @@
                         if (summaryMeta) {
                             summaryMeta.innerText = formatOutlookUpdateTimestamp();
                         }
+                    }
+
+                    // Water & Swim Temp Report (Cell B6)
+                    const wstrBox = document.getElementById('wstr-text');
+                    if (wstrBox && wstrText.trim().length > 0) {
+                        wstrBox.innerHTML = wstrText.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+                    }
+
+                    // Ocean Swell Brief (Cell B7)
+                    const osbBox = document.getElementById('osb-text');
+                    if (osbBox && osbText.trim().length > 0) {
+                        osbBox.innerHTML = osbText.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
                     }
 
                     const manualNoticeBar = document.getElementById('manual-notice-bar');
@@ -1528,7 +1397,6 @@
             const yearDisplay = document.getElementById('current-year-display');
             if (yearDisplay) yearDisplay.innerText = currentYear;
 
-            checkAuthState();
             fetchWeatherData();
             fetchSurfData();
             fetchNWSAlerts();
@@ -1538,6 +1406,81 @@
             setInterval(fetchSurfData, 300000);
             setInterval(syncGoogleSheetDigests, 300000);
         });
+    </script>
+
+    <!-- FIREBASE MODULE SCRIPT FOR NEWSLETTER SYNC + ON-DEVICE NAME MEMORY -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOSAP09_2SYMd9euLR0GFJ0SyIEC48qD8",
+            authDomain: "masonsweather-a37f6.firebaseapp.com",
+            projectId: "masonsweather-a37f6",
+            storageBucket: "masonsweather-a37f6.firebasestorage.app",
+            messagingSenderId: "666401439794",
+            appId: "1:666401439794:web:86d355bb70dae76d00fc2b",
+            measurementId: "G-KN3MVC3WT5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const newsletterForm = document.getElementById('newsletter-form');
+        const newsletterBtn = document.getElementById('newsletter-btn');
+        const newsletterMsg = document.getElementById('newsletter-msg');
+        const nameInput = document.getElementById('newsletter-name');
+
+        // Restore saved name on device (localStorage)
+        if (nameInput) {
+            const savedName = localStorage.getItem('mw_newsletter_name');
+            if (savedName) {
+                nameInput.value = savedName;
+            }
+            nameInput.addEventListener('input', (e) => {
+                localStorage.setItem('mw_newsletter_name', e.target.value);
+            });
+        }
+
+        if (newsletterForm) {
+            newsletterForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const emailInput = document.getElementById('newsletter-email');
+                
+                const name = nameInput ? nameInput.value.trim() : "";
+                const email = emailInput ? emailInput.value.trim() : "";
+
+                if (!name || !email) return;
+
+                // Save name on device so it persists for future visits
+                localStorage.setItem('mw_newsletter_name', name);
+
+                newsletterBtn.disabled = true;
+                newsletterBtn.innerText = "Subscribing...";
+                newsletterMsg.classList.add('hidden');
+
+                try {
+                    await addDoc(collection(db, "newsletter_subscribers"), {
+                        name: name,
+                        email: email,
+                        createdAt: serverTimestamp()
+                    });
+
+                    newsletterMsg.innerText = "🎉 Thanks for subscribing! You're on the list.";
+                    newsletterMsg.className = "mt-3 text-xs font-semibold text-emerald-300 block";
+                    
+                    emailInput.value = "";
+                } catch (error) {
+                    console.error("Firebase database error: ", error);
+                    newsletterMsg.innerText = "❌ Subscription error. Please try again.";
+                    newsletterMsg.className = "mt-3 text-xs font-semibold text-red-300 block";
+                } finally {
+                    newsletterBtn.disabled = false;
+                    newsletterBtn.innerText = "Subscribe";
+                }
+            });
+        }
     </script>
 </body>
 </html>
