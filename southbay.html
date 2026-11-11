@@ -29,8 +29,9 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/images/Mason's Weather Logo.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/images/Mason's Weather Logo.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/images/Mason's Weather Logo.png">
+<link rel="stylesheet" href="/site.css" onerror="if(location.protocol==='file:'){this.onerror=null;this.href='site.css';}">
 </head>
-<body class="bg-gradient-to-b from-[#e0f2fe] via-[#f0f9ff] to-[#fef3c7] min-h-screen text-[#1e293b]">
+<body class="site-dashboard site-southbay min-h-screen">
 
     <div id="nws-alert-bar" class="hidden bg-gradient-to-r from-red-600 to-amber-600 text-white py-3 px-4 shadow-xl sticky top-0 z-50 transition-all duration-500 ease-in-out">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
@@ -80,40 +81,42 @@
         </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        <a href="index.html" class="block group hover:opacity-90 transition-opacity">
-          <header class="flex flex-col sm:flex-row items-center justify-between border-b border-sky-100 pb-6 mb-8 gap-4"> 
-            <div class="logo-section text-center sm:text-left"> 
-              <h1 class="text-4xl font-extrabold text-[#1e3d59] tracking-tight group-hover:text-sky-900 transition-colors">🌊 Mason's Weather</h1> 
-              <p class="text-sm font-semibold text-sky-700 tracking-wider">South Bay Marine & Coastal Weather • Live Microclimate Mesh Network</p> 
-            </div> 
-          </header>
-        </a>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 dashboard-container">
+        <header class="dashboard-masthead">
+            <a class="dashboard-brand" href="/">
+                <img src="/images/Mason's Weather Logo.png" alt="" width="42" height="42" onerror="if(location.protocol==='file:'){this.onerror=null;this.src='images/Mason%27s%20Weather%20Logo.png';}">
+                <span><strong>MASON'S WEATHER</strong><small>LOCAL OBSERVATION NETWORK</small></span>
+            </a>
+            <div class="dashboard-location">
+                <p>SOUTH BAY, CALIFORNIA</p>
+                <h1>Coastal weather</h1>
+                <span>Marine conditions · Beach reports · Local forecasts</span>
+            </div>
+            <div class="header-live-temp">
+                <span class="observation-label">CURRENT OBSERVATION</span>
+                <strong class="temp" id="header-big-temp">--°F</strong>
+                <span class="update-time">Station updated <span id="update-timestamp" class="font-bold">Loading...</span></span>
+            </div>
+        </header>
 
-        <div class="header-live-temp flex flex-col items-center sm:items-end -mt-4 mb-8">
-            <div class="temp text-4xl font-extrabold text-[#1e3d59]" id="header-big-temp">--°F</div>
-            <div class="update-time text-xs text-sky-600/80">Station Updated: <span id="update-timestamp" class="font-bold">Loading...</span></div>
-        </div>
-
-        <nav class="flex flex-wrap gap-2 mb-8 justify-center sm:justify-start">
-            <button onclick="switchTab('live')" id="tab-btn-live" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-[#1e3d59] text-white">
-                🌊 Live Conditions
+        <nav class="dashboard-nav" aria-label="South Bay sections">
+            <button onclick="switchTab('live')" id="tab-btn-live" aria-current="page" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-[#1e3d59] text-white">
+                Live Conditions
             </button>
             <button onclick="switchTab('trends')" id="tab-btn-trends" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-white/60 hover:bg-white text-[#1e3d59]">
-                📊 Forecast & Trends
+                Forecast & Trends
             </button>
             <button onclick="switchTab('yearly')" id="tab-btn-yearly" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-white/60 hover:bg-white text-[#1e3d59]">
-                📅 Yearly Totals
+                Yearly Summary
             </button>
             <button onclick="switchTab('elnino')" id="tab-btn-elnino" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-white/60 hover:bg-white text-[#1e3d59]">
-                🌋 El Niño Center
+                ENSO Outlook
             </button>
             <button onclick="switchTab('cams')" id="tab-btn-cams" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-white/60 hover:bg-white text-[#1e3d59]">
-                📹 Live Beach Cams
+                Beach Cameras
             </button>
             <button onclick="switchTab('resources')" id="tab-btn-resources" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-white/60 hover:bg-white text-[#1e3d59]">
-                ⚓ Ocean & Surf
+                Ocean & Surf
             </button>
         </nav>
 
@@ -122,46 +125,46 @@
             <aside class="lg:col-span-3 flex flex-col gap-4">
                 <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-5">
                     <h3 class="text-lg font-bold text-[#1e3d59] border-b border-sky-100 pb-3 mb-4 flex items-center">
-                        📍 Microclimate Radar
+                        Coastal stations
                     </h3>
                     <p class="text-xs text-slate-500 mb-4">Select a coastal microclimate to update live stats and 24h trends:</p>
                     <div id="city-selector" class="flex flex-col gap-2">
                         <button onclick="selectCity('Redondo Beach', 33.8492, -118.3884, this, 'KCAREDON127')" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-amber-100 text-amber-900 border border-amber-200 shadow-sm">
-                            <span>🏖️️ Redondo Beach</span>
+                            <span>Redondo Beach</span>
                             <span class="text-xs px-2 py-0.5 rounded-full bg-white/60">Coast</span>
                         </button>
                         <button onclick="selectCity('Hermosa Beach', 33.8622, -118.3987, this, 'KCAHERMO17')" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
-                            <span>🏄‍♂️ Hermosa Beach</span>
+                            <span>Hermosa Beach</span>
                             <span class="text-xs opacity-60">Coast</span>
                         </button>
                         <button onclick="selectCity('Manhattan Beach', 33.8847, -118.4109, this, 'KCAMANHA40')" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
-                            <span>🏐 Manhattan Beach</span>
+                            <span>Manhattan Beach</span>
                             <span class="text-xs opacity-60">Coast</span>
                         </button>
                         <button onclick="selectCity('Palos Verdes', 33.7865, -118.3831, this, 'KCAPALOS77')" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
-                            <span>⛰️ Palos Verdes</span>
+                            <span>Palos Verdes</span>
                             <span class="text-xs opacity-60">Cliffs</span>
                         </button>
                         <button onclick="selectCity('Torrance', 33.8358, -118.3406, this, 'KCATORRA170')" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
-                            <span>🏡 Torrance</span>
+                            <span>Torrance</span>
                             <span class="text-xs opacity-60">Inland</span>
                         </button>
                         <button onclick="selectCity('El Segundo', 33.9192, -118.4165, this, 'KCAELSEG23')" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#1e3d59] hover:shadow-sm">
-                            <span>✈️ El Segundo</span>
+                            <span>El Segundo</span>
                             <span class="text-xs opacity-60">North</span>
                         </button>
                     </div>
                 </div>
 
                 <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-5 relative overflow-hidden">
-                    <h4 class="text-sm uppercase tracking-wider text-teal-800 font-bold mb-2">📡 Station Infrastructure</h4>
+                    <h4 class="text-sm uppercase tracking-wider text-teal-800 font-bold mb-2">Station data</h4>
                     <p class="text-xs text-slate-600 leading-relaxed mb-3">
-                        Operating on localized high-fidelity Mason's Weather sensor grids. Features include real-time ground telemetry, re-calibrated barometric sensors, and hyper-targeted ocean wind alignments.
+                        Reports come from local personal weather stations. Updates and available measurements vary by station.
                     </p>
                     <ul class="text-xs text-slate-500 list-disc pl-4 space-y-1">
-                        <li>High-gain Uplinks</li>
-                        <li>Multi-node Microclimate Mesh Mapping</li>
-                        <li>Sub-second API Refresh Target</li>
+                        <li>Temperature and wind</li>
+                        <li>Humidity and barometric pressure</li>
+                        <li>Station-specific update intervals</li>
                     </ul>
                 </div>
 
@@ -175,20 +178,6 @@
 
             <main class="lg:col-span-9 flex flex-col gap-6">
                 
-                <div class="bg-white/70 backdrop-blur-md border border-sky-100 shadow-xl rounded-3xl p-6">
-                    <div class="border-b border-sky-100 pb-2 mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                        <h3 class="text-lg font-bold text-[#1e3d59] flex items-center">
-                            📝 Mason's Coastal Summary
-                        </h3>
-                        <span id="coastal-summary-meta" class="text-2xs font-semibold text-sky-800 uppercase tracking-wider">
-                            Updated: Loading...
-                        </span>
-                    </div>
-                    <div id="coastal-summary-text" class="text-sm text-slate-700 leading-relaxed font-medium">
-                        Establishing secure handshake connection with live Google Sheets database...
-                    </div>
-                </div>
-
                 <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-6 md:p-8">
                     <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-sky-100 pb-6 mb-6">
                         <div>
@@ -205,7 +194,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div class="weather-metrics grid grid-cols-2 md:grid-cols-4 gap-6">
                         <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200/50 rounded-2xl p-4 flex flex-col justify-between">
                             <span class="text-xs font-bold uppercase tracking-wider text-amber-800">Air Temp</span>
                             <div class="my-2">
@@ -245,6 +234,16 @@
                     </div>
                 </div>
 
+                <p class="summary-update-line">Summary last updated: <time id="coastal-summary-updated">Loading from sheet...</time></p>
+                <div class="bg-white/70 backdrop-blur-md border border-sky-100 shadow-xl rounded-3xl p-6">
+                    <div class="border-b border-sky-100 pb-2 mb-3">
+                        <h3 class="text-lg font-bold text-[#1e3d59]">Coastal outlook</h3>
+                    </div>
+                    <div id="coastal-summary-text" class="text-sm text-slate-700 leading-relaxed font-medium">
+                        Establishing connection to the coastal outlook sheet...
+                    </div>
+                </div>
+
                 <div class="bg-amber-100 border border-amber-300/40 rounded-3xl p-6 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="flex items-start space-x-4">
                         <div class="text-3xl mt-1">🐚</div>
@@ -275,7 +274,7 @@
                 </div>
 
                 <!-- DETAILED DAILY WEATHER OUTLOOK SECTION -->
-                <div class="mt-8 border-t border-sky-100 pt-6">
+                <div class="forecast-outlook mt-8 border-t border-sky-100 pt-6">
                     <h4 class="text-xs uppercase tracking-widest font-extrabold text-amber-900/80 mb-4 flex items-center gap-2">
                         <span>📝</span> DETAILED DAILY WEATHER OUTLOOK
                     </h4>
@@ -366,34 +365,33 @@
             <div class="bg-white/70 backdrop-blur-md border border-white/40 shadow-xl rounded-3xl p-6 md:p-8">
                 <div class="border-b border-sky-100 pb-4 mb-6">
                     <h3 class="text-2xl font-bold text-[#1e3d59] flex items-center">
-                        📅 Annual Telemetry Totals
+                        Year-to-date Weather Summary
                     </h3>
                     <p class="text-sm text-slate-500 mt-1 leading-relaxed">
-                        Cumulative station data for <span id="current-year-display" class="font-bold text-sky-700"></span>. <br>
-                        <span class="text-xs bg-amber-100/70 border border-amber-200 text-amber-800 px-2 py-0.5 rounded mt-2 inline-block font-semibold">Automatically resets every January 1st.</span>
+                        Year-to-date weather summary for <span id="current-year-display" class="font-bold text-sky-700"></span>, refreshed from historical daily data.
                     </p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div class="bg-gradient-to-br from-sky-50 to-teal-50 border border-sky-200/50 rounded-2xl p-5 shadow-sm">
                         <h4 class="text-xs font-bold uppercase tracking-wider text-sky-800 mb-2">Yearly Rainfall</h4>
-                        <div class="text-4xl font-extrabold text-[#1e3d59] mb-1">12.42 <span class="text-lg">in</span></div>
-                        <p class="text-xs text-slate-500">Cumulative precipitation</p>
+                        <div class="text-4xl font-extrabold text-[#1e3d59] mb-1"><span id="yearly-rain-total">--</span> <span class="text-lg">in</span></div>
+                        <p id="yearly-rain-through" class="text-xs text-slate-500">Loading year-to-date rainfall...</p>
                     </div>
                     <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200/50 rounded-2xl p-5 shadow-sm">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-amber-800 mb-2">Annual High Temp</h4>
-                        <div class="text-4xl font-extrabold text-amber-950 mb-1">88 <span class="text-lg">°F</span></div>
-                        <p class="text-xs text-slate-500">Recorded on Jul 14</p>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-amber-800 mb-2">Year-to-date High</h4>
+                        <div class="text-4xl font-extrabold text-amber-950 mb-1"><span id="yearly-high-temp">--</span> <span class="text-lg">°F</span></div>
+                        <p id="yearly-high-date" class="text-xs text-slate-500">Annual high temperature</p>
                     </div>
                     <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/50 rounded-2xl p-5 shadow-sm">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-blue-800 mb-2">Annual Low Temp</h4>
-                        <div class="text-4xl font-extrabold text-blue-950 mb-1">42 <span class="text-lg">°F</span></div>
-                        <p class="text-xs text-slate-500">Recorded on Feb 03</p>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-blue-800 mb-2">Year-to-date Low</h4>
+                        <div class="text-4xl font-extrabold text-blue-950 mb-1"><span id="yearly-low-temp">--</span> <span class="text-lg">°F</span></div>
+                        <p id="yearly-low-date" class="text-xs text-slate-500">Annual low temperature</p>
                     </div>
                     <div class="bg-gradient-to-br from-slate-50 to-gray-100 border border-slate-200/50 rounded-2xl p-5 shadow-sm">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-2">Peak Wind Gust</h4>
-                        <div class="text-4xl font-extrabold text-slate-900 mb-1">45 <span class="text-lg">mph</span></div>
-                        <p class="text-xs text-slate-500">Recorded during winter swell</p>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-2">Peak Daily Gust</h4>
+                        <div class="text-4xl font-extrabold text-slate-900 mb-1"><span id="yearly-peak-gust">--</span> <span class="text-lg">mph</span></div>
+                        <p id="yearly-gust-date" class="text-xs text-slate-500">Peak daily wind gust</p>
                     </div>
                 </div>
                 
@@ -403,6 +401,7 @@
                         <canvas id="yearlyPrecipChart"></canvas>
                     </div>
                 </div>
+                <p id="yearly-data-status" class="mt-4 text-xs text-slate-500" role="status">Loading historical data...</p>
             </div>
         </div>
 
@@ -776,10 +775,10 @@
         </div>
 
         <!-- FIREBASE NEWSLETTER SUBSCRIPTION CARD -->
-        <div class="mt-12 bg-gradient-to-br from-[#1e3d59] to-indigo-900 text-white rounded-3xl p-6 md:p-8 shadow-xl border border-sky-300/20 relative overflow-hidden">
+        <div class="newsletter-panel mt-12 bg-gradient-to-br from-[#1e3d59] to-indigo-900 text-white rounded-3xl p-6 md:p-8 shadow-xl border border-sky-300/20 relative overflow-hidden">
             <div class="max-w-3xl">
                 <span class="text-xs font-bold uppercase tracking-widest text-sky-300 bg-white/10 px-3 py-1 rounded-full">Stay Updated</span>
-                <h3 class="text-2xl font-extrabold mt-3 mb-2">📩 Subscribe to Mason's Coastal Weather Updates</h3>
+                <h3 class="text-2xl font-extrabold mt-3 mb-2">Coastal weather updates</h3>
                 <p class="text-sm text-sky-100 mb-6">Get local microclimate alerts, surf conditions, and severe weather warnings delivered directly to your inbox.</p>
 
                 <form id="newsletter-form" class="flex flex-col sm:flex-row gap-3">
@@ -808,34 +807,58 @@
         let currentStation = "KCAREDON127"; 
         let chartInstances = {};
 
-        function switchTab(tabId) {
+        const SOUTH_BAY_ROUTES = {
+            live: "/southbay/",
+            trends: "/southbay/forecast",
+            yearly: "/southbay/yearly",
+            elnino: "/southbay/elnino",
+            cams: "/southbay/cams",
+            resources: "/southbay/ocean"
+        };
+
+        function getInitialTab(routes) {
+            const queryTab = new URLSearchParams(window.location.search).get("tab");
+            if (queryTab && document.getElementById(`tab-content-${queryTab}`)) return queryTab;
+
+            const currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
+            return Object.keys(routes).find(tab => routes[tab].replace(/\/+$/, "") === currentPath) || "live";
+        }
+
+        function switchTab(tabId, updateUrl = true, runEffects = true) {
+            const targetPane = document.getElementById(`tab-content-${tabId}`);
+            const targetBtn = document.getElementById(`tab-btn-${tabId}`);
+            if (!targetPane || !targetBtn) return;
+
             document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('bg-[#1e3d59]', 'text-white');
                 btn.classList.add('bg-white/60', 'text-[#1e3d59]');
+                btn.removeAttribute('aria-current');
             });
 
-            const targetPane = document.getElementById(`tab-content-${tabId}`);
-            if (targetPane) targetPane.classList.remove('hidden');
+            targetPane.classList.remove('hidden');
+            targetBtn.classList.remove('bg-white/60', 'text-[#1e3d59]');
+            targetBtn.classList.add('bg-[#1e3d59]', 'text-white');
+            targetBtn.setAttribute('aria-current', 'page');
 
-            const targetBtn = document.getElementById(`tab-btn-${tabId}`);
-            if (targetBtn) {
-                targetBtn.classList.remove('bg-white/60', 'text-[#1e3d59]');
-                targetBtn.classList.add('bg-[#1e3d59]', 'text-white');
+            const route = SOUTH_BAY_ROUTES[tabId];
+            if (updateUrl && route && window.location.pathname !== route) {
+                window.history.pushState({ tabId }, "", route);
             }
 
-            // Allow DOM to unhide before rendering Chart.js canvases
-            setTimeout(() => {
-                if (tabId === 'trends') {
-                    fetchWeatherData();
-                } else if (tabId === 'yearly') {
-                    renderYearlyChart();
-                } else if (tabId === 'elnino') {
-                    renderElNinoChart();
-                } else if (tabId === 'resources') {
-                    fetchSurfData();
-                }
-            }, 100);
+            if (runEffects) {
+                setTimeout(() => {
+                    if (tabId === 'trends') {
+                        fetchWeatherData();
+                    } else if (tabId === 'yearly') {
+                        fetchYearlyData();
+                    } else if (tabId === 'elnino') {
+                        renderElNinoChart();
+                    } else if (tabId === 'resources') {
+                        fetchSurfData();
+                    }
+                }, 100);
+            }
         }
 
         function toggleAlertDetails() {
@@ -1246,21 +1269,6 @@
             }
         }
 
-        function formatOutlookUpdateTimestamp() {
-            const now = new Date();
-            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            const dayName = days[now.getDay()];
-            
-            let hours = now.getHours();
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const ampm = hours >= 12 ? 'pm' : 'am';
-            
-            hours = hours % 12;
-            hours = hours ? hours : 12; 
-            
-            return `Updated: ${dayName} @ ${hours}:${minutes} ${ampm}`;
-        }
-
         function syncGoogleSheetDigests() {
             window.handleGoogleSheetResponse = function(responseJSON) {
                 try {
@@ -1270,6 +1278,7 @@
                     let manualNoticeDesc = "";
                     let wstrText = "";
                     let osbText = "";
+                    let summaryUpdatedAt = "";
 
                     rows.forEach((row, index) => {
                         if (!row.c) return;
@@ -1288,6 +1297,8 @@
                             if (rawVal) wstrText = rawVal;
                         } else if (key === "osb" || index === 6) { // Row 7 (A7 / B7)
                             if (rawVal) osbText = rawVal;
+                        } else if (key === "lu") { // Row 8 (A8 / B8)
+                            summaryUpdatedAt = (row.c[1] && row.c[1].f) || rawVal;
                         }
                     });
 
@@ -1295,10 +1306,11 @@
                     if (summaryBox && southbayText) {
                         summaryBox.innerHTML = southbayText.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
                         
-                        const summaryMeta = document.getElementById('coastal-summary-meta');
-                        if (summaryMeta) {
-                            summaryMeta.innerText = formatOutlookUpdateTimestamp();
-                        }
+                    }
+
+                    const summaryUpdatedNode = document.getElementById('coastal-summary-updated');
+                    if (summaryUpdatedNode) {
+                        summaryUpdatedNode.textContent = summaryUpdatedAt.trim() || 'Not provided in sheet';
                     }
 
                     // Water & Swim Temp Report (Cell B6)
@@ -1348,15 +1360,90 @@
             document.body.appendChild(script);
         }
 
-        function renderYearlyChart() {
-            renderChart('yearlyPrecipChart', ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], [{ 
-                label: 'Monthly Rain (in)', 
-                data: [3.1, 4.2, 2.0, 0.5, 0.1, 0, 0, 0, 0.2, 0.5, 1.1, 0.72], 
-                backgroundColor: 'rgba(6, 182, 212, 0.6)', 
-                borderColor: '#06b6d4', 
-                borderWidth: 1, 
-                type: 'bar' 
-            }]);
+        async function fetchYearlyData() {
+            const status = document.getElementById('yearly-data-status');
+            const year = new Date().getFullYear();
+            const today = new Date();
+            const endDate = `${year}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            const url = new URL('https://archive-api.open-meteo.com/v1/archive');
+            url.search = new URLSearchParams({
+                latitude: currentLat.toString(),
+                longitude: currentLon.toString(),
+                start_date: `${year}-01-01`,
+                end_date: endDate,
+                daily: 'precipitation_sum,temperature_2m_max,temperature_2m_min,wind_gusts_10m_max',
+                temperature_unit: 'fahrenheit',
+                wind_speed_unit: 'mph',
+                precipitation_unit: 'inch',
+                timezone: 'America/Los_Angeles'
+            }).toString();
+
+            if (status) status.textContent = 'Loading historical observations...';
+
+            const controller = new AbortController();
+            const requestTimeout = setTimeout(() => controller.abort(), 15000);
+
+            try {
+                const response = await fetch(url, { signal: controller.signal });
+                if (!response.ok) throw new Error(`Historical weather request failed (${response.status}).`);
+                const result = await response.json();
+                const daily = result.daily;
+                if (!daily || !Array.isArray(daily.time) || daily.time.length === 0) {
+                    throw new Error('Historical weather response did not contain daily records.');
+                }
+
+                const monthlyRain = Array(12).fill(0);
+                let totalRain = 0;
+                let high = null;
+                let low = null;
+                let peakGust = null;
+
+                daily.time.forEach((date, index) => {
+                    const rain = daily.precipitation_sum?.[index];
+                    const maxTemp = daily.temperature_2m_max?.[index];
+                    const minTemp = daily.temperature_2m_min?.[index];
+                    const gust = daily.wind_gusts_10m_max?.[index];
+                    const month = Number(date.slice(5, 7)) - 1;
+
+                    if (Number.isFinite(rain)) {
+                        totalRain += rain;
+                        if (month >= 0 && month < monthlyRain.length) monthlyRain[month] += rain;
+                    }
+                    if (Number.isFinite(maxTemp) && (!high || maxTemp > high.value)) high = { value: maxTemp, date };
+                    if (Number.isFinite(minTemp) && (!low || minTemp < low.value)) low = { value: minTemp, date };
+                    if (Number.isFinite(gust) && (!peakGust || gust > peakGust.value)) peakGust = { value: gust, date };
+                });
+
+                const formatDate = date => new Date(`${date}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                document.getElementById('yearly-rain-total').textContent = totalRain.toFixed(2);
+                document.getElementById('yearly-rain-through').textContent = `Through ${formatDate(daily.time[daily.time.length - 1])}`;
+                document.getElementById('yearly-high-temp').textContent = high ? Math.round(high.value) : '--';
+                document.getElementById('yearly-high-date').textContent = high ? `Daily high on ${formatDate(high.date)}` : 'No temperature records';
+                document.getElementById('yearly-low-temp').textContent = low ? Math.round(low.value) : '--';
+                document.getElementById('yearly-low-date').textContent = low ? `Daily low on ${formatDate(low.date)}` : 'No temperature records';
+                document.getElementById('yearly-peak-gust').textContent = peakGust ? Math.round(peakGust.value) : '--';
+                document.getElementById('yearly-gust-date').textContent = peakGust ? `Daily peak on ${formatDate(peakGust.date)}` : 'No wind records';
+
+                renderChart('yearlyPrecipChart', ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], [{
+                    label: 'Monthly Rain (in)',
+                    data: monthlyRain,
+                    backgroundColor: 'rgba(23, 107, 141, 0.72)',
+                    borderColor: '#176b8d',
+                    borderWidth: 1,
+                    type: 'bar'
+                }]);
+
+                if (status) status.textContent = 'Source: Open-Meteo historical model data. Gridded estimates; not a station rain-gauge record.';
+            } catch (error) {
+                console.error('Unable to load annual South Bay weather data:', error);
+                if (status) {
+                    status.textContent = error instanceof Error && error.name === 'AbortError'
+                        ? 'Historical data request timed out. Please try again later.'
+                        : 'Annual history is unavailable right now. Please try again later.';
+                }
+            } finally {
+                clearTimeout(requestTimeout);
+            }
         }
 
         function renderElNinoChart() {
@@ -1397,6 +1484,11 @@
             const yearDisplay = document.getElementById('current-year-display');
             if (yearDisplay) yearDisplay.innerText = currentYear;
 
+            const initialTab = getInitialTab(SOUTH_BAY_ROUTES);
+            switchTab(initialTab, false, false);
+            window.addEventListener('popstate', () => switchTab(getInitialTab(SOUTH_BAY_ROUTES), false));
+            if (initialTab === 'yearly') setTimeout(fetchYearlyData, 100);
+            if (initialTab === 'elnino') setTimeout(renderElNinoChart, 100);
             fetchWeatherData();
             fetchSurfData();
             fetchNWSAlerts();

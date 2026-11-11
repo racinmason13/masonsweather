@@ -32,8 +32,9 @@
     <link class="fav" rel="icon" type="image/png" sizes="32x32" href="\images\Mason's Weather Logo.png">
     <link class="fav" rel="icon" type="image/png" sizes="16x16" href="\images\Mason's Weather Logo.png">
     <link class="fav" rel="apple-touch-icon" sizes="180x180" href="\images\Mason's Weather Logo.png">
+<link rel="stylesheet" href="/site.css" onerror="if(location.protocol==='file:'){this.onerror=null;this.href='site.css';}">
 </head>
-<body class="bg-gradient-to-b from-[#fdf2e9] via-[#fed7aa] to-[#fef3c7] min-h-screen text-[#451a03]">
+<body class="site-dashboard site-mohave min-h-screen">
 
     <!-- CONSOLIDATED SINGLE NWS ALERT BAR (NOW AT VERY TOP) -->
     <div id="nws-alert-bar" class="hidden bg-gradient-to-r from-red-700 to-amber-700 text-white py-3 px-4 shadow-xl sticky top-0 z-50 transition-all duration-500 ease-in-out">
@@ -84,33 +85,36 @@
         </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        <a href="index.html" class="block group hover:opacity-90 transition-opacity">
-          <header class="flex flex-col sm:flex-row items-center justify-between border-b border-sky-100 pb-6 mb-8 gap-4"> 
-            <div class="logo-section text-center sm:text-left"> 
-              <h1 class="text-4xl font-extrabold text-[#1e3d59] tracking-tight group-hover:text-sky-900 transition-colors">🌵 Kingman & Hualapai Mountains</h1> 
-              <p class="text-sm font-semibold text-sky-700 tracking-wider">Ranch House Weather Network • Elevation Span: 3,300′ to 8,200′</p> 
-            </div> 
-          </header>
-        </a>
-        <div class="header-live-temp flex flex-col items-center sm:items-end -mt-6 mb-8">
-            <div class="temp text-4xl font-extrabold text-[#7c2d12]" id="header-big-temp">--°F</div>
-            <div class="update-time text-xs text-amber-800/80">Station Feed: <span id="update-timestamp" class="font-bold">Loading...</span></div>
-        </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 dashboard-container">
+        <header class="dashboard-masthead">
+            <a class="dashboard-brand" href="/">
+                <img src="/images/Mason's Weather Logo.png" alt="" width="42" height="42" onerror="if(location.protocol==='file:'){this.onerror=null;this.src='images/Mason%27s%20Weather%20Logo.png';}">
+                <span><strong>MASON'S WEATHER</strong><small>LOCAL OBSERVATION NETWORK</small></span>
+            </a>
+            <div class="dashboard-location">
+                <p>MOHAVE COUNTY, ARIZONA</p>
+                <h1>Desert & mountain weather</h1>
+                <span>Kingman · Lazy Y U · Hualapai Mountains</span>
+            </div>
+            <div class="header-live-temp">
+                <span class="observation-label">CURRENT OBSERVATION</span>
+                <strong class="temp" id="header-big-temp">--°F</strong>
+                <span class="update-time">Station feed <span id="update-timestamp" class="font-bold">Loading...</span></span>
+            </div>
+        </header>
 
-        <nav class="flex flex-wrap gap-2 mb-8 justify-center sm:justify-start">
-            <button onclick="switchTab('live')" id="tab-btn-live" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-[#9a3412] text-white">
-                ☀️ Live Conditions
+        <nav class="dashboard-nav" aria-label="Mohave County sections">
+            <button onclick="switchTab('live')" id="tab-btn-live" aria-current="page" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-[#9a3412] text-white">
+                Live Conditions
             </button>
             <button onclick="switchTab('trends')" id="tab-btn-trends" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-white/60 hover:bg-white text-[#9a3412]">
-                📊 Forecast & Trends
+                Forecast & Trends
             </button>
             <button onclick="switchTab('cams')" id="tab-btn-cams" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-white/60 hover:bg-white text-[#9a3412]">
-                📡 Weather Maps
+                Weather Maps
             </button>
             <button onclick="switchTab('resources')" id="tab-btn-resources" class="tab-btn px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-300 bg-white/60 hover:bg-white text-[#9a3412]">
-                🗺️ Desert Resources
+                Desert Resources
             </button>
         </nav>
 
@@ -119,27 +123,27 @@
             <aside class="lg:col-span-3 flex flex-col gap-4">
                 <div class="bg-white/70 backdrop-blur-md border border-orange-100 shadow-xl rounded-3xl p-5">
                     <h3 class="text-lg font-bold text-[#7c2d12] border-b border-orange-100 pb-3 mb-4 flex items-center">
-                        📍 Microclimates
+                        Local stations
                     </h3>
                     <p class="text-xs text-amber-900/70 mb-4">Select an area elevation to view live weather telemetry & trends:</p>
                     <div id="city-selector" class="flex flex-col gap-2">
                         <button onclick="selectCity('Lazy Y U', 35.136876, -113.964484, 'KAZKINGM257', this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-amber-100 text-amber-950 border border-amber-200 shadow-sm">
                             <span class="flex flex-col">
-                                <span>🏡 Lazy Y U</span>
+                                <span>Lazy Y U</span>
                                 <span class="text-2xs text-amber-800 font-medium">Elevation: ~4,800′</span>
                             </span>
                             <span class="text-xs px-2 py-0.5 rounded-full bg-white/60">Community</span>
                         </button>
                         <button onclick="selectCity('Kingman Valley', 35.207222, -114.033769, 'KAZKINGM227', this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#7c2d12] hover:shadow-sm">
                             <span class="flex flex-col">
-                                <span>🌵 Kingman</span>
+                                <span>Kingman</span>
                                 <span class="text-2xs text-[#7c2d12]/70 font-medium">Elevation: ~3,300′</span>
                             </span>
                             <span class="text-xs opacity-60">Valley</span>
                         </button>
                         <button onclick="selectCity('Hualapai Peak / Park', 35.0970, -113.8750, '', this)" class="city-btn w-full text-left px-4 py-3 rounded-2xl font-semibold transition-all duration-300 flex justify-between items-center bg-white/40 hover:bg-white text-[#7c2d12] hover:shadow-sm">
                             <span class="flex flex-col">
-                                <span>🌲 Hualapai Mountains</span>
+                                <span>Hualapai Mountains</span>
                                 <span class="text-2xs text-[#7c2d12]/70 font-medium">Elevation: ~6,500′</span>
                             </span>
                             <span class="text-xs opacity-60">Pines</span>
@@ -148,9 +152,9 @@
                 </div>
 
                 <div class="bg-[#7c2d12] text-white shadow-xl rounded-3xl p-5 relative overflow-hidden">
-                    <h4 class="text-xs uppercase tracking-wider text-orange-200 font-bold mb-1">Mountain Elevation Swing</h4>
+                    <h4 class="text-xs uppercase tracking-wider text-orange-200 font-bold mb-1">Elevation differences</h4>
                     <p class="text-xs text-orange-100/90 leading-relaxed">
-                        Notice the immense temperature gap! While the dry valley basin of Kingman baked in desert breezes, the upper ridges of the Hualapai pine belts remain heavily sheltered, dropping up to 18 degrees cooler. This acts as our local "Sky Island" escape route!
+                        Temperatures and wind can vary between the Kingman basin and higher elevations in the Hualapai Mountains. Check the station readings for current local differences.
                     </p>
                 </div>
             </aside>
@@ -160,7 +164,7 @@
                 <div class="bg-white/70 backdrop-blur-md border border-orange-100 shadow-xl rounded-3xl p-6">
                     <div class="border-b border-orange-100 pb-2 mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                         <h3 class="text-lg font-bold text-[#7c2d12] flex items-center">
-                            📝 Mason's Outlook
+                            Local outlook
                         </h3>
                         <span id="outlook-timestamp" class="text-2xs font-semibold text-amber-800 uppercase tracking-wider">
                             Updated: Loading...
@@ -187,7 +191,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div class="weather-metrics grid grid-cols-2 md:grid-cols-4 gap-6">
                         <div class="bg-gradient-to-br from-amber-50 to-orange-100/40 border border-amber-200/50 rounded-2xl p-4 flex flex-col justify-between">
                             <span class="text-xs font-bold uppercase tracking-wider text-amber-900">Live Temp</span>
                             <div class="my-2">
@@ -257,7 +261,7 @@
                     </div>
                 </div>
 
-                <div class="border-t border-orange-200/50 pt-6">
+                <div class="forecast-outlook border-t border-orange-200/50 pt-6">
                     <h4 class="text-xs font-extrabold uppercase tracking-widest text-[#7c2d12] mb-4 flex items-center gap-2">
                         <span>📝</span> Detailed Daily Weather Outlook
                     </h4>
@@ -385,20 +389,45 @@
         const SPREADSHEET_ID = "1jQ9ddsqhOXiw2RnN41ZnHs-vyhV2V2lZbmsAa0k3-GY";
 
         // 1. CHOOSE ACTIVE TABS
-        function switchTab(tabId) {
+        const MOHAVE_ROUTES = {
+            live: "/mohave/",
+            trends: "/mohave/forecast",
+            cams: "/mohave/maps",
+            resources: "/mohave/resources"
+        };
+
+        function getInitialTab(routes) {
+            const queryTab = new URLSearchParams(window.location.search).get("tab");
+            if (queryTab && document.getElementById(`tab-content-${queryTab}`)) return queryTab;
+
+            const currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
+            return Object.keys(routes).find(tab => routes[tab].replace(/\/+$/, "") === currentPath) || "live";
+        }
+
+        function switchTab(tabId, updateUrl = true, runEffects = true) {
+            const targetPane = document.getElementById(`tab-content-${tabId}`);
+            const targetBtn = document.getElementById(`tab-btn-${tabId}`);
+            if (!targetPane || !targetBtn) return;
+
             document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('bg-[#9a3412]', 'text-white');
                 btn.classList.add('bg-white/60', 'text-[#9a3412]');
+                btn.removeAttribute('aria-current');
             });
 
-            // Make designated tab visible
-            document.getElementById(`tab-content-${tabId}`).classList.remove('hidden');
-            document.getElementById(`tab-btn-${tabId}`).classList.remove('bg-white/60', 'text-[#9a3412]');
-            document.getElementById(`tab-btn-${tabId}`).classList.add('bg-[#9a3412]', 'text-white');
+            targetPane.classList.remove('hidden');
+            targetBtn.classList.remove('bg-white/60', 'text-[#9a3412]');
+            targetBtn.classList.add('bg-[#9a3412]', 'text-white');
+            targetBtn.setAttribute('aria-current', 'page');
+
+            const route = MOHAVE_ROUTES[tabId];
+            if (updateUrl && route && window.location.pathname !== route) {
+                window.history.pushState({ tabId }, "", route);
+            }
 
             // Render charts and NOAA 7-Day Forecast when tab is selected
-            if (tabId === 'trends') {
+            if (runEffects && tabId === 'trends') {
                 setTimeout(() => {
                     fetchWeatherData();
                 }, 50);
@@ -1017,6 +1046,8 @@
         
         // Dashboard Init Orchestration
         window.addEventListener('DOMContentLoaded', () => {
+            switchTab(getInitialTab(MOHAVE_ROUTES), false, false);
+            window.addEventListener('popstate', () => switchTab(getInitialTab(MOHAVE_ROUTES), false));
             fetchWeatherData();
             fetchNWSAlerts(); 
             startSatelliteAutoRefresh();

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sun & Moon | Mason's Weather</title>
+    <link rel="icon" type="image/png" href="/images/Mason's Weather Logo.png">
+    <link rel="stylesheet" href="/site.css" onerror="if(location.protocol==='file:'){this.onerror=null;this.href='site.css';}">
+</head>
+<body class="site-astronomy min-h-screen">
+    <header class="portal-topbar">
+        <a class="portal-brand" href="/">
+            <img src="/images/Mason's Weather Logo.png" alt="" width="42" height="42" onerror="if(location.protocol==='file:'){this.onerror=null;this.src='images/Mason%27s%20Weather%20Logo.png';}">
+            <span><strong>MASON'S WEATHER</strong><small>LOCAL OBSERVATION NETWORK</small></span>
+        </a>
+        <nav class="portal-nav" aria-label="Primary">
+            <a href="/southbay/">South Bay</a>
+            <a href="/mohave/">Mohave County</a>
+            <a href="/radar.html">National Radar</a>
+            <a href="/astronomy/" aria-current="page">Sun & Moon</a>
+            <a href="/earthquakes/">Earthquakes</a>
+        </nav>
+    </header>
+
+    <main class="astro-main">
+        <section class="astro-heading">
+            <div>
+                <p class="home-kicker">LOCAL SKY CONDITIONS</p>
+                <h1>Sun & Moon</h1>
+                <p>Daily solar and lunar events, calculated for your selected Mason's Weather location.</p>
+            </div>
+            <label class="astro-location-control" for="astro-location">
+                <span>LOCATION</span>
+                <select id="astro-location">
+                    <option value="southbay">South Bay, California</option>
+                    <option value="kingman">Kingman, Arizona</option>
+                    <option value="lazy-y-u">Lazy Y U, Arizona</option>
+                    <option value="hualapai">Hualapai Mountains, Arizona</option>
+                </select>
+                <small id="astro-location-detail">Loading local date...</small>
+            </label>
+        </section>
+
+        <p id="astro-status" class="astro-status" role="status" aria-live="polite">Loading astronomical data...</p>
+
+        <section class="astro-grid" aria-label="Today's sun and moon data">
+            <article class="astro-panel">
+                <div class="astro-panel-heading">
+                    <div><span class="astro-eyebrow">SOLAR</span><h2>Sunlight</h2></div>
+                    <span class="astro-symbol" aria-hidden="true">SUN</span>
+                </div>
+                <div class="astro-event-grid">
+                    <div class="astro-event"><span>Sunrise</span><strong id="sunrise">--</strong></div>
+                    <div class="astro-event"><span>Solar noon</span><strong id="solar-noon">--</strong></div>
+                    <div class="astro-event"><span>Sunset</span><strong id="sunset">--</strong></div>
+                    <div class="astro-event"><span>Daylight</span><strong id="daylight">--</strong></div>
+                </div>
+                <div class="astro-twilight">
+                    <span>Civil twilight</span>
+                    <strong id="civil-twilight">--</strong>
+                </div>
+            </article>
+
+            <article class="astro-panel">
+                <div class="astro-panel-heading">
+                    <div><span class="astro-eyebrow">LUNAR</span><h2>Moon</h2></div>
+                    <span class="astro-symbol astro-moon-symbol" aria-hidden="true">MOON</span>
+                </div>
+                <div class="moon-summary">
+                    <div class="moon-phase-mark" aria-hidden="true"><span id="moon-phase-mark"></span></div>
+                    <div>
+                        <strong id="moon-phase">--</strong>
+                        <span id="moon-illumination">-- illuminated</span>
+                    </div>
+                </div>
+                <div class="astro-event-grid">
+                    <div class="astro-event"><span>Moonrise</span><strong id="moonrise">--</strong></div>
+                    <div class="astro-event"><span>Moon transit</span><strong id="moon-transit">--</strong></div>
+                    <div class="astro-event"><span>Moonset</span><strong id="moonset">--</strong></div>
+                    <div class="astro-event"><span>Nearest phase</span><strong id="nearest-phase">--</strong></div>
+                </div>
+            </article>
+        </section>
+
+        <section class="astro-panel astro-phases">
+            <div class="astro-panel-heading">
+                <div><span class="astro-eyebrow">UPCOMING</span><h2>Primary moon phases</h2></div>
+                <span id="phase-source-status" class="astro-source-note">United States Naval Observatory</span>
+            </div>
+            <div id="phase-list" class="phase-list">
+                <p class="astro-placeholder">Loading upcoming phases...</p>
+            </div>
+        </section>
+
+        <p class="astro-attribution">
+            Rise, set, twilight, and illumination values are astronomical calculations from the
+            <a href="https://aa.usno.navy.mil/data/api.html" target="_blank" rel="noopener noreferrer">U.S. Naval Observatory Astronomical Applications API</a>.
+            Times are local to the selected location. These are calculated event times, not live sky observations.
+        </p>
+    </main>
+
+    <footer class="portal-footer">
+        &copy; 2026 Mason's Weather. Astronomy data: U.S. Naval Observatory.
+    </footer>
+
+    <script>
+        const astronomyLocations = {
+            southbay: {
+                name: 'South Bay, California',
+                coordinates: [33.8492, -118.3884],
+                timeZone: 'America/Los_Angeles',
+                standardOffset: -8,
+                observesDst: true,
+                elevationMeters: 35
+            },
+            kingman: {
+                name: 'Kingman, Arizona',
+                coordinates: [35.207222, -114.033769],
+                timeZone: 'America/Phoenix',
+                standardOffset: -7,
+                observesDst: false,
+                elevationMeters: 1010
+            },
+            'lazy-y-u': {
+                name: 'Lazy Y U, Arizona',
+                coordinates: [35.136876, -113.964484],
+                timeZone: 'America/Phoenix',
+                standardOffset: -7,
+                observesDst: false,
+                elevationMeters: 1463
+            },
+            hualapai: {
+                name: 'Hualapai Mountains, Arizona',
+                coordinates: [35.097, -113.875],
+                timeZone: 'America/Phoenix',
+                standardOffset: -7,
+                observesDst: false,
+                elevationMeters: 1981
+            }
+        };
+
+        const locationSelect = document.getElementById('astro-location');
+        const statusNode = document.getElementById('astro-status');
+        const dateFormatter = new Intl.DateTimeFormat('en-US', {
+            weekday: 'long',
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
+        });
+
+        function getLocalDate(date, timeZone) {
+            const parts = new Intl.DateTimeFormat('en-US', {
+                timeZone,
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).formatToParts(date);
+            const values = {};
+            parts.forEach(part => { values[part.type] = part.value; });
+            return `${values.year}-${values.month}-${values.day}`;
+        }
+
+        function formatLocalTime(value) {
+            if (!value || value === 'null') return 'No event today';
+            const time = value.trim().split(/\s+/)[0];
+            const parts = time.split(':').map(Number);
+            if (parts.length < 2 || !parts.every(Number.isFinite)) return 'Unavailable';
+            const date = new Date();
+            date.setHours(parts[0], parts[1], 0, 0);
+            return new Intl.DateTimeFormat('en-US', {
+                hour: 'numeric',
+                minute: '2-digit'
+            }).format(date);
+        }
+
+        function getEvent(data, events, phenomenon) {
+            const event = events.find(item => item.phen === phenomenon);
+            return event ? formatLocalTime(event.time) : 'No event today';
+        }
+
+        function formatDaylight(sunData) {
+            const rise = sunData.find(item => item.phen === 'Rise');
+            const set = sunData.find(item => item.phen === 'Set');
+            if (!rise || !set || rise.time === 'null' || set.time === 'null') return 'No sunrise/set';
+            const [riseHour, riseMinute] = rise.time.trim().split(/\s+/)[0].split(':').map(Number);
+            const [setHour, setMinute] = set.time.trim().split(/\s+/)[0].split(':').map(Number);
+            let minutes = (setHour * 60 + setMinute) - (riseHour * 60 + riseMinute);
+            if (minutes < 0) minutes += 24 * 60;
+            return `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, '0')}m`;
+        }
+
+        function setNearestPhase(phase) {
+            const date = new Date(phase.year, phase.month - 1, phase.day);
+            const dateText = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(date);
+            document.getElementById('nearest-phase').textContent = `${phase.phase}, ${dateText}`;
+        }
+
+        function setMoonPhaseMark(phase, illumination) {
+            const mark = document.getElementById('moon-phase-mark');
+            mark.dataset.phase = phase.toLowerCase();
+            mark.style.setProperty('--moon-lit', `${parseInt(illumination, 10) || 0}%`);
+        }
+
+        function phaseDateTime(phase) {
+            const [hour, minute] = phase.time.split(':').map(Number);
+            return new Date(Date.UTC(phase.year, phase.month - 1, phase.day, hour, minute));
+        }
+
+        function renderUpcomingPhases(phases, timeZone) {
+            const list = document.getElementById('phase-list');
+            const now = new Date();
+            const upcoming = phases
+                .map(phase => ({ phase, instant: phaseDateTime(phase) }))
+                .filter(item => item.instant >= now)
+                .slice(0, 4);
+
+            list.replaceChildren();
+            if (!upcoming.length) {
+                const message = document.createElement('p');
+                message.className = 'astro-placeholder';
+                message.textContent = 'Upcoming phase data is not available.';
+                list.appendChild(message);
+                return;
+            }
+
+            upcoming.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'phase-card';
+                const title = document.createElement('strong');
+                title.textContent = item.phase.phase;
+                const date = document.createElement('span');
+                date.textContent = new Intl.DateTimeFormat('en-US', {
+                    timeZone,
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric'
+                }).format(item.instant);
+                const time = document.createElement('span');
+                time.textContent = new Intl.DateTimeFormat('en-US', {
+                    timeZone,
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    timeZoneName: 'short'
+                }).format(item.instant);
+                card.append(title, date, time);
+                list.appendChild(card);
+            });
+        }
+
+        async function fetchUsno(url, signal) {
+            const response = await fetch(url, { signal });
+            if (!response.ok) throw new Error(`Astronomical data request failed (${response.status}).`);
+            const result = await response.json();
+            if (result.error) throw new Error(result.error);
+            return result;
+        }
+
+        async function loadAstronomy() {
+            const location = astronomyLocations[locationSelect.value];
+            const now = new Date();
+            const localDate = getLocalDate(now, location.timeZone);
+            document.getElementById('astro-location-detail').textContent =
+                `${dateFormatter.format(new Date(`${localDate}T12:00:00`))} · ${location.elevationMeters.toLocaleString()} m elevation`;
+            statusNode.textContent = 'Loading astronomical data...';
+
+            const dailyUrl = new URL('https://aa.usno.navy.mil/api/rstt/oneday');
+            dailyUrl.search = new URLSearchParams({
+                date: localDate,
+                coords: location.coordinates.join(','),
+                tz: String(location.standardOffset),
+                dst: String(location.observesDst),
+                height: String(location.elevationMeters)
+            }).toString();
+
+            const phasesUrl = new URL('https://aa.usno.navy.mil/api/moon/phases/date');
+            phasesUrl.search = new URLSearchParams({ date: localDate, nump: '8' }).toString();
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 15000);
+
+            try {
+                const [dailyResult, phasesResult] = await Promise.allSettled([
+                    fetchUsno(dailyUrl, controller.signal),
+                    fetchUsno(phasesUrl, controller.signal)
+                ]);
+
+                const failures = [];
+                if (dailyResult.status === 'fulfilled') {
+                    const data = dailyResult.value.properties?.data;
+                    if (!data) {
+                        failures.push('Daily sun and moon details were not returned.');
+                    } else {
+                        const sunData = data.sundata || [];
+                        const moonData = data.moondata || [];
+                        document.getElementById('sunrise').textContent = getEvent(data, sunData, 'Rise');
+                        document.getElementById('solar-noon').textContent = getEvent(data, sunData, 'Upper Transit');
+                        document.getElementById('sunset').textContent = getEvent(data, sunData, 'Set');
+                        document.getElementById('daylight').textContent = formatDaylight(sunData);
+                        document.getElementById('civil-twilight').textContent =
+                            `${getEvent(data, sunData, 'Begin Civil Twilight')} – ${getEvent(data, sunData, 'End Civil Twilight')}`;
+                        document.getElementById('moon-phase').textContent = data.curphase || 'Unavailable';
+                        document.getElementById('moon-illumination').textContent = `${data.fracillum || '--'} illuminated`;
+                        document.getElementById('moonrise').textContent = getEvent(data, moonData, 'Rise');
+                        document.getElementById('moon-transit').textContent = getEvent(data, moonData, 'Upper Transit');
+                        document.getElementById('moonset').textContent = getEvent(data, moonData, 'Set');
+                        if (data.closestphase) setNearestPhase(data.closestphase);
+                        setMoonPhaseMark(data.curphase || '', data.fracillum || '0%');
+                    }
+                } else {
+                    failures.push('Daily sun and moon data could not be loaded.');
+                    console.error('Unable to load daily USNO sun and moon data:', dailyResult.reason);
+                }
+
+                if (phasesResult.status === 'fulfilled') {
+                    renderUpcomingPhases(phasesResult.value.phasedata || [], location.timeZone);
+                } else {
+                    failures.push('Upcoming lunar phases could not be loaded.');
+                    console.error('Unable to load upcoming USNO moon phases:', phasesResult.reason);
+                    document.getElementById('phase-list').innerHTML =
+                        '<p class="astro-placeholder">Upcoming phase data is temporarily unavailable.</p>';
+                }
+
+                statusNode.textContent = failures.length
+                    ? `${failures.join(' ')} Please try again later.`
+                    : `Astronomical calculations for ${location.name}, updated ${new Intl.DateTimeFormat('en-US', {
+                        timeZone: location.timeZone,
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        timeZoneName: 'short'
+                    }).format(now)}.`;
+            } catch (error) {
+                console.error('Unable to load USNO astronomy data:', error);
+                statusNode.textContent = error.name === 'AbortError'
+                    ? 'Astronomical data request timed out. Please try again later.'
+                    : 'Astronomical data is temporarily unavailable. Please try again later.';
+            } finally {
+                clearTimeout(timeout);
+            }
+        }
+
+        locationSelect.addEventListener('change', loadAstronomy);
+        loadAstronomy();
+    </script>
+</body>
+</html>

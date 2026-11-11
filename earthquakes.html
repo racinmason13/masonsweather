@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regional Earthquakes | Mason's Weather</title>
+    <link rel="icon" type="image/png" href="/images/Mason's Weather Logo.png">
+    <link rel="stylesheet" href="/site.css" onerror="if(location.protocol==='file:'){this.onerror=null;this.href='site.css';}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body class="site-earthquakes">
+    <header class="portal-topbar">
+        <a class="portal-brand" href="/">
+            <img src="/images/Mason's Weather Logo.png" alt="" width="42" height="42" onerror="if(location.protocol==='file:'){this.onerror=null;this.src='images/Mason%27s%20Weather%20Logo.png';}">
+            <span><strong>MASON'S WEATHER</strong><small>LOCAL OBSERVATION NETWORK</small></span>
+        </a>
+        <nav class="portal-nav" aria-label="Primary">
+            <a href="/southbay/">South Bay</a>
+            <a href="/mohave/">Mohave County</a>
+            <a href="/radar.html">National Radar</a>
+            <a href="/astronomy/">Sun &amp; Moon</a>
+            <a href="/earthquakes/" aria-current="page">Earthquakes</a>
+        </nav>
+    </header>
+
+    <main class="earthquake-main">
+        <section class="earthquake-heading">
+            <div>
+                <p class="home-kicker">SOUTHERN CALIFORNIA · NEVADA · WESTERN ARIZONA</p>
+                <h1>Regional earthquakes</h1>
+                <p>Recent earthquakes from the U.S. Geological Survey, shown on a map and in a sortable event list.</p>
+            </div>
+            <button id="earthquake-refresh" class="earthquake-refresh" type="button">Refresh data</button>
+        </section>
+
+        <section class="earthquake-panel earthquake-map-panel" aria-labelledby="map-heading">
+            <div class="earthquake-panel-heading">
+                <div><span class="earthquake-eyebrow">PAST 7 DAYS · M 2.0+</span><h2 id="map-heading">Epicenter map</h2></div>
+                <span id="earthquake-count" class="earthquake-count">Loading events...</span>
+            </div>
+            <div id="earthquake-map" class="earthquake-map" aria-label="Map showing earthquake epicenters"></div>
+            <div class="earthquake-legend" aria-label="Map magnitude key">
+                <strong>Magnitude key</strong>
+                <span><i class="earthquake-dot mag-2" aria-hidden="true"></i>M 2.0–2.9</span>
+                <span><i class="earthquake-dot mag-3" aria-hidden="true"></i>M 3.0–3.9</span>
+                <span><i class="earthquake-dot mag-4" aria-hidden="true"></i>M 4.0–4.9</span>
+                <span><i class="earthquake-dot mag-5" aria-hidden="true"></i>M 5.0+</span>
+            </div>
+        </section>
+
+        <section class="earthquake-panel earthquake-table-panel" aria-labelledby="events-heading">
+            <div class="earthquake-panel-heading">
+                <div><span class="earthquake-eyebrow">USGS EVENT FEED</span><h2 id="events-heading">Earthquake list</h2></div>
+                <p id="earthquake-status" class="earthquake-status" role="status" aria-live="polite">Contacting the USGS earthquake catalog...</p>
+            </div>
+            <div class="earthquake-table-scroll">
+                <table class="earthquake-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Epicenter Near</th>
+                            <th scope="col" aria-sort="none"><button class="earthquake-sort" type="button" data-sort="magnitude">Magnitude</button></th>
+                            <th scope="col" aria-sort="none"><button class="earthquake-sort" type="button" data-sort="distance">Distance to Epicenter</button></th>
+                            <th scope="col" aria-sort="descending"><button class="earthquake-sort" type="button" data-sort="time">Time (UTC)</button></th>
+                            <th scope="col">Link</th>
+                        </tr>
+                    </thead>
+                    <tbody id="earthquake-rows">
+                        <tr><td colspan="5" class="earthquake-empty">Loading recent events...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="earthquake-distance-note">Distance is measured from the nearer of two reference points: Redondo Beach, California, and Kingman, Arizona. Event times are shown in Coordinated Universal Time (UTC).</p>
+        </section>
+
+        <p class="earthquake-attribution">
+            Catalog data: <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener noreferrer">U.S. Geological Survey</a>.
+            Map tiles: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>.
+            Feed coverage is bounded to 31.5–37.5°N, 120.5–112°W and includes events of magnitude 2.0 or greater. Event locations and magnitudes are preliminary and may be revised by USGS.
+        </p>
+    </main>
+
+    <footer class="portal-footer">
+        &copy; 2026 Mason's Weather. Earthquake data provided by the U.S. Geological Survey.
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const earthquakeFeed = 'https://earthquake.usgs.gov/fdsnws/event/1/query';
+        const earthquakeSites = [
+            { name: 'South Bay', lat: 33.8492, lon: -118.3884 },
+            { name: 'Kingman', lat: 35.207222, lon: -114.033769 }
+        ];
+        const earthquakeRows = document.getElementById('earthquake-rows');
+        const earthquakeStatus = document.getElementById('earthquake-status');
+        const earthquakeCount = document.getElementById('earthquake-count');
+        const earthquakeRefresh = document.getElementById('earthquake-refresh');
+        let earthquakeEvents = [];
+        let sortKey = 'time';
+        let sortDirection = -1;
+        let earthquakeMap;
+        let earthquakeLayer;
+
+        function initializeEarthquakeMap() {
+            const mapNode = document.getElementById('earthquake-map');
+            if (!window.L) {
+                mapNode.textContent = 'The interactive map library could not be loaded. The event list can still be used.';
+                return;
+            }
+            earthquakeMap = L.map(mapNode).setView([34.8, -116.2], 5);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 12,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+            }).addTo(earthquakeMap);
+            earthquakeLayer = L.featureGroup().addTo(earthquakeMap);
+        }
+
+        function magnitudeClass(magnitude) {
+            if (magnitude >= 5) return 'mag-5';
+            if (magnitude >= 4) return 'mag-4';
+            if (magnitude >= 3) return 'mag-3';
+            return 'mag-2';
+        }
+
+        function magnitudeColor(magnitude) {
+            if (magnitude >= 5) return '#b42318';
+            if (magnitude >= 4) return '#d97706';
+            if (magnitude >= 3) return '#a16207';
+            return '#167b67';
+        }
+
+        function distanceMiles(lat1, lon1, lat2, lon2) {
+            const radians = value => value * Math.PI / 180;
+            const dLat = radians(lat2 - lat1);
+            const dLon = radians(lon2 - lon1);
+            const rawA = Math.sin(dLat / 2) ** 2 +
+                Math.cos(radians(lat1)) * Math.cos(radians(lat2)) * Math.sin(dLon / 2) ** 2;
+            const a = Math.min(1, Math.max(0, rawA));
+            return 3958.7613 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        function formatEventTime(event) {
+            return new Intl.DateTimeFormat('en-US', {
+                timeZone: 'UTC',
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                timeZoneName: 'short'
+            }).format(new Date(event.time));
+        }
+
+        function createEventRow(event) {
+            const row = document.createElement('tr');
+            const placeCell = document.createElement('td');
+            placeCell.textContent = event.place;
+
+            const magnitudeCell = document.createElement('td');
+            const magnitudeBadge = document.createElement('span');
+            magnitudeBadge.className = `earthquake-magnitude ${magnitudeClass(event.magnitude)}`;
+            magnitudeBadge.textContent = event.magnitude.toFixed(1);
+            magnitudeCell.appendChild(magnitudeBadge);
+
+            const distanceCell = document.createElement('td');
+            distanceCell.textContent = `${Math.round(event.distance)} mi (${event.nearestSite})`;
+
+            const timeCell = document.createElement('td');
+            timeCell.textContent = formatEventTime(event);
+
+            const linkCell = document.createElement('td');
+            const detailLink = document.createElement('a');
+            detailLink.href = event.url;
+            detailLink.target = '_blank';
+            detailLink.rel = 'noopener noreferrer';
+            detailLink.textContent = 'USGS details';
+            linkCell.appendChild(detailLink);
+
+            row.append(placeCell, magnitudeCell, distanceCell, timeCell, linkCell);
+            return row;
+        }
+
+        function renderEarthquakeRows() {
+            const sortedEvents = earthquakeEvents.slice().sort((a, b) => {
+                const difference = a[sortKey] - b[sortKey];
+                return difference === 0 ? b.time - a.time : difference * sortDirection;
+            });
+            earthquakeRows.replaceChildren();
+
+            if (sortedEvents.length === 0) {
+                const emptyRow = document.createElement('tr');
+                const emptyCell = document.createElement('td');
+                emptyCell.colSpan = 5;
+                emptyCell.className = 'earthquake-empty';
+                emptyCell.textContent = 'No magnitude 2.0 or greater events were found in the selected region during the past seven days.';
+                emptyRow.appendChild(emptyCell);
+                earthquakeRows.appendChild(emptyRow);
+                return;
+            }
+
+            sortedEvents.forEach(event => earthquakeRows.appendChild(createEventRow(event)));
+        }
+
+        function renderEarthquakeMap() {
+            if (!earthquakeLayer) return;
+            earthquakeLayer.clearLayers();
+            earthquakeEvents.forEach(event => {
+                const marker = L.circleMarker([event.latitude, event.longitude], {
+                    radius: Math.max(5, Math.min(14, 4 + event.magnitude * 1.5)),
+                    color: magnitudeColor(event.magnitude),
+                    fillColor: magnitudeColor(event.magnitude),
+                    fillOpacity: 0.72,
+                    weight: 1.5
+                });
+                const popup = document.createElement('div');
+                const place = document.createElement('strong');
+                place.textContent = event.place;
+                const details = document.createElement('div');
+                details.textContent = `Magnitude ${event.magnitude.toFixed(1)} · ${formatEventTime(event)}`;
+                popup.append(place, details);
+                marker.bindPopup(popup);
+                earthquakeLayer.addLayer(marker);
+            });
+        }
+
+        async function loadEarthquakes() {
+            earthquakeRefresh.disabled = true;
+            earthquakeStatus.textContent = 'Contacting the USGS earthquake catalog...';
+            const endTime = new Date();
+            const startTime = new Date(endTime.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const params = new URLSearchParams({
+                format: 'geojson',
+                starttime: startTime.toISOString(),
+                endtime: endTime.toISOString(),
+                minmagnitude: '2.0',
+                minlatitude: '31.5',
+                maxlatitude: '37.5',
+                minlongitude: '-120.5',
+                maxlongitude: '-112.0',
+                orderby: 'time'
+            });
+
+            try {
+                const response = await fetch(`${earthquakeFeed}?${params.toString()}`);
+                if (!response.ok) throw new Error(`USGS returned HTTP ${response.status}`);
+                const data = await response.json();
+                earthquakeEvents = data.features
+                    .filter(feature => {
+                        const coordinates = feature.geometry && feature.geometry.coordinates;
+                        const properties = feature.properties;
+                        return Array.isArray(coordinates) && properties && Number.isFinite(properties.mag) &&
+                            Number.isFinite(properties.time) && typeof properties.url === 'string';
+                    })
+                    .map(feature => {
+                        const [longitude, latitude] = feature.geometry.coordinates;
+                        const nearest = earthquakeSites
+                            .map(site => ({
+                                name: site.name,
+                                distance: distanceMiles(latitude, longitude, site.lat, site.lon)
+                            }))
+                            .sort((a, b) => a.distance - b.distance)[0];
+                        return {
+                            place: feature.properties.place || 'Location not reported',
+                            magnitude: feature.properties.mag,
+                            distance: nearest.distance,
+                            nearestSite: nearest.name,
+                            time: feature.properties.time,
+                            url: feature.properties.url,
+                            latitude,
+                            longitude
+                        };
+                    });
+                renderEarthquakeRows();
+                renderEarthquakeMap();
+                earthquakeCount.textContent = `${earthquakeEvents.length} event${earthquakeEvents.length === 1 ? '' : 's'}`;
+                earthquakeStatus.textContent = `Updated ${new Date().toLocaleString()} · Past 7 days`;
+            } catch (error) {
+                console.error('Unable to load the USGS earthquake feed:', error);
+                earthquakeCount.textContent = 'Data unavailable';
+                earthquakeStatus.textContent = 'Unable to load USGS earthquake data. Check your connection and try again.';
+                earthquakeRows.replaceChildren();
+                const errorRow = document.createElement('tr');
+                const errorCell = document.createElement('td');
+                errorCell.colSpan = 5;
+                errorCell.className = 'earthquake-empty';
+                errorCell.textContent = 'Earthquake data could not be loaded. Use Refresh data to try again.';
+                errorRow.appendChild(errorCell);
+                earthquakeRows.appendChild(errorRow);
+            } finally {
+                earthquakeRefresh.disabled = false;
+            }
+        }
+
+        document.querySelectorAll('.earthquake-sort').forEach(button => {
+            button.addEventListener('click', () => {
+                const nextKey = button.dataset.sort;
+                sortDirection = sortKey === nextKey ? sortDirection * -1 : -1;
+                sortKey = nextKey;
+                document.querySelectorAll('.earthquake-sort').forEach(sortButton => {
+                    const heading = sortButton.closest('th');
+                    heading.setAttribute('aria-sort', sortButton === button
+                        ? (sortDirection === -1 ? 'descending' : 'ascending')
+                        : 'none');
+                });
+                renderEarthquakeRows();
+            });
+        });
+
+        earthquakeRefresh.addEventListener('click', loadEarthquakes);
+        initializeEarthquakeMap();
+        loadEarthquakes();
+    </script>
+</body>
+</html>
