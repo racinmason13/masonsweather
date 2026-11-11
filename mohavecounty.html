@@ -162,20 +162,6 @@
 
             <main class="lg:col-span-9 flex flex-col gap-6">
                 
-                <div class="bg-white/70 backdrop-blur-md border border-orange-100 shadow-xl rounded-3xl p-6">
-                    <div class="border-b border-orange-100 pb-2 mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                        <h3 class="text-lg font-bold text-[#7c2d12] flex items-center">
-                            Local outlook
-                        </h3>
-                        <span id="outlook-timestamp" class="text-2xs font-semibold text-amber-800 uppercase tracking-wider">
-                            Updated: Loading...
-                        </span>
-                    </div>
-                    <div id="kingman-digest" class="text-sm text-amber-950 leading-relaxed font-medium">
-                        Loading latest desert field reports...
-                    </div>
-                </div>
-
                 <div class="bg-white/70 backdrop-blur-md border border-orange-100 shadow-xl rounded-3xl p-6 md:p-8">
                     <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-orange-100 pb-6 mb-6">
                         <div>
@@ -229,6 +215,18 @@
                             </div>
                             <span class="text-2xs text-stone-600" id="barometer-trend">Trend: Steady</span>
                         </div>
+                    </div>
+                </div>
+
+                <p class="summary-update-line">Summary last updated: <time id="kingman-summary-updated">Loading from sheet...</time></p>
+                <div class="bg-white/70 backdrop-blur-md border border-orange-100 shadow-xl rounded-3xl p-6">
+                    <div class="border-b border-orange-100 pb-2 mb-3">
+                        <h3 class="text-lg font-bold text-[#7c2d12] flex items-center">
+                            Local outlook
+                        </h3>
+                    </div>
+                    <div id="kingman-digest" class="text-sm text-amber-950 leading-relaxed font-medium">
+                        Loading latest desert field reports...
                     </div>
                 </div>
 
@@ -945,22 +943,6 @@
             setInterval(refresh, 300000); // Trigger reload every 5 minutes
         }
 
-        // Helper function to format the last updated timestamp nicely
-        function formatOutlookUpdateTimestamp() {
-            const now = new Date();
-            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            const dayName = days[now.getDay()];
-            
-            let hours = now.getHours();
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const ampm = hours >= 12 ? 'pm' : 'am';
-            
-            hours = hours % 12;
-            hours = hours ? hours : 12; // convert 0 to 12
-            
-            return `Updated: ${dayName} @ ${hours}:${minutes} ${ampm}`;
-        }
-
         // 9. GOOGLE SHEETS SYNC SYSTEM (JSONP / No-CORS Method)
         function syncGoogleSheetDigests() {
             window.handleGoogleSheetResponse = function(responseJSON) {
@@ -970,6 +952,7 @@
                     let manualAlertHeadline = "";
                     let manualAlertDesc = "";
                     let trailBriefText = "";
+                    let summaryUpdatedAt = "";
 
                     for (let row of rows) {
                         if (!row.c || row.c.length < 2) continue;
@@ -986,8 +969,9 @@
                         } else if (key === "manualalertdesc" || key === "manualalertdescription") {
                             manualAlertDesc = rawVal;
                         } else if (key === "trailbrief" || key === "deserthydration" || key === "trailbrieftext") {
-                            // Captured column key targets for the Desert Hydration component
                             trailBriefText = rawVal;
+                        } else if (key === "lu") {
+                            summaryUpdatedAt = (row.c[1] && row.c[1].f) || rawVal;
                         }
                     }
 
@@ -995,11 +979,11 @@
                     const kingmanBox = document.getElementById('kingman-digest');
                     if (kingmanBox && kingmanText) {
                         kingmanBox.innerHTML = kingmanText.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
-                        
-                        const outlookTimestamp = document.getElementById('outlook-timestamp');
-                        if (outlookTimestamp) {
-                            outlookTimestamp.innerText = formatOutlookUpdateTimestamp();
-                        }
+                    }
+
+                    const summaryUpdatedNode = document.getElementById('kingman-summary-updated');
+                    if (summaryUpdatedNode) {
+                        summaryUpdatedNode.textContent = summaryUpdatedAt.trim() || 'Not provided in sheet';
                     }
 
                     // Process Dynamic Trail Brief Text From Spreadsheet Sync

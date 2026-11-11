@@ -528,6 +528,14 @@ body.site-home {
     color: #1e3d59;
 }
 
+html[data-theme="dark"] .summary-update-line {
+    color: #b8c5cb;
+}
+
+html[data-theme="dark"] .summary-update-line time {
+    color: #e6edf1;
+}
+
 .astro-main {
     width: min(1120px, calc(100% - 40px));
     margin: 0 auto;
