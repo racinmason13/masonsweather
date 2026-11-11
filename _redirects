@@ -10,7 +10,7 @@
 /southbay/cams /southbay.html?tab=cams 200
 /southbay/ocean/ /southbay/ocean 301
 /southbay/ocean /southbay.html?tab=resources 200
-/mohave /mohave/ 301
+/mohave /mohavecounty.html?tab=live 200
 /mohave/ /mohavecounty.html?tab=live 200
 /mohave/forecast/ /mohave/forecast 301
 /mohave/forecast /mohavecounty.html?tab=trends 200

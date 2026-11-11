@@ -18,8 +18,11 @@ body.site-earthquakes {
     font-family: "Segoe UI", Arial, sans-serif !important;
 }
 
-.site-home {
-    background: #edf2f4 !important;
+body.site-home {
+    background:
+        radial-gradient(ellipse at 10% 12%, rgb(96 168 185 / 11%), transparent 28rem),
+        radial-gradient(ellipse at 90% 42%, rgb(220 177 112 / 10%), transparent 30rem),
+        #edf2f4 !important;
 }
 
 .portal-topbar {
@@ -98,7 +101,7 @@ body.site-earthquakes {
     gap: clamp(32px, 6vw, 84px);
     align-items: center;
     padding: clamp(28px, 5vw, 60px);
-    background: #fff;
+    background: linear-gradient(115deg, #fff 0%, #f5fafb 68%, #f3f8f5 100%);
     border: 1px solid var(--mw-line);
     border-top: 3px solid #176b82;
 }
@@ -1421,4 +1424,782 @@ html.light .site-national [class~="text-blue-400"] {
     .earthquake-status {
         text-align: left;
     }
+}
+
+body.site-home,
+body.site-dashboard,
+body.site-national,
+body.site-astronomy,
+body.site-earthquakes,
+body.site-radar,
+body.site-telemetry,
+body.site-error {
+    margin: 0;
+}
+
+.site-theme-control {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 8px 13px;
+    border: 1px solid #d5dee3;
+    border-radius: 999px;
+    background: #fff;
+    color: #314957;
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 650;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgb(21 43 59 / 7%);
+    transition: background 140ms ease, border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+.site-theme-control:hover {
+    transform: translateY(-1px);
+    border-color: #9aafb9;
+    background: #f7fafb;
+    box-shadow: 0 3px 8px rgb(21 43 59 / 10%);
+}
+
+.site-theme-control:focus-visible,
+.site-national-alert-acknowledge:focus-visible,
+.home-newsletter-form input:focus-visible,
+.home-newsletter-form button:focus-visible {
+    outline: 2px solid #176b82;
+    outline-offset: 3px;
+}
+
+.site-theme-icon {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.site-theme-control-floating {
+    position: fixed;
+    z-index: 9998;
+    top: 14px;
+    right: 14px;
+    box-shadow: 0 2px 12px rgb(0 0 0 / 16%);
+}
+
+.portal-nav .site-theme-control {
+    border-color: rgb(255 255 255 / 24%);
+    background: rgb(255 255 255 / 8%);
+    color: #fff;
+}
+
+.portal-nav .site-theme-control:hover {
+    background: rgb(255 255 255 / 15%);
+}
+
+.dashboard-nav .site-theme-control {
+    margin-left: 4px;
+}
+
+html[data-theme="dark"] .site-theme-control {
+    border-color: #40535f;
+    background: #1b2b36;
+    color: #e2ebef;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 20%);
+}
+
+html[data-theme="dark"] .site-theme-control:hover {
+    border-color: #718692;
+    background: #263944;
+    box-shadow: 0 3px 9px rgb(0 0 0 / 24%);
+}
+
+html[data-theme="dark"] .site-theme-control:focus-visible {
+    outline-color: #8ed6e0;
+}
+
+.site-national-alert {
+    position: sticky;
+    z-index: 10000;
+    top: 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px max(calc((100vw - 1200px) / 2), 20px);
+    border-bottom: 2px solid #fecaca;
+    background: #7f1d1d;
+    color: #fff;
+    box-shadow: 0 4px 16px rgb(51 10 10 / 28%);
+}
+
+.site-national-alert[hidden],
+.site-national-alert-backdrop[hidden] {
+    display: none !important;
+}
+
+.site-national-alert-label {
+    flex: 0 0 auto;
+    padding: 5px 8px;
+    border: 1px solid rgb(255 255 255 / 45%);
+    border-radius: 3px;
+    color: #fff;
+    font-size: 0.69rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+}
+
+.site-national-alert-message {
+    margin: 0;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.45;
+    white-space: pre-wrap;
+}
+
+.site-national-alert-backdrop {
+    position: fixed;
+    z-index: 10001;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgb(10 15 20 / 78%);
+}
+
+.site-national-alert-dialog {
+    width: min(560px, 100%);
+    padding: clamp(22px, 5vw, 36px);
+    border: 2px solid #fecaca;
+    border-top: 8px solid #b91c1c;
+    border-radius: 6px;
+    background: #fff;
+    color: #1b2932;
+    box-shadow: 0 24px 70px rgb(0 0 0 / 38%);
+}
+
+.site-national-alert-dialog h2 {
+    margin: 0;
+    color: #8f1515;
+    font-size: clamp(1.35rem, 3vw, 1.8rem);
+    font-weight: 900;
+    letter-spacing: -0.025em;
+}
+
+.site-national-alert-dialog p {
+    margin: 15px 0 24px;
+    color: #3c4b54;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.65;
+    white-space: pre-wrap;
+}
+
+.site-national-alert-acknowledge {
+    min-height: 42px;
+    padding: 10px 18px;
+    border: 0;
+    border-radius: 4px;
+    background: #991b1b;
+    color: #fff;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.site-national-alert-acknowledge:hover {
+    background: #7f1d1d;
+}
+
+.home-hero-copy {
+    padding-left: 18px;
+    border-left: 3px solid #3b91a2;
+}
+
+.home-cards > a {
+    background: linear-gradient(145deg, #fff, #f8fbfc) !important;
+}
+
+.home-cards > a:nth-child(2) {
+    border-top: 3px solid #d5ad78 !important;
+    background: linear-gradient(145deg, #fff, #fbf6ee) !important;
+}
+
+.home-cards > a:nth-child(1) {
+    border-top: 3px solid #78b9c9 !important;
+    background: linear-gradient(145deg, #fff, #f0f8fa) !important;
+}
+
+.home-cards > a:nth-child(3) {
+    border-top: 3px solid #8eadd7 !important;
+    background: linear-gradient(145deg, #fff, #f3f6fc) !important;
+}
+
+.home-cards > a:nth-child(4) {
+    border-top: 3px solid #7eb69b !important;
+    background: linear-gradient(145deg, #fff, #f1f8f4) !important;
+}
+
+.home-cards > a:nth-child(5) {
+    border-top: 3px solid #a69acb !important;
+    background: linear-gradient(145deg, #fff, #f6f4fb) !important;
+}
+
+.home-cards > a:nth-child(6) {
+    border-top: 3px solid #d38b82 !important;
+    background: linear-gradient(145deg, #fff, #fcf4f2) !important;
+}
+
+.home-dashboard-icon {
+    display: grid !important;
+    width: 54px;
+    height: 54px;
+    place-content: center;
+    justify-items: center;
+    gap: 2px;
+    padding: 5px !important;
+    border-radius: 10px !important;
+    font-size: 0.55rem !important;
+    line-height: 1;
+}
+
+.home-dashboard-icon svg {
+    width: 23px;
+    height: 23px;
+}
+
+.home-dashboard-icon > span {
+    color: currentColor;
+    font-size: 0.5rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+}
+
+.home-icon-southbay {
+    background: #e6f4f8 !important;
+    color: #176b82 !important;
+}
+
+.home-icon-mohave {
+    background: #f6efe3 !important;
+    color: #8d5d2e !important;
+}
+
+.home-icon-national {
+    background: #e9f0fb !important;
+    color: #2b5f9a !important;
+}
+
+.home-icon-radar {
+    background: #e8f4ee !important;
+    color: #267558 !important;
+}
+
+.home-icon-sky {
+    background: #efedf8 !important;
+    color: #695b91 !important;
+}
+
+.home-icon-earthquake {
+    background: #f9ecea !important;
+    color: #a13a31 !important;
+}
+
+.home-newsletter {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.9fr);
+    align-items: center;
+    gap: 28px;
+    margin-top: 28px;
+    padding: 25px 28px;
+    border: 1px solid #cddde2;
+    border-left: 4px solid #267f8e;
+    border-radius: 5px;
+    background: linear-gradient(110deg, #f0f8f9, #fff 62%);
+}
+
+.home-newsletter h2 {
+    margin: 2px 0 6px;
+    color: #1b3444;
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+}
+
+.home-newsletter > div > p:last-child {
+    max-width: 600px;
+    margin: 0;
+    color: #637481;
+    font-size: 0.82rem;
+    line-height: 1.55;
+}
+
+.home-newsletter-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 9px;
+}
+
+.home-newsletter-form input {
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid #cbd7dc;
+    border-radius: 4px;
+    background: #fff;
+    color: #1b3444;
+    font: inherit;
+    font-size: 0.85rem;
+}
+
+.home-newsletter-form button {
+    padding: 10px 14px;
+    border: 0;
+    border-radius: 4px;
+    background: #176b82;
+    color: #fff;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.home-newsletter-form button:disabled {
+    cursor: wait;
+    opacity: 0.55;
+}
+
+.home-newsletter-status {
+    grid-column: 1 / -1;
+    min-height: 1em;
+    margin: 0;
+    color: #647782;
+    font-size: 0.72rem;
+    line-height: 1.4;
+}
+
+@media (min-width: 1100px) {
+    .home-cards {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .home-hero-copy {
+        padding-left: 13px;
+    }
+
+    .home-newsletter {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 19px;
+    }
+
+    .site-national-alert {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+        padding: 11px 16px;
+    }
+
+    .site-national-alert-message {
+        font-size: 0.82rem;
+    }
+
+    .home-newsletter-form {
+        grid-template-columns: 1fr;
+    }
+
+    .site-dashboard .dashboard-nav {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+    }
+}
+
+html[data-theme="dark"] {
+    color-scheme: dark;
+    --mw-ink: #e6edf1;
+    --mw-muted: #a2b1ba;
+    --mw-line: #354752;
+    --mw-paper: #17252f;
+    --mw-canvas: #101a22;
+}
+
+html[data-theme="dark"] body.site-dashboard,
+html[data-theme="dark"] body.site-national,
+html[data-theme="dark"] body.site-astronomy,
+html[data-theme="dark"] body.site-earthquakes,
+html[data-theme="dark"] body.site-error,
+html[data-theme="dark"] body.site-telemetry {
+    background: #101a22 !important;
+    color: #e6edf1 !important;
+    color-scheme: dark;
+}
+
+html[data-theme="dark"] body.site-home {
+    background:
+        radial-gradient(ellipse at 10% 12%, rgb(72 143 163 / 10%), transparent 28rem),
+        radial-gradient(ellipse at 90% 42%, rgb(164 123 67 / 8%), transparent 30rem),
+        #101a22 !important;
+    color: #e6edf1 !important;
+    color-scheme: dark;
+}
+
+html[data-theme="dark"] body.site-home,
+html[data-theme="dark"] body.site-dashboard,
+html[data-theme="dark"] body.site-national,
+html[data-theme="dark"] body.site-astronomy,
+html[data-theme="dark"] body.site-earthquakes,
+html[data-theme="dark"] body.site-error {
+    color-scheme: dark;
+}
+
+html[data-theme="dark"] .portal-footer {
+    border-color: #354752;
+    background: #101a22;
+    color: #a2b1ba;
+}
+
+html[data-theme="dark"] .portal-brand,
+html[data-theme="dark"] .portal-nav a {
+    color: #e4edf1;
+}
+
+html[data-theme="dark"] .home-kicker {
+    color: #83cbd8;
+}
+
+html[data-theme="dark"] .site-theme-control {
+    border-color: #425560;
+    background: #1b2b36;
+    color: #e6edf1;
+}
+
+html[data-theme="dark"] .portal-nav .site-theme-control {
+    border-color: rgb(255 255 255 / 24%);
+    background: rgb(255 255 255 / 8%);
+    color: #fff;
+}
+
+html[data-theme="dark"] .home-hero h1,
+html[data-theme="dark"] .home-section-heading h2,
+html[data-theme="dark"] .coverage-panel strong,
+html[data-theme="dark"] .home-newsletter h2 {
+    color: #e6edf1;
+}
+
+html[data-theme="dark"] .home-hero {
+    border-color: #354752;
+    background: linear-gradient(115deg, #172832 0%, #1a2e36 68%, #1d302d 100%);
+}
+
+html[data-theme="dark"] .home-intro,
+html[data-theme="dark"] .coverage-panel div span,
+html[data-theme="dark"] .home-section-heading > span,
+html[data-theme="dark"] .home-newsletter > div > p:last-child {
+    color: #a2b1ba;
+}
+
+html[data-theme="dark"] .coverage-panel div,
+html[data-theme="dark"] .home-cards > a > div:last-child {
+    border-color: #354752 !important;
+}
+
+html[data-theme="dark"] .home-cards > a > div:last-child {
+    color: #8ed6e0 !important;
+}
+
+html[data-theme="dark"] .home-cards > a {
+    border-color: #354752 !important;
+    background: linear-gradient(145deg, #1a2a34, #15232c) !important;
+}
+
+html[data-theme="dark"] .home-cards h2 {
+    color: #e6edf1 !important;
+}
+
+html[data-theme="dark"] .home-cards p {
+    color: #a9b8c0 !important;
+}
+
+html[data-theme="dark"] .home-cards > a > div:first-child > div:first-child > span:last-child {
+    border-color: #40515b;
+    background: #21323c !important;
+    color: #c2cdd2 !important;
+}
+
+html[data-theme="dark"] .home-newsletter {
+    border-color: #354752;
+    background: linear-gradient(110deg, #1a2c34, #15232c 65%);
+}
+
+html[data-theme="dark"] .home-newsletter-form input {
+    border-color: #465963;
+    background: #111d25;
+    color: #e6edf1;
+}
+
+html[data-theme="dark"] .home-newsletter-status,
+html[data-theme="dark"] .astro-heading > div > p:last-child,
+html[data-theme="dark"] .earthquake-heading > div > p:last-child,
+html[data-theme="dark"] .earthquake-status,
+html[data-theme="dark"] .earthquake-distance-note,
+html[data-theme="dark"] .earthquake-attribution,
+html[data-theme="dark"] .earthquake-count {
+    color: #a2b1ba;
+}
+
+html[data-theme="dark"] .astro-panel,
+html[data-theme="dark"] .earthquake-panel {
+    border-color: #354752;
+    background: #17252f;
+    color: #e6edf1;
+}
+
+html[data-theme="dark"] .astro-panel-heading h2,
+html[data-theme="dark"] .astro-event strong,
+html[data-theme="dark"] .astro-event span,
+html[data-theme="dark"] .astro-twilight strong,
+html[data-theme="dark"] .astro-twilight > span,
+html[data-theme="dark"] .astro-status,
+html[data-theme="dark"] .astro-attribution,
+html[data-theme="dark"] .astro-placeholder,
+html[data-theme="dark"] .phase-card span,
+html[data-theme="dark"] .earthquake-panel-heading h2,
+html[data-theme="dark"] .earthquake-legend strong {
+    color: #aebcc4;
+}
+
+html[data-theme="dark"] .astro-panel-heading h2,
+html[data-theme="dark"] .astro-event strong,
+html[data-theme="dark"] .astro-twilight strong,
+html[data-theme="dark"] .earthquake-panel-heading h2,
+html[data-theme="dark"] .earthquake-legend strong {
+    color: #e6edf1;
+}
+
+html[data-theme="dark"] .phase-card {
+    border-color: #354752;
+    background: #202f39;
+}
+
+html[data-theme="dark"] .phase-card strong {
+    color: #e6edf1;
+}
+
+html[data-theme="dark"] .site-dashboard .newsletter-panel {
+    border-color: #354752 !important;
+    background: #17252f !important;
+    color: #e6edf1 !important;
+}
+
+html[data-theme="dark"] .site-dashboard .newsletter-panel h3,
+html[data-theme="dark"] .site-dashboard .newsletter-panel p {
+    color: #d3dee3 !important;
+}
+
+html[data-theme="dark"] .earthquake-table {
+    color: #d7e1e6;
+}
+
+html[data-theme="dark"] .earthquake-table th {
+    border-color: #354752;
+    background: #202f39;
+    color: #d2dde2;
+}
+
+html[data-theme="dark"] .earthquake-table td {
+    border-color: #2b3c46;
+}
+
+html[data-theme="dark"] .earthquake-empty {
+    color: #a2b1ba;
+}
+
+html[data-theme="dark"] .earthquake-refresh {
+    border-color: #465963;
+    background: #1b2b36;
+    color: #e6edf1;
+}
+
+html[data-theme="dark"] .site-dashboard [class*="bg-white/"],
+html[data-theme="dark"] .site-dashboard [class~="bg-white"],
+html[data-theme="dark"] .site-dashboard [class*="bg-gradient-to-br"]:not([class~="text-white"]) {
+    background: #17252f !important;
+    border-color: #354752 !important;
+    color: #e6edf1 !important;
+}
+
+html[data-theme="dark"] .site-dashboard [class~="text-slate-700"],
+html[data-theme="dark"] .site-dashboard [class~="text-slate-600"],
+html[data-theme="dark"] .site-dashboard [class~="text-slate-500"],
+html[data-theme="dark"] .site-dashboard [class~="text-slate-400"] {
+    color: #aebcc4 !important;
+}
+
+html[data-theme="dark"] .site-dashboard [class*="border-sky-100"],
+html[data-theme="dark"] .site-dashboard [class*="border-white/"] {
+    border-color: #354752 !important;
+}
+
+html[data-theme="dark"] .site-dashboard .tab-btn:not([aria-current="page"]) {
+    color: #aebcc4 !important;
+}
+
+html[data-theme="dark"] .site-dashboard .tab-btn:not([aria-current="page"]):hover {
+    background: #263843 !important;
+    color: #e6edf1 !important;
+}
+
+html[data-theme="dark"] .site-dashboard h2,
+html[data-theme="dark"] .site-dashboard h3,
+html[data-theme="dark"] .site-dashboard #detailed-outlook-grid h5,
+html[data-theme="dark"] .site-dashboard #weekly-forecast-details > div > span {
+    color: #e6edf1 !important;
+}
+
+html[data-theme="dark"] .site-dashboard #detailed-outlook-grid > div,
+html[data-theme="dark"] .site-dashboard #weekly-forecast-details > div,
+html[data-theme="dark"] .site-dashboard .weather-metrics > div {
+    border-color: #354752 !important;
+    background: #17252f !important;
+    color: #e6edf1 !important;
+}
+
+html[data-theme="dark"] .site-dashboard #detailed-outlook-grid p,
+html[data-theme="dark"] .site-dashboard #weekly-forecast-details p,
+html[data-theme="dark"] .site-dashboard #coastal-summary-text,
+html[data-theme="dark"] .site-dashboard #kingman-digest {
+    color: #c2cfd6 !important;
+}
+
+html[data-theme="dark"] .site-dashboard .weather-metrics [id^="metric-"],
+html[data-theme="dark"] .site-dashboard .city-btn {
+    color: #e6edf1 !important;
+}
+
+html[data-theme="dark"] .site-dashboard .city-btn[class*="bg-amber-100"] {
+    border-color: var(--site-accent) !important;
+    background: var(--site-accent) !important;
+    color: #fff !important;
+}
+
+html[data-theme="light"] body.site-error,
+html[data-theme="light"] body.site-telemetry {
+    background: #edf2f4 !important;
+    color: #172a38 !important;
+}
+
+html[data-theme="light"] body.site-error [class*="bg-white/5"],
+html[data-theme="light"] body.site-telemetry [class*="bg-white/5"] {
+    background: #fff !important;
+    border-color: #d7e0e5 !important;
+    color: #172a38 !important;
+}
+
+html[data-theme="light"] body.site-error .text-white {
+    color: #172a38 !important;
+}
+
+html[data-theme="light"] body.site-telemetry #auth-gate,
+html[data-theme="light"] body.site-telemetry #dashboard-content > header {
+    background: #f4f7f8 !important;
+}
+
+html[data-theme="light"] body.site-telemetry #lock-panel,
+html[data-theme="light"] body.site-telemetry .app-card,
+html[data-theme="light"] body.site-telemetry [class*="bg-[#0f172a]"] {
+    background: #fff !important;
+    border-color: #d7e0e5 !important;
+    color: #172a38 !important;
+}
+
+html[data-theme="light"] body.site-telemetry #auth-gate h1,
+html[data-theme="light"] body.site-telemetry #dashboard-content > header h2 {
+    color: #172a38 !important;
+}
+
+html[data-theme="light"] body.site-telemetry #auth-gate label,
+html[data-theme="light"] body.site-telemetry #auth-gate p:not(#auth-error),
+html[data-theme="light"] body.site-telemetry #dashboard-content > header p {
+    color: #637481 !important;
+}
+
+html[data-theme="light"] .site-national .app-card button.text-white,
+html[data-theme="light"] .site-national .app-card a.text-white {
+    color: #fff !important;
+}
+
+html[data-theme="light"] body.site-radar {
+    background-color: #e9eff2 !important;
+}
+
+html[data-theme="dark"] body.site-radar {
+    background-color: #0d1117 !important;
+}
+
+html[data-theme="light"] .site-radar .brand-overlay {
+    border-color: rgb(23 42 56 / 18%) !important;
+    background: rgb(255 255 255 / 96%) !important;
+    color: #172a38 !important;
+    box-shadow: 0 8px 22px rgb(22 42 56 / 18%) !important;
+}
+
+html[data-theme="dark"] .site-radar .brand-overlay {
+    border-color: rgb(255 255 255 / 15%);
+    background: rgb(15 23 42 / 95%);
+    color: #fff;
+}
+
+.site-radar .site-national-alert {
+    position: fixed;
+    right: 0;
+    left: 0;
+}
+
+html[data-theme="dark"] .site-mohave [class*="text-amber-"],
+html[data-theme="dark"] .site-mohave [class*="text-orange-"],
+html[data-theme="dark"] .site-mohave [class*="text-yellow-"],
+html[data-theme="dark"] .site-mohave [class*="text-stone-"],
+html[data-theme="dark"] .site-mohave [class*="text-[#7c2d12]"],
+html[data-theme="dark"] .site-mohave [class*="text-[#9a3412]"] {
+    color: #e6c39f !important;
+}
+
+html[data-theme="dark"] .site-mohave [class*="bg-amber-"],
+html[data-theme="dark"] .site-mohave [class*="bg-orange-"],
+html[data-theme="dark"] .site-mohave [class*="bg-yellow-"] {
+    border-color: #51483a !important;
+    background: #292d2b !important;
+}
+
+html[data-theme="dark"] .site-mohave [class*="border-amber-"],
+html[data-theme="dark"] .site-mohave [class*="border-orange-"],
+html[data-theme="dark"] .site-mohave [class*="border-yellow-"] {
+    border-color: #51483a !important;
+}
+
+html[data-theme="dark"] .site-mohave .city-btn[class*="bg-amber-100"] {
+    border-color: #c28b61 !important;
+    background: #8d512f !important;
+    color: #fff !important;
+}
+
+html[data-theme="dark"] .site-mohave .city-btn[class*="bg-amber-100"] [class*="text-amber-"] {
+    color: #fff1dc !important;
+}
+
+html[data-theme="dark"] .site-mohave .city-btn > span:last-child {
+    color: #b8c5cb !important;
+    opacity: 1;
+}
+
+html[data-theme="dark"] .site-mohave .weather-metrics > div > span:first-child,
+html[data-theme="dark"] .site-mohave .forecast-outlook > h4 {
+    color: #e6c39f !important;
 }

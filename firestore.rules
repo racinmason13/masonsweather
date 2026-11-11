@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function validSubscriber() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['name', 'email', 'createdAt', 'subscribedAt'])
+        && data.email is string
+        && data.email.size() <= 254
+        && data.email.matches('^.+@.+\\..+$')
+        && (!('name' in data) || (data.name is string && data.name.size() <= 120))
+        && (
+          (data.keys().hasAll(['createdAt']) && !data.keys().hasAny(['subscribedAt']) && data.createdAt == request.time)
+          || (data.keys().hasAll(['subscribedAt']) && !data.keys().hasAny(['createdAt']) && data.subscribedAt == request.time)
+        );
+    }
+
+    match /newsletter_subscribers/{subscriberId} {
+      allow create: if validSubscriber();
+      allow read, update, delete: if false;
+    }
+
+    match /users/{userId} {
+      allow read, delete: if request.auth != null && request.auth.uid == userId;
+      allow create, update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly(['savedCities'])
+        && request.resource.data.savedCities is list
+        && request.resource.data.savedCities.size() <= 100;
+    }
+  }
+}

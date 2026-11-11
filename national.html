@@ -108,6 +108,7 @@
         }
     </style>
 <link rel="stylesheet" href="/site.css">
+<script src="/site.js" defer onerror="if(location.protocol==='file:'){this.onerror=null;this.src='site.js';}"></script>
 </head>
 <body class="site-national bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-blue-500 selection:text-white transition-colors duration-300">
 
@@ -267,7 +268,7 @@
                             <i class="fa-solid fa-bookmark text-blue-500"></i>
                             <span>Saved Monitored Cities</span>
                         </h3>
-                        <span class="text-[11px] text-slate-500 app-text-muted" id="synced-badge">Cloud Storage</span>
+                        <span class="text-[11px] text-slate-500 app-text-muted" id="synced-badge" role="status" aria-live="polite">Checking Firebase...</span>
                     </div>
 
                     <!-- City List -->
@@ -282,8 +283,8 @@
                 <!-- Club Quick Join Banner -->
                 <div class="mt-4 p-4 rounded-2xl bg-gradient-to-r from-blue-900/40 to-indigo-900/40 border border-blue-500/20">
                     <p class="text-xs font-bold text-blue-400">MASONS SEVERE WEATHER CLUB</p>
-                    <p class="text-[11px] text-slate-400 app-text-muted mt-0.5">Receive instant SMS & Email severe cell warnings.</p>
-                    <form onsubmit="handleNewsletterSubmit(event)" class="mt-2.5 flex gap-2">
+                    <p class="text-[11px] text-slate-400 app-text-muted mt-0.5">Join the severe-weather email list. Automated email delivery is not yet connected.</p>
+                    <form onsubmit="event.preventDefault(); if (window.handleNewsletterSubmit) handleNewsletterSubmit(event); return false;" class="mt-2.5 flex gap-2">
                         <input type="email" id="newsletter-email" required placeholder="Enter your email..." 
                                class="bg-slate-950 app-input text-xs px-3 py-1.5 rounded-lg border border-slate-700 flex-1 focus:outline-none focus:border-blue-500">
                         <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition">Join</button>
@@ -709,9 +710,11 @@
                         email: user.email,
                         name: user.displayName || user.email.split('@')[0]
                     };
+                    setCitySyncStatus('Loading cloud favorites...');
                     await loadSavedCitiesFromFirestore(user.uid);
                 } else {
                     currentUser = null;
+                    setCitySyncStatus('Saved on this device', 'Sign in to sync favorites to Firebase.');
                 }
                 updateAuthUI();
             });
@@ -773,7 +776,8 @@
                 if (authMode === 'signup') {
                     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                     await userCredential.user.updateProfile({ displayName: name });
-                    await syncCitiesToFirestore(userCredential.user.uid);
+                    const synced = await syncCitiesToFirestore(userCredential.user.uid);
+                    if (!synced) throw new Error('Your account was created, but favorites could not be synced to Firebase.');
                     showAlert('Account created & synced successfully!', 'success');
                 } else {
                     await auth.signInWithEmailAndPassword(email, password);
@@ -789,31 +793,55 @@
             auth.signOut().then(() => {
                 savedCities = ["Los Angeles, USA", "New York, USA", "Miami, USA"];
                 renderSavedCities();
+                setCitySyncStatus('Saved on this device', 'Sign in to sync favorites to Firebase.');
                 closeAuthModal();
             });
         }
 
+        function setCitySyncStatus(message, detail = message) {
+            const badge = document.getElementById('synced-badge');
+            if (!badge) return;
+            badge.textContent = message;
+            badge.title = detail;
+        }
+
         async function syncCitiesToFirestore(uid) {
             const userId = uid || (currentUser ? currentUser.uid : null);
-            if (!userId) return;
-            await db.collection('users').doc(userId).set({
-                savedCities: savedCities
-            }, { merge: true });
+            if (!userId) {
+                setCitySyncStatus('Saved on this device', 'Sign in to sync favorites to Firebase.');
+                return false;
+            }
+            setCitySyncStatus('Syncing favorites...');
+            try {
+                await db.collection('users').doc(userId).set({
+                    savedCities: savedCities
+                }, { merge: true });
+                setCitySyncStatus('Synced to Firebase');
+                return true;
+            } catch (error) {
+                console.error('Unable to sync favorite cities to Firebase:', error);
+                const code = error && error.code ? error.code : 'unknown';
+                setCitySyncStatus(`Sync failed (${code})`, error.message || code);
+                return false;
+            }
         }
 
         async function loadSavedCitiesFromFirestore(uid) {
             try {
                 const doc = await db.collection('users').doc(uid).get();
-                if (doc.exists && doc.data().savedCities) {
+                if (doc.exists && Array.isArray(doc.data().savedCities)) {
                     savedCities = doc.data().savedCities;
                     localStorage.setItem('masons_saved_cities', JSON.stringify(savedCities));
                     renderSavedCities();
                     checkIfFavorite(currentCityName);
+                    setCitySyncStatus('Synced to Firebase');
                 } else {
                     await syncCitiesToFirestore(uid);
                 }
             } catch (err) {
-                console.error("Firestore error:", err);
+                console.error('Unable to load favorite cities from Firebase:', err);
+                const code = err && err.code ? err.code : 'unknown';
+                setCitySyncStatus(`Sync failed (${code})`, err.message || code);
             }
         }
 
@@ -1024,7 +1052,7 @@
         function clearSearch() { document.getElementById('search-input').value = ''; document.getElementById('search-results').classList.add('hidden'); }
         function useCurrentLocation() { if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(pos => fetchWeatherData(pos.coords.latitude, pos.coords.longitude, "Current Location")); } }
 
-        function toggleFavoriteCurrent() {
+        async function toggleFavoriteCurrent() {
             if (savedCities.includes(currentCityName)) { 
                 savedCities = savedCities.filter(c => c !== currentCityName); 
             } else { 
@@ -1033,7 +1061,11 @@
             localStorage.setItem('masons_saved_cities', JSON.stringify(savedCities));
             renderSavedCities(); 
             checkIfFavorite(currentCityName);
-            if (currentUser) syncCitiesToFirestore();
+            if (currentUser) {
+                await syncCitiesToFirestore();
+            } else {
+                setCitySyncStatus('Saved on this device', 'Sign in to sync favorites to Firebase.');
+            }
         }
 
         function checkIfFavorite(cityName) {
@@ -1053,12 +1085,16 @@
             });
         }
 
-        function removeFavorite(city) { 
+        async function removeFavorite(city) { 
             savedCities = savedCities.filter(c => c !== city); 
             localStorage.setItem('masons_saved_cities', JSON.stringify(savedCities)); 
             renderSavedCities(); 
             checkIfFavorite(currentCityName); 
-            if (currentUser) syncCitiesToFirestore();
+            if (currentUser) {
+                await syncCitiesToFirestore();
+            } else {
+                setCitySyncStatus('Saved on this device', 'Sign in to sync favorites to Firebase.');
+            }
         }
 
         async function searchCityByName(city) { const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`); const data = await res.json(); if (data.results[0]) fetchWeatherData(data.results[0].latitude, data.results[0].longitude, city); }
@@ -1104,11 +1140,14 @@
                     subscribedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                alert('Subscribed to Masons Severe Weather Club!');
+                alert('Your email has been saved to the subscriber list. Automated email delivery is not connected yet.');
                 if (emailInput) emailInput.value = '';
             } catch (error) {
                 console.error("Newsletter submission failed:", error);
-                alert('Error saving subscription: ' + error.message);
+                const code = error && error.code ? error.code : 'unknown';
+                alert(code === 'permission-denied'
+                    ? 'Firebase denied this write (permission-denied). Check Firestore rules for newsletter_subscribers.'
+                    : `Could not save subscription (${code}): ${error.message}`);
             }
         }
         function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }

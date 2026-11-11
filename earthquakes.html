@@ -6,6 +6,7 @@
     <title>Regional Earthquakes | Mason's Weather</title>
     <link rel="icon" type="image/png" href="/images/Mason's Weather Logo.png">
     <link rel="stylesheet" href="/site.css" onerror="if(location.protocol==='file:'){this.onerror=null;this.href='site.css';}">
+    <script src="/site.js" defer onerror="if(location.protocol==='file:'){this.onerror=null;this.src='site.js';}"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
 <body class="site-earthquakes">
@@ -75,7 +76,7 @@
         <p class="earthquake-attribution">
             Catalog data: <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener noreferrer">U.S. Geological Survey</a>.
             Map tiles: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>.
-            Feed coverage is bounded to 31.5–37.5°N, 120.5–112°W and includes events of magnitude 2.0 or greater. Event locations and magnitudes are preliminary and may be revised by USGS.
+            Feed coverage is bounded to 32.5–36.8°N, 119.5–113.2°W and includes events of magnitude 2.0 or greater. Event locations and magnitudes are preliminary and may be revised by USGS.
         </p>
     </main>
 
@@ -232,10 +233,10 @@
                 starttime: startTime.toISOString(),
                 endtime: endTime.toISOString(),
                 minmagnitude: '2.0',
-                minlatitude: '31.5',
-                maxlatitude: '37.5',
-                minlongitude: '-120.5',
-                maxlongitude: '-112.0',
+                minlatitude: '32.5',
+                maxlatitude: '36.8',
+                minlongitude: '-119.5',
+                maxlongitude: '-113.2',
                 orderby: 'time'
             });
 
