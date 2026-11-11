@@ -240,7 +240,7 @@
             });
             const db = getFirestore(app);
             submitButton.disabled = false;
-            statusNode.textContent = 'Firebase is connected. A successful save will be confirmed here; email delivery is not connected.';
+            statusNode.textContent = 'Enter your email address above.';
 
             form.addEventListener('submit', async event => {
                 event.preventDefault();
