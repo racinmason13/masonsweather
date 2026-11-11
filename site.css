@@ -252,6 +252,7 @@ body.site-earthquakes {
 }
 
 .site-astronomy {
+    margin: 0;
     min-height: 100vh;
     background:
         radial-gradient(ellipse at 82% 10%, rgb(223 218 241 / 45%), transparent 32rem),
@@ -259,6 +260,7 @@ body.site-earthquakes {
 }
 
 .site-earthquakes {
+    margin: 0;
     min-height: 100vh;
     background:
         radial-gradient(ellipse at 86% 8%, rgb(226 218 203 / 40%), transparent 34rem),
